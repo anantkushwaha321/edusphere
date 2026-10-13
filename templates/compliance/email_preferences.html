@@ -4,54 +4,54 @@
 {% block header_title %}Email & Communication Preferences{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto bg-white p-8 sm:p-10 rounded-3xl border border-slate-200/80 shadow-sm space-y-6">
-    <div class="border-b border-slate-100 pb-4">
-        <h2 class="text-xl font-bold text-slate-900">Email Notification Channels</h2>
-        <p class="text-xs text-slate-500 mt-1">Manage which notifications you wish to receive. We strictly respect your opt-out preferences and guarantee zero unsolicited spam.</p>
+<div class="max-w-2xl mx-auto app-card p-6 sm:p-8 rounded-xl border border-[#1E293B] bg-[#0F172A] shadow-sm space-y-6">
+    <div class="border-b border-[#1E293B] pb-4">
+        <h2 class="text-lg font-bold text-white tracking-tight">Email Notification Channels</h2>
+        <p class="text-xs text-slate-400 mt-1">Manage which notifications you wish to receive. We strictly respect your opt-out preferences and guarantee zero unsolicited spam.</p>
     </div>
 
-    <form method="POST" class="space-y-5">
+    <form method="POST" class="space-y-4">
         {% csrf_token %}
 
         <!-- Academic Announcements -->
-        <div class="flex items-start justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100">
+        <div class="flex items-start justify-between p-4 rounded-xl bg-[#131D33] border border-[#1E293B]">
             <div class="pr-4 space-y-0.5">
-                <label for="academic_announcements" class="text-sm font-bold text-slate-900 cursor-pointer">Official Academic Circulars & Notices</label>
-                <p class="text-xs text-slate-500">Crucial exam schedules, campus closures, and institutional notices.</p>
+                <label for="academic_announcements" class="text-xs font-semibold text-white cursor-pointer">Official Academic Circulars & Notices</label>
+                <p class="text-xs text-slate-400">Crucial exam schedules, campus closures, and institutional notices.</p>
             </div>
-            <input type="checkbox" id="academic_announcements" name="academic_announcements" class="mt-1 h-5 w-5 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300" {% if pref.academic_announcements %}checked{% endif %}>
+            <input type="checkbox" id="academic_announcements" name="academic_announcements" class="mt-1 h-4 w-4 rounded bg-[#090D16] border-[#1E293B] text-blue-600 focus:ring-blue-500" {% if pref.academic_announcements %}checked{% endif %}>
         </div>
 
         <!-- Assignment Alerts -->
-        <div class="flex items-start justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100">
+        <div class="flex items-start justify-between p-4 rounded-xl bg-[#131D33] border border-[#1E293B]">
             <div class="pr-4 space-y-0.5">
-                <label for="assignment_alerts" class="text-sm font-bold text-slate-900 cursor-pointer">Assignment Deadlines & Task Releases</label>
-                <p class="text-xs text-slate-500">Alerts when a teacher publishes an assignment or a due date approaches.</p>
+                <label for="assignment_alerts" class="text-xs font-semibold text-white cursor-pointer">Assignment Deadlines & Task Releases</label>
+                <p class="text-xs text-slate-400">Alerts when a teacher publishes an assignment or a due date approaches.</p>
             </div>
-            <input type="checkbox" id="assignment_alerts" name="assignment_alerts" class="mt-1 h-5 w-5 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300" {% if pref.assignment_alerts %}checked{% endif %}>
+            <input type="checkbox" id="assignment_alerts" name="assignment_alerts" class="mt-1 h-4 w-4 rounded bg-[#090D16] border-[#1E293B] text-blue-600 focus:ring-blue-500" {% if pref.assignment_alerts %}checked{% endif %}>
         </div>
 
         <!-- Grade Notifications -->
-        <div class="flex items-start justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100">
+        <div class="flex items-start justify-between p-4 rounded-xl bg-[#131D33] border border-[#1E293B]">
             <div class="pr-4 space-y-0.5">
-                <label for="grade_notifications" class="text-sm font-bold text-slate-900 cursor-pointer">Grade & Evaluation Publications</label>
-                <p class="text-xs text-slate-500">Instant notification when instructor remarks or marks are uploaded.</p>
+                <label for="grade_notifications" class="text-xs font-semibold text-white cursor-pointer">Grade & Evaluation Publications</label>
+                <p class="text-xs text-slate-400">Instant notification when instructor remarks or marks are uploaded.</p>
             </div>
-            <input type="checkbox" id="grade_notifications" name="grade_notifications" class="mt-1 h-5 w-5 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300" {% if pref.grade_notifications %}checked{% endif %}>
+            <input type="checkbox" id="grade_notifications" name="grade_notifications" class="mt-1 h-4 w-4 rounded bg-[#090D16] border-[#1E293B] text-blue-600 focus:ring-blue-500" {% if pref.grade_notifications %}checked{% endif %}>
         </div>
 
-        <!-- Marketing & Surveys (Opt-in by default False) -->
-        <div class="flex items-start justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100">
+        <!-- Marketing & Surveys -->
+        <div class="flex items-start justify-between p-4 rounded-xl bg-[#131D33] border border-[#1E293B]">
             <div class="pr-4 space-y-0.5">
-                <label for="marketing_and_surveys" class="text-sm font-bold text-slate-900 cursor-pointer">Optional Surveys & Institutional Newsletter</label>
-                <p class="text-xs text-slate-500">Occasional voluntary academic feedback surveys and student life newsletters (Opt-in only).</p>
+                <label for="marketing_and_surveys" class="text-xs font-semibold text-white cursor-pointer">Optional Surveys & Institutional Newsletter</label>
+                <p class="text-xs text-slate-400">Occasional voluntary academic feedback surveys and student life newsletters (Opt-in only).</p>
             </div>
-            <input type="checkbox" id="marketing_and_surveys" name="marketing_and_surveys" class="mt-1 h-5 w-5 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300" {% if pref.marketing_and_surveys %}checked{% endif %}>
+            <input type="checkbox" id="marketing_and_surveys" name="marketing_and_surveys" class="mt-1 h-4 w-4 rounded bg-[#090D16] border-[#1E293B] text-blue-600 focus:ring-blue-500" {% if pref.marketing_and_surveys %}checked{% endif %}>
         </div>
 
-        <div class="pt-3 flex items-center justify-between">
-            <span class="text-xs text-slate-400 font-mono">Preferences update immediately</span>
-            <button type="submit" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs shadow-md transition-all">
+        <div class="pt-3 border-t border-[#1E293B] flex items-center justify-between">
+            <span class="text-xs text-slate-500 font-mono">Preferences update immediately</span>
+            <button type="submit" class="app-btn app-btn-primary px-5 py-2 rounded-md text-xs font-medium">
                 Save Preferences
             </button>
         </div>

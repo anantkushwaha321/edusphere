@@ -32,15 +32,15 @@ class UserProfileUpdateForm(forms.ModelForm):
             'date_of_birth': 'Optional: Used for verifying age and minor parental protections.',
         }
         widgets = {
-            'first_name': forms.TextInput(attrs={'class': 'w-full px-3.5 py-2 rounded-lg border border-slate-300 text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none'}),
-            'last_name': forms.TextInput(attrs={'class': 'w-full px-3.5 py-2 rounded-lg border border-slate-300 text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none'}),
-            'email': forms.EmailInput(attrs={'class': 'w-full px-3.5 py-2 rounded-lg border border-slate-300 text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none'}),
-            'phone': forms.TextInput(attrs={'class': 'w-full px-3.5 py-2 rounded-lg border border-slate-300 text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none'}),
-            'bio': forms.Textarea(attrs={'class': 'w-full px-3.5 py-2 rounded-lg border border-slate-300 text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none', 'rows': 3}),
-            'address': forms.Textarea(attrs={'class': 'w-full px-3.5 py-2 rounded-lg border border-slate-300 text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none', 'rows': 2}),
-            'gender': forms.Select(attrs={'class': 'w-full px-3.5 py-2 rounded-lg border border-slate-300 text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none'}),
-            'date_of_birth': forms.DateInput(attrs={'type': 'date', 'class': 'w-full px-3.5 py-2 rounded-lg border border-slate-300 text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none'}),
-            'avatar': forms.FileInput(attrs={'class': 'block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100'}),
+            'first_name': forms.TextInput(attrs={'class': 'app-input w-full px-3 py-2 rounded-md bg-[#131D33] border border-[#1E293B] text-white focus:border-blue-500 focus:outline-none'}),
+            'last_name': forms.TextInput(attrs={'class': 'app-input w-full px-3 py-2 rounded-md bg-[#131D33] border border-[#1E293B] text-white focus:border-blue-500 focus:outline-none'}),
+            'email': forms.EmailInput(attrs={'class': 'app-input w-full px-3 py-2 rounded-md bg-[#131D33] border border-[#1E293B] text-white focus:border-blue-500 focus:outline-none'}),
+            'phone': forms.TextInput(attrs={'class': 'app-input w-full px-3 py-2 rounded-md bg-[#131D33] border border-[#1E293B] text-white focus:border-blue-500 focus:outline-none'}),
+            'bio': forms.Textarea(attrs={'class': 'app-input w-full px-3 py-2 rounded-md bg-[#131D33] border border-[#1E293B] text-white focus:border-blue-500 focus:outline-none', 'rows': 3}),
+            'address': forms.Textarea(attrs={'class': 'app-input w-full px-3 py-2 rounded-md bg-[#131D33] border border-[#1E293B] text-white focus:border-blue-500 focus:outline-none', 'rows': 2}),
+            'gender': forms.Select(attrs={'class': 'app-input w-full px-3 py-2 rounded-md bg-[#131D33] border border-[#1E293B] text-white focus:border-blue-500 focus:outline-none'}),
+            'date_of_birth': forms.DateInput(attrs={'type': 'date', 'class': 'app-input w-full px-3 py-2 rounded-md bg-[#131D33] border border-[#1E293B] text-white focus:border-blue-500 focus:outline-none'}),
+            'avatar': forms.FileInput(attrs={'class': 'block w-full text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer'}),
         }
 
 
@@ -48,40 +48,40 @@ class CustomPasswordChangeForm(PasswordChangeForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
-            field.widget.attrs.update({'class': 'w-full px-3.5 py-2 rounded-lg border border-slate-300 text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none'})
+            field.widget.attrs.update({'class': 'app-input w-full px-3 py-2 rounded-md bg-[#131D33] border border-[#1E293B] text-white focus:border-blue-500 focus:outline-none'})
 
 
 class UserCreationAdminForm(forms.ModelForm):
     password = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'w-full px-3.5 py-2 rounded-lg border border-slate-300 text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none'}),
+        widget=forms.PasswordInput(attrs={'class': 'app-input w-full px-3 py-2 rounded-md bg-[#131D33] border border-[#1E293B] text-white focus:border-blue-500 focus:outline-none'}),
         help_text='At least 6 characters.'
     )
     # Student specific
-    roll_number = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'w-full px-3.5 py-2 rounded-lg border border-slate-300'}))
-    admission_number = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'w-full px-3.5 py-2 rounded-lg border border-slate-300'}))
-    department = forms.ModelChoiceField(queryset=Department.objects.all(), required=False, widget=forms.Select(attrs={'class': 'w-full px-3.5 py-2 rounded-lg border border-slate-300'}))
-    academic_year = forms.ModelChoiceField(queryset=AcademicYear.objects.all(), required=False, widget=forms.Select(attrs={'class': 'w-full px-3.5 py-2 rounded-lg border border-slate-300'}))
-    current_semester = forms.IntegerField(required=False, initial=1, widget=forms.NumberInput(attrs={'class': 'w-full px-3.5 py-2 rounded-lg border border-slate-300'}))
-    guardian_name = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'w-full px-3.5 py-2 rounded-lg border border-slate-300'}))
-    guardian_phone = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'w-full px-3.5 py-2 rounded-lg border border-slate-300'}))
-    parent_email = forms.EmailField(required=False, widget=forms.EmailInput(attrs={'class': 'w-full px-3.5 py-2 rounded-lg border border-slate-300'}), help_text='Required for minors under 18')
-    is_minor = forms.BooleanField(required=False, initial=False, widget=forms.CheckboxInput(attrs={'class': 'h-4 w-4 text-indigo-600 focus:ring-indigo-500 rounded border-slate-300'}), help_text='Check if student is under 18')
+    roll_number = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'app-input w-full px-3 py-2 rounded-md bg-[#131D33] border border-[#1E293B] text-white'}))
+    admission_number = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'app-input w-full px-3 py-2 rounded-md bg-[#131D33] border border-[#1E293B] text-white'}))
+    department = forms.ModelChoiceField(queryset=Department.objects.all(), required=False, widget=forms.Select(attrs={'class': 'app-input w-full px-3 py-2 rounded-md bg-[#131D33] border border-[#1E293B] text-white'}))
+    academic_year = forms.ModelChoiceField(queryset=AcademicYear.objects.all(), required=False, widget=forms.Select(attrs={'class': 'app-input w-full px-3 py-2 rounded-md bg-[#131D33] border border-[#1E293B] text-white'}))
+    current_semester = forms.IntegerField(required=False, initial=1, widget=forms.NumberInput(attrs={'class': 'app-input w-full px-3 py-2 rounded-md bg-[#131D33] border border-[#1E293B] text-white'}))
+    guardian_name = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'app-input w-full px-3 py-2 rounded-md bg-[#131D33] border border-[#1E293B] text-white'}))
+    guardian_phone = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'app-input w-full px-3 py-2 rounded-md bg-[#131D33] border border-[#1E293B] text-white'}))
+    parent_email = forms.EmailField(required=False, widget=forms.EmailInput(attrs={'class': 'app-input w-full px-3 py-2 rounded-md bg-[#131D33] border border-[#1E293B] text-white'}), help_text='Required for minors under 18')
+    is_minor = forms.BooleanField(required=False, initial=False, widget=forms.CheckboxInput(attrs={'class': 'h-4 w-4 text-blue-600 focus:ring-blue-500 rounded bg-[#131D33] border-[#1E293B]'}), help_text='Check if student is under 18')
 
     # Teacher specific
-    employee_id = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'w-full px-3.5 py-2 rounded-lg border border-slate-300'}))
-    designation = forms.CharField(required=False, initial='Assistant Professor', widget=forms.TextInput(attrs={'class': 'w-full px-3.5 py-2 rounded-lg border border-slate-300'}))
-    qualifications = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'w-full px-3.5 py-2 rounded-lg border border-slate-300'}))
+    employee_id = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'app-input w-full px-3 py-2 rounded-md bg-[#131D33] border border-[#1E293B] text-white'}))
+    designation = forms.CharField(required=False, initial='Assistant Professor', widget=forms.TextInput(attrs={'class': 'app-input w-full px-3 py-2 rounded-md bg-[#131D33] border border-[#1E293B] text-white'}))
+    qualifications = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'app-input w-full px-3 py-2 rounded-md bg-[#131D33] border border-[#1E293B] text-white'}))
 
     class Meta:
         model = User
         fields = ['username', 'first_name', 'last_name', 'email', 'role', 'phone']
         widgets = {
-            'username': forms.TextInput(attrs={'class': 'w-full px-3.5 py-2 rounded-lg border border-slate-300'}),
-            'first_name': forms.TextInput(attrs={'class': 'w-full px-3.5 py-2 rounded-lg border border-slate-300'}),
-            'last_name': forms.TextInput(attrs={'class': 'w-full px-3.5 py-2 rounded-lg border border-slate-300'}),
-            'email': forms.EmailInput(attrs={'class': 'w-full px-3.5 py-2 rounded-lg border border-slate-300'}),
-            'role': forms.Select(attrs={'class': 'w-full px-3.5 py-2 rounded-lg border border-slate-300', 'id': 'roleSelect'}),
-            'phone': forms.TextInput(attrs={'class': 'w-full px-3.5 py-2 rounded-lg border border-slate-300'}),
+            'username': forms.TextInput(attrs={'class': 'app-input w-full px-3 py-2 rounded-md bg-[#131D33] border border-[#1E293B] text-white'}),
+            'first_name': forms.TextInput(attrs={'class': 'app-input w-full px-3 py-2 rounded-md bg-[#131D33] border border-[#1E293B] text-white'}),
+            'last_name': forms.TextInput(attrs={'class': 'app-input w-full px-3 py-2 rounded-md bg-[#131D33] border border-[#1E293B] text-white'}),
+            'email': forms.EmailInput(attrs={'class': 'app-input w-full px-3 py-2 rounded-md bg-[#131D33] border border-[#1E293B] text-white'}),
+            'role': forms.Select(attrs={'class': 'app-input w-full px-3 py-2 rounded-md bg-[#131D33] border border-[#1E293B] text-white', 'id': 'roleSelect'}),
+            'phone': forms.TextInput(attrs={'class': 'app-input w-full px-3 py-2 rounded-md bg-[#131D33] border border-[#1E293B] text-white'}),
         }
 
     def save(self, commit=True):

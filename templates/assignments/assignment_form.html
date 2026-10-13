@@ -4,50 +4,53 @@
 {% block header_title %}{{ title }}{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto bg-white p-8 rounded-3xl border border-slate-200/80 shadow-sm space-y-6">
-    <div class="border-b border-slate-100 pb-3">
-        <h2 class="text-lg font-bold text-slate-900">{{ title }}</h2>
+<div class="max-w-2xl mx-auto app-card p-6 sm:p-8 rounded-xl border border-[#1E293B] bg-[#0F172A] shadow-sm space-y-6">
+    <div class="border-b border-[#1E293B] pb-4">
+        <h2 class="text-lg font-bold text-white tracking-tight">{{ title }}</h2>
+        <p class="text-xs text-slate-400 mt-1">Create and distribute an academic assignment with deadlines and evaluation criteria.</p>
     </div>
 
     <form method="POST" enctype="multipart/form-data" class="space-y-4">
         {% csrf_token %}
         <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Course *</label>
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Course *</label>
             {{ form.course }}
         </div>
         <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Assignment Title *</label>
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Assignment Title *</label>
             {{ form.title }}
         </div>
         <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Detailed Instructions & Prompts *</label>
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Detailed Instructions & Prompts *</label>
             {{ form.description }}
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Maximum Marks *</label>
+                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Maximum Marks *</label>
                 {{ form.max_marks }}
             </div>
             <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Due Date & Time *</label>
+                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Due Date & Time *</label>
                 {{ form.due_date }}
             </div>
         </div>
 
         <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Reference File / Brief Attachment</label>
-            {{ form.attachment }}
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Reference File / Brief Attachment</label>
+            <div class="p-3 rounded-lg border border-[#1E293B] bg-[#131D33]">
+                {{ form.attachment }}
+            </div>
         </div>
 
         <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Publishing Status</label>
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Publishing Status</label>
             {{ form.status }}
         </div>
 
-        <div class="pt-4 flex items-center justify-end space-x-3">
-            <a href="{% url 'assignment_list' %}" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-all">Cancel</a>
-            <button type="submit" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs shadow-sm transition-all">Publish Assignment</button>
+        <div class="pt-4 border-t border-[#1E293B] flex items-center justify-end space-x-3">
+            <a href="{% url 'assignment_list' %}" class="app-btn app-btn-secondary px-4 py-2 rounded-md text-xs font-medium">Cancel</a>
+            <button type="submit" class="app-btn app-btn-primary px-5 py-2 rounded-md text-xs font-medium">Publish Assignment</button>
         </div>
     </form>
 </div>

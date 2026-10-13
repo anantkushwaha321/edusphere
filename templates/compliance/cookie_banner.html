@@ -31,63 +31,63 @@
 </div>
 
 <!-- Detailed Cookie Preferences Modal -->
-<div id="cookiePreferencesModal" class="no-print fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 max-h-[90vh] overflow-y-auto">
-        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+<div id="cookiePreferencesModal" class="no-print fixed inset-0 z-50 bg-[#090D16]/80 backdrop-blur-sm hidden flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="app-card bg-[#0F172A] rounded-xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-[#1E293B] space-y-6 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between border-b border-[#1E293B] pb-4">
             <div>
-                <h3 id="modalTitle" class="text-lg font-bold text-slate-900">Manage Cookie Preferences</h3>
-                <p class="text-xs text-slate-500 mt-0.5">Customize which categories of cookies you authorize.</p>
+                <h3 id="modalTitle" class="text-base font-bold text-white tracking-tight">Manage Cookie Preferences</h3>
+                <p class="text-xs text-slate-400 mt-0.5">Customize which categories of cookies you authorize.</p>
             </div>
-            <button type="button" id="closeCookieModalBtn" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" aria-label="Close modal">
+            <button type="button" id="closeCookieModalBtn" class="text-slate-400 hover:text-white p-1 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500" aria-label="Close modal">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
         </div>
 
         <div class="space-y-4 text-xs">
             <!-- Essential Cookies -->
-            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+            <div class="p-4 rounded-xl bg-[#131D33] border border-[#1E293B] space-y-2">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h4 class="font-bold text-slate-900 text-sm">1. Strictly Necessary Cookies</h4>
-                        <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">Always Active</span>
+                        <h4 class="font-semibold text-white text-xs">1. Strictly Necessary Cookies</h4>
+                        <span class="text-[10px] font-semibold text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800">Always Active</span>
                     </div>
                 </div>
-                <p class="text-slate-600 leading-relaxed">
+                <p class="text-slate-400 leading-relaxed">
                     Required for core security, CSRF protection, and user session management (`sessionid`, `csrftoken`). These cannot be disabled as the system cannot function securely without them.
                 </p>
             </div>
 
             <!-- Functional Cookies -->
-            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+            <div class="p-4 rounded-xl bg-[#131D33] border border-[#1E293B] space-y-2">
                 <div class="flex items-center justify-between">
-                    <h4 class="font-bold text-slate-900 text-sm">2. Functional & Preference Cookies</h4>
+                    <h4 class="font-semibold text-white text-xs">2. Functional & Preference Cookies</h4>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="prefFunctional" class="sr-only peer">
-                        <div class="w-10 h-5 bg-slate-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                        <div class="w-9 h-5 bg-[#090D16] border border-[#1E293B] peer-focus:outline-none peer-focus:ring-1 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-500 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600 peer-checked:after:bg-white"></div>
                     </label>
                 </div>
-                <p class="text-slate-600 leading-relaxed">
+                <p class="text-slate-400 leading-relaxed">
                     Remembers your UI view choices, sidebar toggles, and user accessibility options between visits.
                 </p>
             </div>
 
             <!-- Analytics Cookies -->
-            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+            <div class="p-4 rounded-xl bg-[#131D33] border border-[#1E293B] space-y-2">
                 <div class="flex items-center justify-between">
-                    <h4 class="font-bold text-slate-900 text-sm">3. Performance & Usage Analytics</h4>
+                    <h4 class="font-semibold text-white text-xs">3. Performance & Usage Analytics</h4>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="prefAnalytics" class="sr-only peer">
-                        <div class="w-10 h-5 bg-slate-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                        <div class="w-9 h-5 bg-[#090D16] border border-[#1E293B] peer-focus:outline-none peer-focus:ring-1 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-500 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600 peer-checked:after:bg-white"></div>
                     </label>
                 </div>
-                <p class="text-slate-600 leading-relaxed">
+                <p class="text-slate-400 leading-relaxed">
                     Gathers strictly aggregated and anonymized navigation performance metrics to help faculty and IT administrators optimize platform responsiveness.
                 </p>
             </div>
         </div>
 
-        <div class="pt-4 border-t border-slate-100 flex items-center justify-end space-x-3">
-            <button type="button" id="savePreferencesBtn" class="w-full sm:w-auto px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs shadow-md transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <div class="pt-4 border-t border-[#1E293B] flex items-center justify-end space-x-3">
+            <button type="button" id="savePreferencesBtn" class="app-btn app-btn-primary w-full sm:w-auto px-5 py-2 rounded-md text-xs font-medium">
                 Save Selected Preferences
             </button>
         </div>
