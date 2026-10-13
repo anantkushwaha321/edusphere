@@ -1,16 +1,16 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-[#070A13] text-[#F5F7FF]">
+<html lang="en" class="h-full bg-[#090D16] text-[#F8FAFC]">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Passwordless OTP Sign-in & Registration for IIMTMANIA — IIMT UNIVERSITY Academic Portal">
-    <title>Sign In & Register — IIMTMANIA | IIMT UNIVERSITY</title>
+    <meta name="description" content="Sign In & Verification — EduSphere Academic Management System">
+    <title>Sign In & Register — EduSphere | IIMT UNIVERSITY</title>
 
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -20,33 +20,32 @@
             theme: {
                 extend: {
                     colors: {
-                        midnight: '#070A13',
-                        midnight2: '#0D1222',
+                        ground: '#090D16',
+                        card: '#0F172A',
+                        borderSubtle: '#1E293B',
                     },
                     fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
                     }
                 }
             }
         }
     </script>
 
-    <!-- Dark Liquid Glass Design System & Animation Engine -->
+    <!-- EduSphere Design System -->
     <link rel="stylesheet" href="{% static 'css/design-system.css' %}">
     <link rel="stylesheet" href="{% static 'css/animations.css' %}">
-    <link rel="stylesheet" href="{% static 'css/liquid-glass.css' %}">
 
     <style>
         .fade-enter {
             opacity: 0;
-            transform: translateY(8px);
-            transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+            transform: translateY(4px);
+            transition: opacity 0.15s ease-out, transform 0.15s ease-out;
         }
         .fade-enter-active {
             opacity: 1;
             transform: translateY(0);
         }
-        /* Disable number arrows */
         input::-webkit-outer-spin-button,
         input::-webkit-inner-spin-button {
             -webkit-appearance: none;
@@ -55,7 +54,6 @@
         input[type=number] {
             -moz-appearance: textfield;
         }
-        /* Screen Reader Accessible utility */
         .sr-only {
             position: absolute;
             width: 1px;
@@ -71,7 +69,7 @@
             position: static;
             width: auto;
             height: auto;
-            padding: 0.75rem 1rem;
+            padding: 0.5rem 1rem;
             margin: 0;
             overflow: visible;
             clip: auto;
@@ -79,213 +77,186 @@
         }
     </style>
 </head>
-<body class="min-h-full flex flex-col justify-between font-sans bg-[#070A13] text-[#F5F7FF] antialiased selection:bg-blue-600 selection:text-white relative overflow-x-hidden">
-
-    <!-- Atmospheric Animated Background -->
-    {% include 'components/ambient_background.html' %}
+<body class="min-h-full flex flex-col justify-between font-sans bg-[#090D16] text-[#F8FAFC] antialiased selection:bg-blue-600 selection:text-white relative">
 
     <!-- Skip Link for Accessibility -->
-    <a href="#authCard" class="sr-only focus:not-sr-only fixed top-3 left-3 z-50 bg-blue-600 text-white rounded-xl shadow-xl font-bold text-xs ring-2 ring-white">
+    <a href="#authCard" class="sr-only focus:not-sr-only fixed top-3 left-3 z-50 bg-blue-600 text-white rounded-md shadow-lg font-medium text-xs ring-2 ring-white">
         Skip to Authentication &rarr;
     </a>
 
-    <!-- Top Minimal Brand Bar -->
-    <header class="relative z-20 w-full px-6 py-4 flex items-center justify-between">
-        <a href="{% url 'home' %}" class="flex items-center space-x-3 group">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-violet-600 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform" aria-hidden="true">
-                🎓
+    <!-- Top Minimal Navigation -->
+    <header class="w-full px-6 py-4 flex items-center justify-between border-b border-[#1E293B] bg-[#090D16]">
+        <a href="{% url 'home' %}" class="flex items-center space-x-2 group">
+            <div class="w-7 h-7 rounded-md bg-blue-600 flex items-center justify-center text-white" aria-hidden="true">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                </svg>
             </div>
             <div>
-                <span class="text-xl font-extrabold text-white tracking-tight flex items-center gap-1">
-                    IIMT<span class="gradient-text-electric">MANIA</span>
-                </span>
-                <span class="block text-[9px] uppercase tracking-widest text-slate-400 font-bold -mt-0.5">IIMT UNIVERSITY Portal</span>
+                <span class="text-sm font-bold tracking-tight text-white">EduSphere</span>
+                <span class="block text-[9px] uppercase tracking-wider text-slate-400 font-medium -mt-0.5">IIMT UNIVERSITY</span>
             </div>
         </a>
 
-        <a href="{% url 'home' %}" class="glass-btn glass-btn-secondary text-xs py-2 px-3.5 rounded-xl hidden sm:inline-flex items-center space-x-1.5">
+        <a href="{% url 'home' %}" class="app-btn app-btn-secondary text-xs py-1.5 px-3 rounded-md hidden sm:inline-flex items-center space-x-1">
             <span aria-hidden="true">&larr;</span>
-            <span>Back to Home</span>
+            <span>Home</span>
         </a>
     </header>
 
-    <!-- Main Centered Authentication Stage -->
-    <main class="relative z-10 flex-1 flex items-center justify-center p-4 py-8">
-        <div class="max-w-md w-full space-y-6">
+    <!-- Main Authentication Stage -->
+    <main class="flex-1 flex items-center justify-center p-4 py-8">
+        <div class="max-w-sm w-full space-y-4">
 
-            <!-- Hero Header -->
-            <div class="text-center space-y-2">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-card text-[11px] font-semibold text-blue-300 border border-blue-500/20 mb-1">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
-                    <span>Zero-Password Cryptographic Gateway</span>
-                </div>
-                <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                    Sign In to <span class="gradient-text-electric">IIMTMANIA</span>
-                </h1>
-                <p class="text-xs text-slate-400">Official academic & campus ecosystem of IIMT UNIVERSITY</p>
+            <!-- Heading -->
+            <div class="text-center space-y-1">
+                <h1 class="text-xl font-bold text-white tracking-tight">Institutional Sign In</h1>
+                <p class="text-xs text-slate-400">Authenticate using your registered university email</p>
             </div>
 
             <!-- Dynamic Feedback Alert Banner -->
-            <div id="alertBox" class="hidden glass-card rounded-2xl p-4 text-xs font-semibold border transition-all duration-200" role="alert" aria-live="polite">
-                <div class="flex items-start space-x-2.5">
-                    <span id="alertIcon" class="text-base" aria-hidden="true">ℹ️</span>
-                    <p id="alertMessage" class="flex-1 leading-relaxed text-slate-200"></p>
+            <div id="alertBox" class="hidden app-card p-3 text-xs font-medium border transition-all" role="alert" aria-live="polite">
+                <div class="flex items-start space-x-2">
+                    <span id="alertIcon" class="text-xs" aria-hidden="true">ℹ️</span>
+                    <p id="alertMessage" class="flex-1 leading-snug text-slate-200"></p>
                 </div>
             </div>
 
-            <!-- Main Interactive Auth Card (Dark Liquid Glass) -->
-            <div id="authCard" class="glass-panel spotlight-card p-6 sm:p-8 rounded-3xl shadow-2xl space-y-6 border border-white/10 relative">
+            <!-- Main Interactive Auth Card -->
+            <div id="authCard" class="app-card p-6 rounded-xl border border-[#1E293B] shadow-sm space-y-5">
 
-                <!-- STEP 1: Email Input Form -->
-                <div id="stepEmail" class="space-y-5">
-                    <div class="text-center">
-                        <h2 class="text-base font-bold text-white">Enter Your Email Address</h2>
-                        <p class="text-xs text-slate-400 mt-1">We will transmit a secure 6-digit one-time code to authenticate your session.</p>
-                    </div>
-
-                    <form id="emailForm" onsubmit="handleSendOtp(event)" class="space-y-4">
+                <!-- STEP 1: Email Form -->
+                <div id="stepEmail" class="space-y-4">
+                    <form id="emailForm" onsubmit="handleSendOtp(event)" class="space-y-3.5">
                         {% csrf_token %}
                         <div>
-                            <label for="emailInput" class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Institutional Email Address</label>
-                            <div class="relative">
-                                <input type="email" id="emailInput" required autocomplete="email" placeholder="name@iimtindia.net"
-                                       class="glass-input w-full px-4 py-3 rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none transition-all">
-                                <span class="absolute right-3.5 top-3.5 text-slate-400" aria-hidden="true">✉️</span>
-                            </div>
+                            <label for="emailInput" class="block text-xs font-semibold text-slate-300 mb-1.5">Institutional Email</label>
+                            <input type="email" id="emailInput" required autocomplete="email" placeholder="name@iimtindia.net"
+                                   class="app-input w-full px-3 py-2 rounded-md text-white text-xs placeholder-slate-500 focus:outline-none">
                         </div>
 
                         <!-- Terms of Service & Privacy Consent Checkbox -->
-                        <div class="pt-1 flex items-start space-x-2.5">
-                            <input type="checkbox" id="termsConsent" required class="mt-0.5 h-4 w-4 rounded bg-[#0D1222] border-white/20 text-blue-600 focus:ring-blue-500">
-                            <label for="termsConsent" class="text-xs text-slate-300 leading-snug cursor-pointer">
-                                I agree to the <a href="{% url 'compliance:terms_of_service' %}" target="_blank" class="text-blue-400 underline font-semibold hover:text-blue-300">Terms of Service</a> and have read the <a href="{% url 'compliance:privacy_policy' %}" target="_blank" class="text-blue-400 underline font-semibold hover:text-blue-300">Privacy Policy</a>.
+                        <div class="pt-1 flex items-start space-x-2">
+                            <input type="checkbox" id="termsConsent" required class="mt-0.5 h-3.5 w-3.5 rounded bg-[#131D33] border-[#1E293B] text-blue-600 focus:ring-blue-500">
+                            <label for="termsConsent" class="text-[11px] text-slate-400 leading-snug cursor-pointer">
+                                I agree to the <a href="{% url 'compliance:terms_of_service' %}" target="_blank" class="text-blue-400 underline hover:text-blue-300">Terms of Service</a> and <a href="{% url 'compliance:privacy_policy' %}" target="_blank" class="text-blue-400 underline hover:text-blue-300">Privacy Policy</a>.
                             </label>
                         </div>
 
-                        <div class="pt-2">
-                            <button type="submit" id="sendOtpBtn" class="glass-btn glass-btn-primary w-full py-3 px-4 rounded-xl text-sm font-bold shadow-lg shadow-blue-600/30 flex items-center justify-center space-x-2">
+                        <div class="pt-1">
+                            <button type="submit" id="sendOtpBtn" class="app-btn app-btn-primary w-full py-2 px-3 rounded-md text-xs font-medium flex items-center justify-center space-x-2">
                                 <span id="sendOtpText">Send Verification Code</span>
-                                <div id="sendOtpSpinner" class="hidden w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                <div id="sendOtpSpinner" class="hidden w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                             </button>
                         </div>
                     </form>
                 </div>
 
                 <!-- STEP 2: 6-Digit OTP Verification -->
-                <div id="stepOtp" class="hidden space-y-5 fade-enter">
+                <div id="stepOtp" class="hidden space-y-4 fade-enter">
                     <div class="text-center">
-                        <div class="inline-flex w-11 h-11 rounded-2xl bg-blue-500/20 text-blue-400 items-center justify-center text-xl mb-2 border border-blue-500/30">
-                            📩
-                        </div>
-                        <h2 class="text-base font-bold text-white">Enter 6-Digit Code</h2>
-                        <p class="text-xs text-slate-400 mt-1">
-                            Dispatched to <strong id="displayEmail" class="text-blue-300 font-mono"></strong>
+                        <h2 class="text-sm font-semibold text-white">Enter 6-Digit Code</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">
+                            Sent to <strong id="displayEmail" class="text-slate-200 font-mono"></strong>
                         </p>
-                        <button type="button" onclick="handleChangeEmail()" class="text-xs text-blue-400 hover:text-blue-300 underline font-semibold mt-1 inline-block">
-                            Change Email Address
+                        <button type="button" onclick="handleChangeEmail()" class="text-[11px] text-blue-400 hover:text-blue-300 underline font-medium mt-1 inline-block">
+                            Change email
                         </button>
                     </div>
 
-                    <form id="otpForm" onsubmit="handleVerifyOtp(event)" class="space-y-5">
+                    <form id="otpForm" onsubmit="handleVerifyOtp(event)" class="space-y-4">
                         <!-- Segmented 6-Digit OTP Input -->
-                        <div class="flex justify-between items-center gap-2 max-w-xs mx-auto">
-                            <input type="text" maxlength="1" inputmode="numeric" class="otp-digit glass-input w-11 h-12 text-center text-xl font-black rounded-xl text-white focus:ring-2 focus:ring-blue-500" required>
-                            <input type="text" maxlength="1" inputmode="numeric" class="otp-digit glass-input w-11 h-12 text-center text-xl font-black rounded-xl text-white focus:ring-2 focus:ring-blue-500" required>
-                            <input type="text" maxlength="1" inputmode="numeric" class="otp-digit glass-input w-11 h-12 text-center text-xl font-black rounded-xl text-white focus:ring-2 focus:ring-blue-500" required>
-                            <input type="text" maxlength="1" inputmode="numeric" class="otp-digit glass-input w-11 h-12 text-center text-xl font-black rounded-xl text-white focus:ring-2 focus:ring-blue-500" required>
-                            <input type="text" maxlength="1" inputmode="numeric" class="otp-digit glass-input w-11 h-12 text-center text-xl font-black rounded-xl text-white focus:ring-2 focus:ring-blue-500" required>
-                            <input type="text" maxlength="1" inputmode="numeric" class="otp-digit glass-input w-11 h-12 text-center text-xl font-black rounded-xl text-white focus:ring-2 focus:ring-blue-500" required>
+                        <div class="flex justify-between items-center gap-1.5 max-w-[260px] mx-auto">
+                            <input type="text" maxlength="1" inputmode="numeric" class="otp-digit app-input w-9 h-10 text-center text-base font-semibold rounded-md text-white focus:ring-1 focus:ring-blue-500" required>
+                            <input type="text" maxlength="1" inputmode="numeric" class="otp-digit app-input w-9 h-10 text-center text-base font-semibold rounded-md text-white focus:ring-1 focus:ring-blue-500" required>
+                            <input type="text" maxlength="1" inputmode="numeric" class="otp-digit app-input w-9 h-10 text-center text-base font-semibold rounded-md text-white focus:ring-1 focus:ring-blue-500" required>
+                            <input type="text" maxlength="1" inputmode="numeric" class="otp-digit app-input w-9 h-10 text-center text-base font-semibold rounded-md text-white focus:ring-1 focus:ring-blue-500" required>
+                            <input type="text" maxlength="1" inputmode="numeric" class="otp-digit app-input w-9 h-10 text-center text-base font-semibold rounded-md text-white focus:ring-1 focus:ring-blue-500" required>
+                            <input type="text" maxlength="1" inputmode="numeric" class="otp-digit app-input w-9 h-10 text-center text-base font-semibold rounded-md text-white focus:ring-1 focus:ring-blue-500" required>
                         </div>
 
-                        <!-- Expiry & Resend Cooldown Section -->
-                        <div class="flex items-center justify-between text-xs text-slate-400 px-1">
-                            <span class="flex items-center space-x-1">
-                                <span>⏱️ Expires in 5 mins</span>
-                            </span>
+                        <!-- Cooldown -->
+                        <div class="flex items-center justify-between text-[11px] text-slate-400 px-1">
+                            <span>Expires in 5m</span>
                             <div id="resendContainer">
-                                <span id="cooldownText" class="text-slate-400 font-mono">Resend in 60s</span>
-                                <button type="button" id="resendBtn" onclick="handleResendOtp()" class="hidden text-blue-400 hover:text-blue-300 font-bold underline">
+                                <span id="cooldownText" class="text-slate-500 font-mono">Resend in 60s</span>
+                                <button type="button" id="resendBtn" onclick="handleResendOtp()" class="hidden text-blue-400 hover:text-blue-300 font-medium underline">
                                     Resend Code
                                 </button>
                             </div>
                         </div>
 
-                        <div class="pt-2">
-                            <button type="submit" id="verifyOtpBtn" class="glass-btn glass-btn-primary w-full py-3 px-4 rounded-xl text-sm font-bold shadow-lg shadow-blue-600/30 flex items-center justify-center space-x-2">
-                                <span id="verifyOtpText">Verify Code & Enter</span>
-                                <div id="verifyOtpSpinner" class="hidden w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <div class="pt-1">
+                            <button type="submit" id="verifyOtpBtn" class="app-btn app-btn-primary w-full py-2 px-3 rounded-md text-xs font-medium flex items-center justify-center space-x-2">
+                                <span id="verifyOtpText">Verify & Continue</span>
+                                <div id="verifyOtpSpinner" class="hidden w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                             </button>
                         </div>
                     </form>
                 </div>
 
-                <!-- STEP 3: Complete Student Profile (New Users Only) -->
-                <div id="stepProfile" class="hidden space-y-5 fade-enter">
+                <!-- STEP 3: Complete Student Profile (New Users) -->
+                <div id="stepProfile" class="hidden space-y-4 fade-enter">
                     <div class="text-center">
-                        <div class="inline-flex w-11 h-11 rounded-2xl bg-emerald-500/20 text-emerald-400 items-center justify-center text-xl mb-2 border border-emerald-500/30">
-                            🎉
-                        </div>
-                        <h2 class="text-base font-bold text-white">Complete Student Profile</h2>
-                        <p class="text-xs text-slate-400 mt-1">Email verified! Please provide your university profile details.</p>
+                        <h2 class="text-sm font-semibold text-white">Student Information</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Enter your academic details to complete registration.</p>
                     </div>
 
-                    <form id="profileForm" onsubmit="handleCompleteRegistration(event)" class="space-y-4">
-                        <div class="grid grid-cols-2 gap-3">
+                    <form id="profileForm" onsubmit="handleCompleteRegistration(event)" class="space-y-3">
+                        <div class="grid grid-cols-2 gap-2">
                             <div>
-                                <label for="regFirstName" class="block text-xs font-bold text-slate-300 mb-1">First Name *</label>
+                                <label for="regFirstName" class="block text-[11px] font-medium text-slate-300 mb-1">First Name *</label>
                                 <input type="text" id="regFirstName" required placeholder="Alice"
-                                       class="glass-input w-full px-3 py-2.5 rounded-xl text-white text-xs">
+                                       class="app-input w-full px-2.5 py-1.5 rounded-md text-white text-xs">
                             </div>
                             <div>
-                                <label for="regLastName" class="block text-xs font-bold text-slate-300 mb-1">Last Name *</label>
+                                <label for="regLastName" class="block text-[11px] font-medium text-slate-300 mb-1">Last Name *</label>
                                 <input type="text" id="regLastName" required placeholder="Sharma"
-                                       class="glass-input w-full px-3 py-2.5 rounded-xl text-white text-xs">
+                                       class="app-input w-full px-2.5 py-1.5 rounded-md text-white text-xs">
                             </div>
                         </div>
 
                         <div>
-                            <label for="regRollNumber" class="block text-xs font-bold text-slate-300 mb-1">Student Roll Number (Optional)</label>
-                            <input type="text" id="regRollNumber" placeholder="e.g. CS2026-050"
-                                   class="glass-input w-full px-3 py-2.5 rounded-xl text-white text-xs">
+                            <label for="regRollNumber" class="block text-[11px] font-medium text-slate-300 mb-1">Roll Number (Optional)</label>
+                            <input type="text" id="regRollNumber" placeholder="CS2026-050"
+                                   class="app-input w-full px-2.5 py-1.5 rounded-md text-white text-xs font-mono">
                         </div>
 
                         <div>
-                            <label for="regDepartment" class="block text-xs font-bold text-slate-300 mb-1">Academic Department</label>
-                            <select id="regDepartment" class="glass-input w-full px-3 py-2.5 rounded-xl text-white text-xs bg-[#0D1222]">
+                            <label for="regDepartment" class="block text-[11px] font-medium text-slate-300 mb-1">Department</label>
+                            <select id="regDepartment" class="app-input w-full px-2.5 py-1.5 rounded-md text-white text-xs bg-[#131D33]">
                                 {% for d in departments %}
-                                <option value="{{ d.id }}" class="bg-[#070A13] text-white">{{ d.name }} ({{ d.code }})</option>
+                                <option value="{{ d.id }}" class="bg-[#090D16] text-white">{{ d.name }}</option>
                                 {% empty %}
-                                <option value="" class="bg-[#070A13] text-white">General Academic Department</option>
+                                <option value="" class="bg-[#090D16] text-white">General Academic Department</option>
                                 {% endfor %}
                             </select>
                         </div>
 
-                        <div class="pt-2">
-                            <button type="submit" id="completeRegBtn" class="glass-btn glass-btn-primary w-full py-3 px-4 rounded-xl text-sm font-bold shadow-lg shadow-blue-600/30 flex items-center justify-center space-x-2">
-                                <span id="completeRegText">Finalize & Enter Dashboard</span>
-                                <div id="completeRegSpinner" class="hidden w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <div class="pt-1">
+                            <button type="submit" id="completeRegBtn" class="app-btn app-btn-primary w-full py-2 px-3 rounded-md text-xs font-medium flex items-center justify-center space-x-2">
+                                <span id="completeRegText">Finalize Registration</span>
+                                <div id="completeRegSpinner" class="hidden w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                             </button>
                         </div>
                     </form>
                 </div>
 
-                <!-- Quick Seed Demo Login Buttons (1-Click Fill) -->
-                <div class="pt-4 border-t border-white/10">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center mb-2.5">
-                        Demo Institutional Accounts (1-Click Fill)
+                <!-- Test Demo Accounts -->
+                <div class="pt-3 border-t border-[#1E293B]">
+                    <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider text-center mb-2">
+                        Quick Demo Accounts
                     </p>
-                    <div class="grid grid-cols-3 gap-2 text-center">
-                        <button type="button" onclick="fillDemoEmail('admin@iimtindia.net')" class="glass-card p-2 rounded-xl text-xs font-bold border-violet-500/30 hover:border-violet-500/60 text-violet-200 transition-all focus:outline-none">
-                            <span class="block text-xs">Admin</span>
-                            <span class="text-[9px] text-violet-300 font-mono">admin@</span>
+                    <div class="grid grid-cols-3 gap-1.5 text-center">
+                        <button type="button" onclick="fillDemoEmail('admin@iimtindia.net')" class="app-btn app-btn-secondary py-1 px-1.5 rounded text-[11px]">
+                            Admin
                         </button>
-                        <button type="button" onclick="fillDemoEmail('alan.turing@iimtindia.net')" class="glass-card p-2 rounded-xl text-xs font-bold border-emerald-500/30 hover:border-emerald-500/60 text-emerald-200 transition-all focus:outline-none">
-                            <span class="block text-xs">Faculty</span>
-                            <span class="text-[9px] text-emerald-300 font-mono">alan.turing@</span>
+                        <button type="button" onclick="fillDemoEmail('alan.turing@iimtindia.net')" class="app-btn app-btn-secondary py-1 px-1.5 rounded text-[11px]">
+                            Faculty
                         </button>
-                        <button type="button" onclick="fillDemoEmail('student.alice@iimtindia.net')" class="glass-card p-2 rounded-xl text-xs font-bold border-blue-500/30 hover:border-blue-500/60 text-blue-200 transition-all focus:outline-none">
-                            <span class="block text-xs">Student</span>
-                            <span class="text-[9px] text-blue-300 font-mono">student.alice@</span>
+                        <button type="button" onclick="fillDemoEmail('student.alice@iimtindia.net')" class="app-btn app-btn-secondary py-1 px-1.5 rounded text-[11px]">
+                            Student
                         </button>
                     </div>
                 </div>
@@ -294,41 +265,19 @@
         </div>
     </main>
 
-    <!-- Official Institutional Liquid Glass Footer -->
-    <footer class="relative z-20 max-w-4xl mx-auto w-full text-center text-xs text-slate-400 space-y-2 py-4 px-4" role="contentinfo">
-        <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-slate-300">
-            <a href="{% url 'compliance:privacy_policy' %}" class="hover:text-white transition-colors">Privacy Policy</a>
-            <span aria-hidden="true" class="text-slate-600">•</span>
-            <a href="{% url 'compliance:terms_of_service' %}" class="hover:text-white transition-colors">Terms of Service</a>
-            <span aria-hidden="true" class="text-slate-600">•</span>
-            <a href="{% url 'compliance:cookie_policy' %}" class="hover:text-white transition-colors">Cookie Policy</a>
-            <span aria-hidden="true" class="text-slate-600">•</span>
-            <a href="{% url 'compliance:refund_policy' %}" class="hover:text-white transition-colors">Tuition Refund</a>
-            <span aria-hidden="true" class="text-slate-600">•</span>
-            <a href="{% url 'compliance:parental_consent' %}" class="hover:text-white transition-colors">Parental Consent</a>
-            <span aria-hidden="true" class="text-slate-600">•</span>
-            <a href="{% url 'compliance:accessibility_statement' %}" class="hover:text-white transition-colors">Accessibility</a>
-        </div>
-        <p class="text-[11px] text-slate-500">
-            &copy; 2026 IIMT UNIVERSITY • 'O' Pocket, Ganga Nagar, Meerut, UP 250001 • Contact: privacy@iimtindia.net
-        </p>
+    <!-- Footer -->
+    <footer class="w-full text-center text-[11px] text-slate-500 py-3 px-4 border-t border-[#1E293B] bg-[#090D16]">
+        &copy; 2026 IIMT UNIVERSITY &bull; EduSphere Smart Academic Management System
     </footer>
 
-    <!-- Accessible Cookie Banner Component -->
-    {% include 'compliance/cookie_banner.html' %}
-
-    <!-- Global Animation & Tactile Scripts -->
-    <script src="{% static 'js/animations.js' %}"></script>
+    <!-- Scripts -->
     <script src="{% static 'js/main.js' %}"></script>
-
-    <!-- Client-Side OTP Controller Script -->
     <script>
         let currentEmail = '';
         let cooldownTimer = null;
         let remainingSeconds = 0;
         let lastOtpEntered = '';
 
-        // Helper to extract CSRF token from cookie
         function getCsrfToken() {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
@@ -353,15 +302,15 @@
             const msg = document.getElementById('alertMessage');
             const icon = document.getElementById('alertIcon');
 
-            box.className = 'glass-card rounded-2xl p-4 text-xs font-semibold border transition-all duration-200';
+            box.className = 'app-card p-3 text-xs font-medium border transition-all';
             if (type === 'error') {
-                box.classList.add('border-rose-500/50', 'bg-rose-950/40', 'text-rose-200');
+                box.classList.add('border-rose-900', 'bg-rose-950/40', 'text-rose-200');
                 icon.textContent = '⚠️';
             } else if (type === 'success') {
-                box.classList.add('border-emerald-500/50', 'bg-emerald-950/40', 'text-emerald-200');
-                icon.textContent = '✅';
+                box.classList.add('border-emerald-900', 'bg-emerald-950/40', 'text-emerald-200');
+                icon.textContent = '✓';
             } else {
-                box.classList.add('border-blue-500/50', 'bg-blue-950/40', 'text-blue-200');
+                box.classList.add('border-blue-900', 'bg-blue-950/40', 'text-blue-200');
                 icon.textContent = 'ℹ️';
             }
             msg.textContent = message;
@@ -378,7 +327,6 @@
             hideAlert();
         }
 
-        // Start Resend Cooldown Countdown
         function startCooldown(seconds) {
             remainingSeconds = seconds;
             const cooldownText = document.getElementById('cooldownText');
@@ -402,7 +350,6 @@
             cooldownText.textContent = `Resend in ${remainingSeconds}s`;
         }
 
-        // STEP 1: Send OTP
         async function handleSendOtp(event) {
             event.preventDefault();
             hideAlert();
@@ -411,7 +358,7 @@
             const terms = document.getElementById('termsConsent').checked;
 
             if (!terms) {
-                showAlert("Please accept the Terms of Service and Privacy Policy to proceed.", 'error');
+                showAlert("Please accept the Terms of Service to proceed.", 'error');
                 return;
             }
 
@@ -420,7 +367,7 @@
             const spinner = document.getElementById('sendOtpSpinner');
 
             btn.disabled = true;
-            text.textContent = 'Sending Code...';
+            text.textContent = 'Sending...';
             spinner.classList.remove('hidden');
 
             try {
@@ -439,12 +386,10 @@
                     currentEmail = email;
                     document.getElementById('displayEmail').textContent = email;
 
-                    // Transition to OTP screen
                     document.getElementById('stepEmail').classList.add('hidden');
                     document.getElementById('stepOtp').classList.remove('hidden');
                     document.getElementById('stepOtp').classList.add('fade-enter-active');
 
-                    // Focus first digit
                     const firstInput = document.querySelector('.otp-digit');
                     if (firstInput) firstInput.focus();
 
@@ -454,7 +399,7 @@
                     showAlert(data.message || 'Failed to send verification code.', 'error');
                 }
             } catch (err) {
-                showAlert("Network communication error. Please check your connection.", 'error');
+                showAlert("Network connection error. Please retry.", 'error');
             } finally {
                 btn.disabled = false;
                 text.textContent = 'Send Verification Code';
@@ -462,7 +407,6 @@
             }
         }
 
-        // Resend OTP
         async function handleResendOtp() {
             hideAlert();
             const resendBtn = document.getElementById('resendBtn');
@@ -489,7 +433,7 @@
                     resendBtn.textContent = 'Resend Code';
                 }
             } catch (err) {
-                showAlert("Failed to resend verification code.", 'error');
+                showAlert("Failed to resend code.", 'error');
                 resendBtn.disabled = false;
                 resendBtn.textContent = 'Resend Code';
             }
@@ -501,11 +445,9 @@
             document.getElementById('stepOtp').classList.add('hidden');
             document.getElementById('stepProfile').classList.add('hidden');
             document.getElementById('stepEmail').classList.remove('hidden');
-            // Clear inputs
             document.querySelectorAll('.otp-digit').forEach(el => el.value = '');
         }
 
-        // Collect 6-digit OTP from input boxes
         function getOtpString() {
             let code = '';
             document.querySelectorAll('.otp-digit').forEach(el => {
@@ -514,14 +456,13 @@
             return code;
         }
 
-        // STEP 2: Verify OTP
         async function handleVerifyOtp(event) {
             event.preventDefault();
             hideAlert();
 
             const otp = getOtpString();
             if (otp.length !== 6) {
-                showAlert("Please enter all 6 digits of your verification code.", 'error');
+                showAlert("Please enter all 6 digits.", 'error');
                 return;
             }
             lastOtpEntered = otp;
@@ -551,16 +492,15 @@
 
                 if (data.success) {
                     if (data.requires_registration) {
-                        // User verified email, now transition to profile setup
                         document.getElementById('stepOtp').classList.add('hidden');
                         document.getElementById('stepProfile').classList.remove('hidden');
                         document.getElementById('stepProfile').classList.add('fade-enter-active');
                         showAlert(data.message, 'success');
                     } else if (data.authenticated && data.redirect_url) {
-                        showAlert("Authentication successful! Redirecting to workspace...", 'success');
+                        showAlert("Verification successful. Redirecting...", 'success');
                         setTimeout(() => {
                             window.location.href = data.redirect_url;
-                        }, 400);
+                        }, 250);
                     }
                 } else {
                     showAlert(data.message || 'Invalid verification code.', 'error');
@@ -569,12 +509,11 @@
                 showAlert("Verification failed due to a network error.", 'error');
             } finally {
                 btn.disabled = false;
-                text.textContent = 'Verify Code & Enter';
+                text.textContent = 'Verify & Continue';
                 spinner.classList.add('hidden');
             }
         }
 
-        // STEP 3: Complete Student Registration
         async function handleCompleteRegistration(event) {
             event.preventDefault();
             hideAlert();
@@ -589,7 +528,7 @@
             const spinner = document.getElementById('completeRegSpinner');
 
             btn.disabled = true;
-            text.textContent = 'Finalizing...';
+            text.textContent = 'Saving...';
             spinner.classList.remove('hidden');
 
             try {
@@ -614,23 +553,23 @@
                 const data = await response.json();
 
                 if (data.success && data.redirect_url) {
-                    showAlert("Account created successfully! Redirecting to student dashboard...", 'success');
+                    showAlert("Account created. Redirecting...", 'success');
                     setTimeout(() => {
                         window.location.href = data.redirect_url;
-                    }, 400);
+                    }, 250);
                 } else {
                     showAlert(data.message || 'Failed to complete registration.', 'error');
                 }
             } catch (err) {
-                showAlert("Error completing registration. Please retry.", 'error');
+                showAlert("Error saving profile.", 'error');
             } finally {
                 btn.disabled = false;
-                text.textContent = 'Finalize & Enter Dashboard';
+                text.textContent = 'Finalize Registration';
                 spinner.classList.add('hidden');
             }
         }
 
-        // Setup 6-digit auto-advance and backspace handling
+        // Auto-advance
         const digitInputs = document.querySelectorAll('.otp-digit');
         digitInputs.forEach((input, index) => {
             input.addEventListener('input', (e) => {
@@ -647,7 +586,6 @@
                 }
             });
 
-            // Handle paste of full 6-digit code
             input.addEventListener('paste', (e) => {
                 e.preventDefault();
                 const pasteData = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');

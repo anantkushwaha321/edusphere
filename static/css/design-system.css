@@ -1,121 +1,270 @@
 /**
- * IIMTMANIA — Design System: Dark Liquid Glass
- * Core CSS Custom Properties, Surface Tokens, and Typography Scale
+ * EduSphere Design System — Restrained Developer Dark UI
+ * Core CSS Custom Properties, Component Tokens, and Strict Typography
  */
 
 :root {
-    /* Base Color Tokens */
-    --bg-midnight: #070A13;
-    --bg-secondary: #0D1222;
-    --bg-tertiary: #131A30;
-    --bg-elevated: #182240;
+    /* 1. Canvas & Surface Layers */
+    --surface-ground: #090D16;       /* Deep institutional midnight navy */
+    --surface-card: #0F172A;         /* Slate-900 elevated primary surface */
+    --surface-card-hover: #172033;   /* Interactive hover elevation */
+    --surface-muted: #131D33;        /* Slate-900/800 form input & headers */
+    --surface-highlight: #1E293B;    /* Borders & dividers */
 
-    /* Liquid Glass Surface Tokens */
-    --glass-bg-subtle: rgba(13, 18, 34, 0.45);
-    --glass-bg-base: rgba(13, 18, 34, 0.70);
-    --glass-bg-elevated: rgba(18, 26, 48, 0.85);
-    --glass-border-subtle: rgba(255, 255, 255, 0.06);
-    --glass-border-base: rgba(255, 255, 255, 0.12);
-    --glass-border-highlight: rgba(255, 255, 255, 0.22);
-    --glass-inner-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.10);
-    --glass-blur-sm: 8px;
-    --glass-blur-md: 16px;
-    --glass-blur-lg: 24px;
+    /* 2. Structural Borders */
+    --border-subtle: #1E293B;        /* 1px clean crisp border */
+    --border-muted: #172033;         /* Subtle divider */
+    --border-focus: #3B82F6;         /* Accessible focus ring */
 
-    /* Accent & Brand Colors */
-    --accent-blue: #3B82F6;
-    --accent-blue-glow: rgba(59, 130, 246, 0.35);
-    --accent-violet: #8B5CF6;
-    --accent-violet-glow: rgba(139, 92, 246, 0.35);
-    --accent-cyan: #22D3EE;
-    --accent-cyan-glow: rgba(34, 211, 238, 0.35);
+    /* 3. Typography Contrast Scale */
+    --text-primary: #F8FAFC;         /* Heading & active text (slate-50) */
+    --text-secondary: #94A3B8;       /* Primary body text & labels (slate-400) */
+    --text-muted: #64748B;           /* Timestamps, codes, footers (slate-500) */
+    --text-inverted: #090D16;        /* Dark text on light buttons */
 
-    /* Text & Content Tokens */
-    --text-primary: #F5F7FF;
-    --text-secondary: #94A3B8;
-    --text-muted: #64748B;
-    --text-subtle: #475569;
+    /* 4. Restrained Academic Accents */
+    --accent-primary: #2563EB;       /* Institutional blue (blue-600) */
+    --accent-hover: #1D4ED8;         /* Button hover (blue-700) */
+    --accent-subtle: rgba(37, 99, 235, 0.12);
 
-    /* Semantic Status Colors */
+    /* 5. Semantic Status System */
     --status-success: #10B981;
-    --status-success-bg: rgba(16, 185, 129, 0.15);
-    --status-success-border: rgba(16, 185, 129, 0.30);
-    
+    --status-success-bg: rgba(16, 185, 129, 0.12);
+    --status-success-border: rgba(16, 185, 129, 0.25);
+
     --status-warning: #F59E0B;
-    --status-warning-bg: rgba(245, 158, 11, 0.15);
-    --status-warning-border: rgba(245, 158, 11, 0.30);
-    
+    --status-warning-bg: rgba(245, 158, 11, 0.12);
+    --status-warning-border: rgba(245, 158, 11, 0.25);
+
     --status-danger: #EF4444;
-    --status-danger-bg: rgba(239, 68, 68, 0.15);
-    --status-danger-border: rgba(239, 68, 68, 0.30);
-    
+    --status-danger-bg: rgba(239, 68, 68, 0.12);
+    --status-danger-border: rgba(239, 68, 68, 0.25);
+
     --status-info: #38BDF8;
-    --status-info-bg: rgba(56, 189, 248, 0.15);
-    --status-info-border: rgba(56, 189, 248, 0.30);
+    --status-info-bg: rgba(56, 189, 248, 0.12);
+    --status-info-border: rgba(56, 189, 248, 0.25);
 
-    /* Elevation Shadows */
-    --shadow-glass-sm: 0 4px 12px 0 rgba(0, 0, 0, 0.35);
-    --shadow-glass-md: 0 10px 30px -5px rgba(0, 0, 0, 0.50);
-    --shadow-glass-lg: 0 20px 45px -10px rgba(0, 0, 0, 0.65), 0 0 30px -5px rgba(59, 130, 246, 0.15);
-    --shadow-glow-blue: 0 0 35px -5px rgba(59, 130, 246, 0.40);
-    --shadow-glow-violet: 0 0 35px -5px rgba(139, 92, 246, 0.40);
-
-    /* Motion & Timing */
-    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-smooth: 400ms cubic-bezier(0.16, 1, 0.3, 1);
-    --transition-spring: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
-
-    /* Border Radius Scale */
-    --radius-sm: 8px;
-    --radius-md: 14px;
-    --radius-lg: 20px;
-    --radius-xl: 28px;
+    /* 6. Geometry & Radii */
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
     --radius-full: 9999px;
+
+    /* 7. Elevation & Shadows */
+    --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.3);
+    --shadow-elevated: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+
+    /* 8. Motion (Subtle & Quick) */
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Base Body Application */
+/* Base Document Configuration */
 html, body {
-    background-color: var(--bg-midnight) !important;
+    background-color: var(--surface-ground) !important;
     color: var(--text-primary);
     font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom Scrollbars */
+/* Subtle Custom Scrollbar */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
 }
 ::-webkit-scrollbar-track {
-    background: var(--bg-midnight);
+    background: var(--surface-ground);
 }
 ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.12);
-    border-radius: 9999px;
+    background: #1E293B;
+    border-radius: var(--radius-full);
 }
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.22);
+    background: #334155;
 }
 
-/* Gradient Text Effect */
-.gradient-text {
-    background: linear-gradient(135deg, #FFFFFF 0%, #60A5FA 50%, #C084FC 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+/* -------------------------------------------------------------
+ * CORE COMPONENT STYLES
+ * ----------------------------------------------------------- */
+
+/* Cards & Containers */
+.app-card, .glass-card, .glass-card-static {
+    background-color: var(--surface-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    position: relative;
+    transition: border-color var(--transition-fast), background-color var(--transition-fast);
 }
 
-.gradient-text-electric {
-    background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 40%, #8B5CF6 80%, #22D3EE 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+.app-card-interactive, .glass-card:hover {
+    background-color: var(--surface-card);
+}
+.app-card-interactive:hover, .glass-card:hover {
+    border-color: #334155;
+    background-color: var(--surface-card-hover);
+    transform: none; /* No artificial 3D tilt */
 }
 
-.gradient-text-gold {
-    background: linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+.app-panel, .glass-panel {
+    background-color: var(--surface-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+}
+
+/* Navigation Bar */
+.app-navbar, .glass-navbar {
+    background-color: rgba(9, 13, 22, 0.94);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+/* Form Inputs */
+.app-input, .glass-input {
+    background-color: var(--surface-muted) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: var(--radius-md) !important;
+    color: var(--text-primary) !important;
+    font-size: 0.875rem !important;
+    line-height: 1.25rem !important;
+    padding: 0.5rem 0.75rem !important;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast) !important;
+}
+
+.app-input:focus, .glass-input:focus {
+    outline: none !important;
+    border-color: var(--border-focus) !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.20) !important;
+}
+
+.app-input::placeholder, .glass-input::placeholder {
+    color: var(--text-muted) !important;
+}
+
+/* Buttons */
+.app-btn, .glass-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.app-btn-primary, .glass-btn-primary {
+    background-color: var(--accent-primary);
+    color: #FFFFFF;
+    border: 1px solid transparent;
+}
+.app-btn-primary:hover, .glass-btn-primary:hover {
+    background-color: var(--accent-hover);
+    color: #FFFFFF;
+    transform: none;
+    box-shadow: none;
+}
+.app-btn-primary:active, .glass-btn-primary:active {
+    background-color: #1E40AF;
+}
+
+.app-btn-secondary, .glass-btn-secondary {
+    background-color: var(--surface-card);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
+}
+.app-btn-secondary:hover, .glass-btn-secondary:hover {
+    background-color: var(--surface-highlight);
+    color: var(--text-primary);
+    border-color: #334155;
+    transform: none;
+}
+
+/* Semantic Status Badges */
+.app-badge, .badge-glass {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.15rem 0.55rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1rem;
+    border-radius: var(--radius-sm);
+}
+
+.app-badge-blue, .badge-glass-blue {
+    background-color: rgba(37, 99, 235, 0.14);
+    color: #93C5FD;
+    border: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+.app-badge-emerald, .badge-glass-emerald {
+    background-color: var(--status-success-bg);
+    color: #6EE7B7;
+    border: 1px solid var(--status-success-border);
+}
+
+.app-badge-amber, .badge-glass-amber {
+    background-color: var(--status-warning-bg);
+    color: #FCD34D;
+    border: 1px solid var(--status-warning-border);
+}
+
+.app-badge-rose, .badge-glass-rose {
+    background-color: var(--status-danger-bg);
+    color: #FCA5A5;
+    border: 1px solid var(--status-danger-border);
+}
+
+.app-badge-slate, .badge-glass-violet {
+    background-color: rgba(148, 163, 184, 0.12);
+    color: #CBD5E1;
+    border: 1px solid rgba(148, 163, 184, 0.20);
+}
+
+/* High-Density Data Tables */
+.app-table {
+    width: 100%;
+    text-align: left;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+}
+
+.app-table thead th {
+    background-color: var(--surface-muted);
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.6875rem;
+    letter-spacing: 0.05em;
+    padding: 0.625rem 1rem;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.app-table tbody td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+}
+
+.app-table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* Typography Gradient (Only for Primary Brand Mark) */
+.brand-mark {
+    color: var(--text-primary);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+.brand-mark-accent {
+    color: var(--accent-primary);
 }

@@ -1,181 +1,161 @@
 {% extends 'base.html' %}
 
-{% block title %}Admin Dashboard — IIMTMANIA | IIMT UNIVERSITY{% endblock %}
+{% block title %}Admin Console — EduSphere | IIMT UNIVERSITY{% endblock %}
 
 {% block content %}
-<div class="space-y-8">
-    <!-- Header Welcome Banner (Dark Liquid Glass) -->
-    <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+<div class="space-y-6">
+    <!-- Header Welcome Banner -->
+    <div class="app-card p-5 sm:p-6 border border-[#1E293B] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-card border-violet-500/30 text-[10px] font-bold text-violet-300 mb-2">
+            <div class="flex items-center space-x-2 text-xs text-slate-400 mb-1">
                 <span>Institutional Governance</span>
-                <span>•</span>
-                <span>System Administrator</span>
+                <span>&bull;</span>
+                <span>System Administration</span>
             </div>
-            <h1 class="text-2xl sm:text-3xl font-black text-white">Central Command Console</h1>
-            <p class="text-xs text-slate-300 mt-1">
-                University: <span class="text-white font-bold">IIMT UNIVERSITY</span> &bull; 
-                All Systems Operational
+            <h1 class="text-xl font-bold text-white">Central Administration Console</h1>
+            <p class="text-xs text-slate-400 mt-0.5">
+                Institution: <span class="text-white font-medium">IIMT UNIVERSITY</span> &bull; 
+                All Services Active
             </p>
         </div>
-        <div class="flex flex-wrap items-center gap-3">
-            <a href="{% url 'user_create' %}" class="glass-btn glass-btn-primary px-4 py-2.5 rounded-xl text-xs font-bold inline-flex items-center space-x-1.5">
-                <span>+ Create User</span>
+        <div class="flex flex-wrap items-center gap-2">
+            <a href="{% url 'user_create' %}" class="app-btn app-btn-primary text-xs py-2 px-3 rounded-md inline-flex items-center space-x-1">
+                <span>+ Add User</span>
             </a>
-            <a href="{% url 'course_create' %}" class="glass-btn glass-btn-secondary px-4 py-2.5 rounded-xl text-xs font-semibold">
+            <a href="{% url 'course_create' %}" class="app-btn app-btn-secondary text-xs py-2 px-3 rounded-md">
                 <span>+ New Course</span>
             </a>
-            <a href="{% url 'announcement_create' %}" class="glass-btn glass-btn-secondary px-4 py-2.5 rounded-xl text-xs font-semibold">
-                <span>📢 Broadcast</span>
+            <a href="{% url 'announcement_create' %}" class="app-btn app-btn-secondary text-xs py-2 px-3 rounded-md">
+                <span>Broadcast</span>
             </a>
-            <a href="{% url 'activity_log_list' %}" class="glass-btn glass-btn-secondary px-4 py-2.5 rounded-xl text-xs font-semibold">
-                <span>📜 Audit Trails</span>
+            <a href="{% url 'activity_log_list' %}" class="app-btn app-btn-secondary text-xs py-2 px-3 rounded-md">
+                <span>Audit Logs</span>
             </a>
         </div>
     </div>
 
-    <!-- Top Stats KPI Row (Spotlight Liquid Cards) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <!-- Students -->
-        <div class="glass-card spotlight-card p-6 rounded-2xl flex items-center justify-between">
-            <div>
-                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Students</p>
-                <h3 class="text-3xl font-black text-white mt-1 font-mono">{{ total_students }}</h3>
-                <span class="text-xs text-blue-400 font-semibold mt-1 inline-flex items-center">Active Enrollees</span>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-xl font-bold border border-blue-500/30">
-                👨‍🎓
-            </div>
+    <!-- Top KPI Row -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="app-card p-4">
+            <span class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Total Students</span>
+            <div class="text-2xl font-bold text-white mt-1 font-mono">{{ total_students }}</div>
+            <span class="text-xs text-slate-500 mt-0.5 inline-block">Active enrollees</span>
         </div>
 
-        <!-- Faculty -->
-        <div class="glass-card spotlight-card p-6 rounded-2xl flex items-center justify-between">
-            <div>
-                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Faculty Members</p>
-                <h3 class="text-3xl font-black text-white mt-1 font-mono">{{ total_teachers }}</h3>
-                <span class="text-xs text-violet-400 font-semibold mt-1 inline-flex items-center">Academic Staff</span>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-violet-500/20 text-violet-400 flex items-center justify-center text-xl font-bold border border-violet-500/30">
-                👨‍🏫
-            </div>
+        <div class="app-card p-4">
+            <span class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Faculty Members</span>
+            <div class="text-2xl font-bold text-white mt-1 font-mono">{{ total_teachers }}</div>
+            <span class="text-xs text-slate-500 mt-0.5 inline-block">Academic staff</span>
         </div>
 
-        <!-- Courses -->
-        <div class="glass-card spotlight-card p-6 rounded-2xl flex items-center justify-between">
-            <div>
-                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Active Courses</p>
-                <h3 class="text-3xl font-black text-white mt-1 font-mono">{{ total_courses }}</h3>
-                <span class="text-xs text-cyan-400 font-semibold mt-1 inline-flex items-center">{{ total_departments }} Departments</span>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xl font-bold border border-cyan-500/30">
-                📚
-            </div>
+        <div class="app-card p-4">
+            <span class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Active Courses</span>
+            <div class="text-2xl font-bold text-white mt-1 font-mono">{{ total_courses }}</div>
+            <span class="text-xs text-slate-500 mt-0.5 inline-block">{{ total_departments }} Departments</span>
         </div>
 
-        <!-- Campus Attendance Rate -->
-        <div class="glass-card spotlight-card p-6 rounded-2xl flex items-center justify-between">
-            <div>
-                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Campus Attendance</p>
-                <h3 class="text-3xl font-black {% if campus_attendance_pct >= 75 %}text-emerald-400{% else %}text-amber-400{% endif %} mt-1 font-mono">{{ campus_attendance_pct }}%</h3>
-                <span class="text-xs {% if campus_attendance_pct >= 75 %}text-emerald-400{% else %}text-amber-400{% endif %} font-semibold mt-1 inline-flex items-center">Overall Compliance</span>
+        <div class="app-card p-4">
+            <span class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Campus Attendance Rate</span>
+            <div class="text-2xl font-bold mt-1 font-mono {% if campus_attendance_pct >= 75 %}text-emerald-400{% else %}text-amber-400{% endif %}">
+                {{ campus_attendance_pct }}%
             </div>
-            <div class="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl font-bold border border-emerald-500/30">
-                📊
-            </div>
+            <span class="text-xs mt-0.5 inline-block {% if campus_attendance_pct >= 75 %}text-emerald-500{% else %}text-amber-500{% endif %}">
+                Overall institutional average
+            </span>
         </div>
     </div>
 
-    <!-- Analytics Charts & Course Load Row -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Chart: Student Distribution by Department -->
-        <div class="glass-card p-6 rounded-2xl flex flex-col justify-between">
+    <!-- Analytics & Course Load Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Chart: Department Enrollment -->
+        <div class="app-card p-5 flex flex-col justify-between">
             <div>
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-base font-bold text-white">Students by Department</h3>
-                    <span class="text-xs text-slate-400 font-mono">Live distribution</span>
+                <div class="flex items-center justify-between mb-3 border-b border-[#1E293B] pb-2">
+                    <h3 class="text-sm font-semibold text-white">Enrollment by Department</h3>
+                    <span class="text-xs text-slate-500 font-mono">Live distribution</span>
                 </div>
-                <div class="h-64 flex items-center justify-center">
+                <div class="h-60 flex items-center justify-center">
                     <canvas id="deptChart"></canvas>
                 </div>
             </div>
-            <p class="text-[11px] text-slate-400 text-center mt-3">Distribution reflects active enrollees per faculty division</p>
+            <p class="text-[11px] text-slate-500 text-center mt-2">Active student registrations per faculty division</p>
         </div>
 
         <!-- Featured Courses List -->
-        <div class="glass-card p-6 rounded-2xl flex flex-col justify-between">
+        <div class="app-card p-5 flex flex-col justify-between">
             <div>
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-base font-bold text-white">Course Catalog & Load</h3>
-                    <a href="{% url 'course_list' %}" class="text-xs text-blue-400 hover:text-blue-300 font-semibold">View All &rarr;</a>
+                <div class="flex items-center justify-between mb-3 border-b border-[#1E293B] pb-2">
+                    <h3 class="text-sm font-semibold text-white">Course Catalog & Load</h3>
+                    <a href="{% url 'course_list' %}" class="text-xs text-blue-400 hover:text-blue-300 font-medium">All Courses</a>
                 </div>
-                <div class="divide-y divide-white/10">
+                <div class="divide-y divide-[#1E293B]">
                     {% for c in courses %}
-                    <div class="py-3 flex items-center justify-between gap-3">
+                    <div class="py-2.5 flex items-center justify-between gap-3">
                         <div class="min-w-0 pr-2">
-                            <span class="badge-glass badge-glass-blue text-[10px] font-mono">{{ c.code }}</span>
-                            <span class="text-xs font-bold text-white ml-2 truncate inline-block max-w-[200px]">{{ c.name }}</span>
-                            <p class="text-[11px] text-slate-400 mt-0.5">Faculty: {{ c.teacher.user.get_full_name|default:"Unassigned" }}</p>
+                            <span class="app-badge app-badge-blue text-[10px] font-mono">{{ c.code }}</span>
+                            <span class="text-xs font-medium text-white ml-1.5 truncate inline-block max-w-[200px]">{{ c.name }}</span>
+                            <p class="text-[11px] text-slate-500 mt-0.5">Faculty: {{ c.teacher.user.get_full_name|default:"Unassigned" }}</p>
                         </div>
                         <div class="text-right flex-shrink-0">
-                            <span class="badge-glass badge-glass-violet text-xs font-mono font-bold">{{ c.enrollment_count }} Enrolled</span>
+                            <span class="text-xs font-medium text-slate-300 font-mono">{{ c.enrollment_count }} Enrolled</span>
                         </div>
                     </div>
                     {% empty %}
-                    <p class="text-xs text-slate-400 py-6 text-center">No active courses registered.</p>
+                    <p class="text-xs text-slate-500 py-4 text-center">No active courses registered.</p>
                     {% endfor %}
                 </div>
             </div>
-            <div class="pt-4 border-t border-white/10 text-right">
-                <a href="{% url 'department_list' %}" class="text-xs text-blue-400 hover:text-blue-300 font-semibold">
+            <div class="pt-3 border-t border-[#1E293B] text-right">
+                <a href="{% url 'department_list' %}" class="text-xs text-blue-400 hover:text-blue-300 font-medium">
                     Manage Departments &rarr;
                 </a>
             </div>
         </div>
     </div>
 
-    <!-- Recent Activities & Campus Announcements -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Activity Stream -->
-        <div class="glass-card p-6 rounded-2xl">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-base font-bold text-white">Security & Activity Audit Stream</h3>
-                <a href="{% url 'activity_log_list' %}" class="text-xs text-blue-400 hover:text-blue-300 font-semibold">Full Logs &rarr;</a>
+    <!-- Security Activity & Notices Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Security Activity Stream -->
+        <div class="app-card p-5">
+            <div class="flex items-center justify-between mb-3 border-b border-[#1E293B] pb-2">
+                <h3 class="text-sm font-semibold text-white">System Audit Trail</h3>
+                <a href="{% url 'activity_log_list' %}" class="text-xs text-blue-400 hover:text-blue-300 font-medium">Full Logs &rarr;</a>
             </div>
-            <div class="space-y-3">
+            <div class="space-y-2">
                 {% for act in recent_activities %}
-                <div class="flex items-start space-x-3 text-xs p-2.5 rounded-xl glass-card border-white/5">
-                    <span class="w-2 h-2 rounded-full bg-blue-400 mt-1.5 flex-shrink-0 shadow-[0_0_6px_#3b82f6]"></span>
+                <div class="flex items-start space-x-2.5 text-xs p-2 rounded-md bg-[#131D33] border border-[#1E293B]">
+                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></span>
                     <div class="flex-1 min-w-0">
                         <p class="text-slate-200 font-medium leading-snug truncate">{{ act.action }}</p>
-                        <p class="text-[10px] text-slate-400 mt-0.5 font-mono">{{ act.user.username|default:"System" }} &bull; {{ act.timestamp|timesince }} ago</p>
+                        <p class="text-[10px] text-slate-500 font-mono mt-0.5">{{ act.user.username|default:"System" }} &bull; {{ act.timestamp|timesince }} ago</p>
                     </div>
                 </div>
                 {% empty %}
-                <p class="text-xs text-slate-400 py-6 text-center">No audit trail records present.</p>
+                <p class="text-xs text-slate-500 py-4 text-center">No audit trail records present.</p>
                 {% endfor %}
             </div>
         </div>
 
-        <!-- Campus Announcements -->
-        <div class="glass-card p-6 rounded-2xl">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-base font-bold text-white">Campus Notices Broadcast</h3>
-                <a href="{% url 'announcement_list' %}" class="text-xs text-blue-400 hover:text-blue-300 font-semibold">Manage &rarr;</a>
+        <!-- Campus Notices -->
+        <div class="app-card p-5">
+            <div class="flex items-center justify-between mb-3 border-b border-[#1E293B] pb-2">
+                <h3 class="text-sm font-semibold text-white">Active Notices</h3>
+                <a href="{% url 'announcement_list' %}" class="text-xs text-blue-400 hover:text-blue-300 font-medium">Manage &rarr;</a>
             </div>
-            <div class="space-y-3">
+            <div class="space-y-2">
                 {% for an in recent_announcements %}
-                <div class="p-3.5 rounded-xl glass-card border-white/10 hover:border-white/20 transition-all">
-                    <div class="flex items-center justify-between mb-1.5">
-                        <span class="badge-glass {% if an.priority == 'HIGH' or an.priority == 'URGENT' %}badge-glass-rose{% else %}badge-glass-blue{% endif %} text-[9px]">
+                <div class="p-2.5 rounded-md bg-[#131D33] border border-[#1E293B]">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="app-badge {% if an.priority == 'HIGH' or an.priority == 'URGENT' %}app-badge-rose{% else %}app-badge-blue{% endif %} text-[9px]">
                             {{ an.priority }}
                         </span>
-                        <span class="text-[10px] text-slate-400 font-mono">{{ an.created_at|date:"M d, Y" }}</span>
+                        <span class="text-[10px] text-slate-500 font-mono">{{ an.created_at|date:"M d, Y" }}</span>
                     </div>
-                    <h4 class="text-xs font-bold text-white truncate">{{ an.title }}</h4>
-                    <p class="text-[11px] text-slate-300 mt-1 line-clamp-2 leading-relaxed">{{ an.content }}</p>
+                    <h4 class="text-xs font-semibold text-white truncate">{{ an.title }}</h4>
+                    <p class="text-[11px] text-slate-400 mt-0.5 line-clamp-2 leading-relaxed">{{ an.content }}</p>
                 </div>
                 {% empty %}
-                <p class="text-xs text-slate-400 py-6 text-center">No active announcements posted.</p>
+                <p class="text-xs text-slate-500 py-4 text-center">No announcements posted.</p>
                 {% endfor %}
             </div>
         </div>
@@ -194,20 +174,8 @@
                 datasets: [{
                     label: 'Students Enrolled',
                     data: {{ dept_counts|safe }},
-                    backgroundColor: [
-                        'rgba(59, 130, 246, 0.85)',
-                        'rgba(139, 92, 246, 0.85)',
-                        'rgba(34, 211, 238, 0.85)',
-                        'rgba(16, 185, 129, 0.85)',
-                    ],
-                    borderColor: [
-                        'rgba(59, 130, 246, 1)',
-                        'rgba(139, 92, 246, 1)',
-                        'rgba(34, 211, 238, 1)',
-                        'rgba(16, 185, 129, 1)',
-                    ],
-                    borderWidth: 1,
-                    borderRadius: 8,
+                    backgroundColor: '#2563EB',
+                    borderRadius: 4,
                 }]
             },
             options: {
@@ -216,24 +184,24 @@
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: '#070A13',
-                        titleColor: '#F5F7FF',
-                        bodyColor: '#93c5fd',
-                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        backgroundColor: '#0F172A',
+                        titleColor: '#F8FAFC',
+                        bodyColor: '#94A3B8',
+                        borderColor: '#1E293B',
                         borderWidth: 1,
-                        padding: 10,
-                        cornerRadius: 8
+                        padding: 8,
+                        cornerRadius: 6
                     }
                 },
                 scales: {
                     x: {
-                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                        ticks: { color: '#94a3b8', font: { family: 'Inter', size: 10 } }
+                        grid: { color: 'rgba(255, 255, 255, 0.03)' },
+                        ticks: { color: '#64748B', font: { family: 'Inter', size: 10 } }
                     },
                     y: {
                         beginAtZero: true,
-                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                        ticks: { stepSize: 1, color: '#94a3b8', font: { family: 'Inter', size: 10 } }
+                        grid: { color: 'rgba(255, 255, 255, 0.03)' },
+                        ticks: { stepSize: 1, color: '#64748B', font: { family: 'Inter', size: 10 } }
                     }
                 }
             }

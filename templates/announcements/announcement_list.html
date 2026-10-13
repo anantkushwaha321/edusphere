@@ -1,64 +1,64 @@
 {% extends 'base.html' %}
 
-{% block title %}Campus Notices & Bulletins — IIMTMANIA | IIMT UNIVERSITY{% endblock %}
+{% block title %}Campus Notices & Bulletins — EduSphere | IIMT UNIVERSITY{% endblock %}
 
 {% block content %}
 <div class="space-y-6 max-w-4xl mx-auto">
-    <!-- Filter and Broadcast Button (Liquid Glass) -->
-    <div class="glass-panel p-5 rounded-2xl border border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <form method="GET" class="flex items-center space-x-3">
+    <!-- Filter and Broadcast Button -->
+    <div class="app-card p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <form method="GET" class="flex items-center space-x-2.5">
             <label for="priorityFilter" class="sr-only">Filter by Priority</label>
-            <select id="priorityFilter" name="priority" onchange="this.form.submit()" class="glass-input py-2 px-3.5 rounded-xl text-xs text-white bg-[#0D1222] border-white/10 focus:outline-none">
-                <option value="" class="bg-[#070A13]">All Priorities</option>
-                <option value="URGENT" class="bg-[#070A13]" {% if selected_priority == 'URGENT' %}selected{% endif %}>Urgent Only</option>
-                <option value="IMPORTANT" class="bg-[#070A13]" {% if selected_priority == 'IMPORTANT' %}selected{% endif %}>Important Only</option>
-                <option value="NORMAL" class="bg-[#070A13]" {% if selected_priority == 'NORMAL' %}selected{% endif %}>Normal Notices</option>
+            <select id="priorityFilter" name="priority" onchange="this.form.submit()" class="app-input py-1.5 px-3 rounded-md text-xs bg-[#131D33]">
+                <option value="" class="bg-[#090D16]">All Priorities</option>
+                <option value="URGENT" class="bg-[#090D16]" {% if selected_priority == 'URGENT' %}selected{% endif %}>Urgent Only</option>
+                <option value="IMPORTANT" class="bg-[#090D16]" {% if selected_priority == 'IMPORTANT' %}selected{% endif %}>Important Only</option>
+                <option value="NORMAL" class="bg-[#090D16]" {% if selected_priority == 'NORMAL' %}selected{% endif %}>Normal Notices</option>
             </select>
             {% if selected_priority %}
-            <a href="{% url 'announcement_list' %}" class="text-xs text-rose-400 hover:text-rose-300 font-semibold underline">Clear Filter</a>
+            <a href="{% url 'announcement_list' %}" class="text-xs text-rose-400 hover:text-rose-300 font-medium underline">Clear Filter</a>
             {% endif %}
         </form>
 
         {% if request.user.is_teacher_role or request.user.is_admin_role %}
         <div>
-            <a href="{% url 'announcement_create' %}" class="glass-btn glass-btn-primary px-4 py-2.5 rounded-xl text-xs font-bold inline-flex items-center space-x-1.5 shadow-md shadow-blue-600/30">
+            <a href="{% url 'announcement_create' %}" class="app-btn app-btn-primary text-xs py-1.5 px-3 rounded-md inline-flex items-center space-x-1">
                 <span>+ Post Announcement</span>
             </a>
         </div>
         {% endif %}
     </div>
 
-    <!-- Announcements Feed (Dark Liquid Glass Cards) -->
-    <div class="space-y-4">
+    <!-- Announcements Feed -->
+    <div class="space-y-3.5">
         {% for a in announcements %}
-        <div class="glass-card spotlight-card rounded-2xl p-6 sm:p-7 space-y-3 hover:border-white/20 transition-all">
+        <div class="app-card p-5 space-y-2.5">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-2">
-                    <span class="badge-glass
-                        {% if a.priority == 'URGENT' %}badge-glass-rose
-                        {% elif a.priority == 'IMPORTANT' %}badge-glass-amber
-                        {% else %}badge-glass-blue{% endif %} text-xs font-bold">
+                    <span class="app-badge
+                        {% if a.priority == 'URGENT' %}app-badge-rose
+                        {% elif a.priority == 'IMPORTANT' %}app-badge-amber
+                        {% else %}app-badge-blue{% endif %} text-[10px]">
                         {{ a.get_priority_display }}
                     </span>
-                    <span class="text-xs text-slate-400 font-medium">&bull; For: {{ a.get_target_audience_display }}</span>
+                    <span class="text-xs text-slate-400 font-medium">&bull; Audience: {{ a.get_target_audience_display }}</span>
                 </div>
-                <span class="text-xs text-slate-400 font-mono">{{ a.created_at|date:"M d, Y" }}</span>
+                <span class="text-xs text-slate-500 font-mono">{{ a.created_at|date:"M d, Y" }}</span>
             </div>
 
-            <h3 class="text-lg font-bold text-white">{{ a.title }}</h3>
-            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">{{ a.content|linebreaks }}</p>
+            <h3 class="text-sm font-semibold text-white">{{ a.title }}</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">{{ a.content|linebreaks }}</p>
 
-            <div class="pt-3 border-t border-white/10 flex items-center justify-between text-xs text-slate-400">
-                <span>Issued by <strong class="text-white">{{ a.author.get_full_name|default:a.author.username }}</strong></span>
+            <div class="pt-3 border-t border-[#1E293B] flex items-center justify-between text-xs text-slate-400">
+                <span>Issued by <strong class="text-slate-200">{{ a.author.get_full_name|default:a.author.username }}</strong></span>
                 {% if a.attachment %}
-                <a href="{{ a.attachment.url }}" download class="text-blue-400 font-bold hover:text-blue-300 inline-flex items-center space-x-1">
-                    <span>📎 Download Attachment</span>
+                <a href="{{ a.attachment.url }}" download class="text-blue-400 font-medium hover:text-blue-300 inline-flex items-center space-x-1">
+                    <span>Download Attachment</span>
                 </a>
                 {% endif %}
             </div>
         </div>
         {% empty %}
-        <div class="glass-card p-8 rounded-2xl text-center text-slate-400">
+        <div class="app-card p-6 text-center text-xs text-slate-400">
             No active announcements found matching criteria.
         </div>
         {% endfor %}

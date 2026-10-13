@@ -1,27 +1,27 @@
 {% extends 'base.html' %}
 
-{% block title %}Assignments & Tasks — IIMTMANIA | IIMT UNIVERSITY{% endblock %}
+{% block title %}Assignments & Tasks — EduSphere | IIMT UNIVERSITY{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
-    <!-- Header Filter Bar (Liquid Glass) -->
-    <div class="glass-panel p-5 rounded-2xl border border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <form method="GET" class="flex flex-wrap items-center gap-3 flex-1">
+    <!-- Header Filter Bar -->
+    <div class="app-card p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <form method="GET" class="flex flex-wrap items-center gap-2.5 flex-1">
             <label for="courseFilter" class="sr-only">Filter by Course</label>
-            <select id="courseFilter" name="course" onchange="this.form.submit()" class="glass-input py-2 px-3.5 rounded-xl text-xs text-white bg-[#0D1222] border-white/10 focus:outline-none">
-                <option value="" class="bg-[#070A13]">All Courses</option>
+            <select id="courseFilter" name="course" onchange="this.form.submit()" class="app-input py-1.5 px-3 rounded-md text-xs bg-[#131D33]">
+                <option value="" class="bg-[#090D16]">All Courses</option>
                 {% for c in user_courses %}
-                <option value="{{ c.id }}" class="bg-[#070A13]" {% if selected_course == c.id|stringformat:"i" %}selected{% endif %}>{{ c.code }} - {{ c.name }}</option>
+                <option value="{{ c.id }}" class="bg-[#090D16]" {% if selected_course == c.id|stringformat:"i" %}selected{% endif %}>{{ c.code }} - {{ c.name }}</option>
                 {% endfor %}
             </select>
             {% if selected_course %}
-            <a href="{% url 'assignment_list' %}" class="text-xs text-rose-400 hover:text-rose-300 font-semibold underline">Reset Filter</a>
+            <a href="{% url 'assignment_list' %}" class="text-xs text-rose-400 hover:text-rose-300 font-medium underline">Clear Filter</a>
             {% endif %}
         </form>
 
         {% if request.user.is_teacher_role or request.user.is_admin_role %}
         <div>
-            <a href="{% url 'assignment_create' %}" class="glass-btn glass-btn-primary px-4 py-2.5 rounded-xl text-xs font-bold inline-flex items-center space-x-1.5 shadow-md shadow-blue-600/30">
+            <a href="{% url 'assignment_create' %}" class="app-btn app-btn-primary text-xs py-1.5 px-3 rounded-md inline-flex items-center space-x-1">
                 <span>+ Create Assignment</span>
             </a>
         </div>
@@ -29,58 +29,58 @@
     </div>
 
     <!-- Assignments List Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {% for a in assignments %}
-        <div class="glass-card spotlight-card rounded-2xl p-6 flex flex-col justify-between hover-lift">
+        <div class="app-card p-4 flex flex-col justify-between">
             <div>
-                <div class="flex items-center justify-between mb-3">
-                    <span class="badge-glass badge-glass-blue text-xs font-mono font-bold">{{ a.course.code }}</span>
-                    <span class="badge-glass {% if a.is_past_due %}badge-glass-rose{% else %}badge-glass-emerald{% endif %} text-[10px]">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="app-badge app-badge-blue text-[11px] font-mono">{{ a.course.code }}</span>
+                    <span class="app-badge {% if a.is_past_due %}app-badge-rose{% else %}app-badge-emerald{% endif %} text-[10px]">
                         {% if a.is_past_due %}Past Due{% else %}Open for Submission{% endif %}
                     </span>
                 </div>
-                <h3 class="text-base font-bold text-white">{{ a.title }}</h3>
-                <p class="text-xs text-slate-300 mt-1 line-clamp-2 leading-relaxed">{{ a.description }}</p>
+                <h3 class="text-sm font-semibold text-white">{{ a.title }}</h3>
+                <p class="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">{{ a.description }}</p>
 
-                <div class="mt-4 pt-3 border-t border-white/10 text-xs text-slate-400 space-y-1">
-                    <p>Due Date: <span class="font-bold text-white font-mono">{{ a.due_date|date:"M d, Y H:i" }}</span></p>
-                    <p>Max Marks: <span class="font-bold text-white font-mono">{{ a.max_marks }}</span></p>
+                <div class="mt-4 pt-3 border-t border-[#1E293B] text-xs text-slate-400 space-y-1">
+                    <p>Due Date: <span class="font-medium text-slate-200 font-mono">{{ a.due_date|date:"M d, Y H:i" }}</span></p>
+                    <p>Max Marks: <span class="font-medium text-slate-200 font-mono">{{ a.max_marks }}</span></p>
 
                     {% if request.user.is_student_role %}
-                        <div class="mt-2 pt-2 border-t border-white/10">
+                        <div class="mt-2 pt-2 border-t border-[#1E293B]">
                             {% if a.my_submission %}
-                                <span class="badge-glass {% if a.my_submission.status == 'GRADED' %}badge-glass-emerald{% else %}badge-glass-blue{% endif %} text-[11px]">
+                                <span class="app-badge {% if a.my_submission.status == 'GRADED' %}app-badge-emerald{% else %}app-badge-blue{% endif %} text-[10px]">
                                     {{ a.my_submission.get_status_display }}
                                     {% if a.my_submission.marks_obtained is not None %}
                                     ({{ a.my_submission.marks_obtained }}/{{ a.max_marks }})
                                     {% endif %}
                                 </span>
                             {% else %}
-                                <span class="badge-glass badge-glass-amber text-[11px]">Pending Submission</span>
+                                <span class="app-badge app-badge-amber text-[10px]">Pending Submission</span>
                             {% endif %}
                         </div>
                     {% else %}
-                        <div class="mt-2 pt-2 border-t border-white/10 flex items-center justify-between text-[11px]">
-                            <span>Submissions: <strong class="text-white font-mono">{{ a.total_submissions }}</strong></span>
+                        <div class="mt-2 pt-2 border-t border-[#1E293B] flex items-center justify-between text-[11px]">
+                            <span>Submissions: <strong class="text-slate-200 font-mono">{{ a.total_submissions }}</strong></span>
                             <span>Graded: <strong class="text-emerald-400 font-mono">{{ a.total_graded }}</strong></span>
                         </div>
                     {% endif %}
                 </div>
             </div>
 
-            <div class="mt-5 pt-3 border-t border-white/10 flex items-center justify-between">
-                <a href="{% url 'assignment_detail' pk=a.id %}" class="text-xs font-bold text-blue-400 hover:text-blue-300">
-                    Assignment Hub &rarr;
+            <div class="mt-4 pt-3 border-t border-[#1E293B] flex items-center justify-between text-xs">
+                <a href="{% url 'assignment_detail' pk=a.id %}" class="text-blue-400 hover:text-blue-300 font-medium">
+                    View Details &rarr;
                 </a>
                 {% if request.user.is_teacher_role and a.pending_grading > 0 %}
-                <span class="badge-glass badge-glass-amber text-[10px]">
-                    {{ a.pending_grading }} to evaluate
+                <span class="app-badge app-badge-amber text-[10px]">
+                    {{ a.pending_grading }} to grade
                 </span>
                 {% endif %}
             </div>
         </div>
         {% empty %}
-        <div class="col-span-3 glass-card p-8 rounded-2xl text-center text-slate-400">
+        <div class="col-span-3 app-card p-6 text-center text-xs text-slate-400">
             No assignments found matching your filter.
         </div>
         {% endfor %}

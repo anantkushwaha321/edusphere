@@ -1,107 +1,106 @@
 {% extends 'base.html' %}
 {% load attendance_tags %}
 
-{% block title %}Record Attendance — IIMT UNIVERSITY{% endblock %}
-{% block header_title %}Mark Roll-Call Attendance{% endblock %}
+{% block title %}Record Attendance — EduSphere | IIMT UNIVERSITY{% endblock %}
 
 {% block content %}
 <div class="space-y-6 max-w-4xl mx-auto">
     <!-- Course & Date Selection Card -->
-    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
-        <h3 class="text-sm font-bold text-slate-900 border-b border-slate-100 pb-2">Session Parameters</h3>
+    <div class="app-card p-5 space-y-4">
+        <h2 class="text-xs font-semibold text-white uppercase tracking-wider border-b border-[#1E293B] pb-2">Session Parameters</h2>
         <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Select Course *</label>
-                <select name="course" onchange="this.form.submit()" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
-                    <option value="">-- Choose Course --</option>
+                <label for="selectCourse" class="block text-xs font-medium text-slate-300 mb-1">Select Course *</label>
+                <select id="selectCourse" name="course" onchange="this.form.submit()" class="app-input w-full px-3 py-1.5 rounded-md text-xs bg-[#131D33]">
+                    <option value="" class="bg-[#090D16]">-- Choose Course --</option>
                     {% for c in courses %}
-                    <option value="{{ c.id }}" {% if selected_course.id == c.id %}selected{% endif %}>{{ c.code }} - {{ c.name }}</option>
+                    <option value="{{ c.id }}" class="bg-[#090D16]" {% if selected_course.id == c.id %}selected{% endif %}>{{ c.code }} - {{ c.name }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Attendance Date *</label>
-                <input type="date" name="date" value="{{ selected_date }}" onchange="this.form.submit()" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                <label for="selectDate" class="block text-xs font-medium text-slate-300 mb-1">Attendance Date *</label>
+                <input type="date" id="selectDate" name="date" value="{{ selected_date }}" onchange="this.form.submit()" class="app-input w-full px-3 py-1.5 rounded-md text-xs">
             </div>
         </form>
     </div>
 
     {% if selected_course %}
     <!-- Roll Call Form -->
-    <form method="POST" class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+    <form method="POST" class="app-card overflow-hidden">
         {% csrf_token %}
         <input type="hidden" name="course" value="{{ selected_course.id }}">
         <input type="hidden" name="date" value="{{ selected_date }}">
 
-        <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="p-4 sm:p-5 border-b border-[#1E293B] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-                <h3 class="text-base font-bold text-slate-900">{{ selected_course.code }} Roll-Call ({{ selected_date }})</h3>
-                <p class="text-xs text-slate-500">{{ enrolled_students.count }} Enrolled Students in this course</p>
+                <h3 class="text-sm font-semibold text-white">{{ selected_course.code }} Roll-Call ({{ selected_date }})</h3>
+                <p class="text-xs text-slate-400 mt-0.5">{{ enrolled_students.count }} Enrolled Students in this course</p>
             </div>
             <div class="flex items-center space-x-2">
-                <button type="button" onclick="setAllStatus('PRESENT')" class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg text-xs font-bold border border-emerald-200 transition-colors">
-                    ✅ Mark All Present
+                <button type="button" onclick="setAllStatus('PRESENT')" class="app-btn app-btn-secondary py-1 px-2.5 rounded text-xs text-emerald-400 hover:text-emerald-300 border-emerald-900/60 hover:bg-emerald-950/40">
+                    Mark All Present
                 </button>
-                <button type="button" onclick="setAllStatus('ABSENT')" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-800 rounded-lg text-xs font-bold border border-rose-200 transition-colors">
-                    ❌ Mark All Absent
+                <button type="button" onclick="setAllStatus('ABSENT')" class="app-btn app-btn-secondary py-1 px-2.5 rounded text-xs text-rose-400 hover:text-rose-300 border-rose-900/60 hover:bg-rose-950/40">
+                    Mark All Absent
                 </button>
             </div>
         </div>
 
-        <div class="px-6 py-4 bg-slate-50 border-b border-slate-100">
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Lecture Topic Covered (Optional)</label>
-            <input type="text" name="topic_covered" value="{{ existing_session.topic_covered|default:'' }}" placeholder="e.g. Chapter 5: Balanced Binary Search Trees" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        <div class="px-5 py-3 bg-[#131D33] border-b border-[#1E293B]">
+            <label for="topicInput" class="block text-xs font-medium text-slate-300 mb-1">Lecture Topic Covered (Optional)</label>
+            <input type="text" id="topicInput" name="topic_covered" value="{{ existing_session.topic_covered|default:'' }}" placeholder="e.g. Chapter 5: Balanced Binary Search Trees" class="app-input w-full px-3 py-1.5 rounded-md text-xs">
         </div>
 
         <!-- Student Attendance Table -->
         <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse text-xs">
+            <table class="app-table w-full">
                 <thead>
-                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase">
-                        <th class="py-3 px-4">Roll No</th>
-                        <th class="py-3 px-4">Student Name</th>
-                        <th class="py-3 px-4 text-center">Status</th>
-                        <th class="py-3 px-4">Remarks / Note</th>
+                    <tr>
+                        <th class="w-28">Roll No</th>
+                        <th>Student Name</th>
+                        <th class="text-center w-64">Status</th>
+                        <th>Remarks</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody>
                     {% for enrollment in enrolled_students %}
                     {% with student=enrollment.student %}
-                    <tr class="hover:bg-slate-50/70">
-                        <td class="py-3.5 px-4 font-mono font-bold text-indigo-700">{{ student.roll_number }}</td>
-                        <td class="py-3.5 px-4 font-semibold text-slate-900">{{ student.user.get_full_name }}</td>
-                        <td class="py-3.5 px-4 text-center">
-                            <div class="inline-flex items-center space-x-3">
+                    <tr>
+                        <td class="font-mono text-xs font-medium text-blue-400">{{ student.roll_number }}</td>
+                        <td class="font-medium text-white text-xs">{{ student.user.get_full_name }}</td>
+                        <td class="text-center">
+                            <div class="inline-flex items-center space-x-3 text-xs">
                                 <label class="inline-flex items-center space-x-1 cursor-pointer">
-                                    <input type="radio" name="status_{{ student.id }}" value="PRESENT" class="status-radio-PRESENT text-emerald-600 focus:ring-emerald-500"
+                                    <input type="radio" name="status_{{ student.id }}" value="PRESENT" class="status-radio-PRESENT text-emerald-500 focus:ring-emerald-500"
                                         {% if not existing_records or existing_records|dict_get_status:student.id == 'PRESENT' %}checked{% endif %}>
-                                    <span class="text-xs font-bold text-emerald-700">Present</span>
+                                    <span class="text-emerald-400 font-medium">Present</span>
                                 </label>
                                 <label class="inline-flex items-center space-x-1 cursor-pointer">
-                                    <input type="radio" name="status_{{ student.id }}" value="ABSENT" class="status-radio-ABSENT text-rose-600 focus:ring-rose-500"
+                                    <input type="radio" name="status_{{ student.id }}" value="ABSENT" class="status-radio-ABSENT text-rose-500 focus:ring-rose-500"
                                         {% if existing_records|dict_get_status:student.id == 'ABSENT' %}checked{% endif %}>
-                                    <span class="text-xs font-bold text-rose-700">Absent</span>
+                                    <span class="text-rose-400 font-medium">Absent</span>
                                 </label>
                                 <label class="inline-flex items-center space-x-1 cursor-pointer">
-                                    <input type="radio" name="status_{{ student.id }}" value="LATE" class="status-radio-LATE text-amber-600 focus:ring-amber-500"
+                                    <input type="radio" name="status_{{ student.id }}" value="LATE" class="status-radio-LATE text-amber-500 focus:ring-amber-500"
                                         {% if existing_records|dict_get_status:student.id == 'LATE' %}checked{% endif %}>
-                                    <span class="text-xs font-bold text-amber-700">Late</span>
+                                    <span class="text-amber-400 font-medium">Late</span>
                                 </label>
                                 <label class="inline-flex items-center space-x-1 cursor-pointer">
-                                    <input type="radio" name="status_{{ student.id }}" value="EXCUSED" class="status-radio-EXCUSED text-blue-600 focus:ring-blue-500"
+                                    <input type="radio" name="status_{{ student.id }}" value="EXCUSED" class="status-radio-EXCUSED text-blue-500 focus:ring-blue-500"
                                         {% if existing_records|dict_get_status:student.id == 'EXCUSED' %}checked{% endif %}>
-                                    <span class="text-xs font-bold text-blue-700">Excused</span>
+                                    <span class="text-blue-400 font-medium">Excused</span>
                                 </label>
                             </div>
                         </td>
-                        <td class="py-3.5 px-4">
-                            <input type="text" name="remarks_{{ student.id }}" value="{{ existing_records|dict_get_remarks:student.id }}" placeholder="Optional..." class="w-full px-2 py-1 rounded-lg border border-slate-200 text-xs">
+                        <td>
+                            <input type="text" name="remarks_{{ student.id }}" value="{{ existing_records|dict_get_remarks:student.id }}" placeholder="Optional note..." class="app-input w-full px-2 py-1 rounded text-xs">
                         </td>
                     </tr>
                     {% endwith %}
                     {% empty %}
                     <tr>
-                        <td colspan="4" class="py-8 text-center text-slate-400">No students are currently enrolled in this course.</td>
+                        <td colspan="4" class="py-6 text-center text-slate-500">No students are currently enrolled in this course.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -109,9 +108,9 @@
         </div>
 
         {% if enrolled_students %}
-        <div class="p-6 bg-slate-50 border-t border-slate-100 flex items-center justify-end space-x-3">
-            <a href="{% url 'attendance_dashboard' %}" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl text-xs transition-all">Cancel</a>
-            <button type="submit" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs shadow-md transition-all">
+        <div class="p-4 border-t border-[#1E293B] bg-[#131D33] flex items-center justify-end space-x-2">
+            <a href="{% url 'attendance_dashboard' %}" class="app-btn app-btn-secondary text-xs py-1.5 px-3 rounded-md">Cancel</a>
+            <button type="submit" class="app-btn app-btn-primary text-xs py-1.5 px-4 rounded-md">
                 Save & Confirm Attendance
             </button>
         </div>

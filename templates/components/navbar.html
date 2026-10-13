@@ -1,100 +1,102 @@
 {% load static %}
-<header class="glass-navbar sticky top-0 w-full z-40 border-b border-white/10" role="banner">
+<header class="app-navbar sticky top-0 w-full z-40 border-b border-[#1E293B]" role="banner">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
-            <!-- Brand Logo -->
+        <div class="flex items-center justify-between h-14">
+            <!-- Brand Logo & Mobile Sidebar Trigger -->
             <div class="flex items-center space-x-3">
                 {% if request.user.is_authenticated %}
-                <button id="openSidebarBtn" class="md:hidden text-slate-400 hover:text-white p-2 rounded-xl glass-card-static focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Open Navigation Menu">
+                <button id="openSidebarBtn" class="md:hidden text-slate-400 hover:text-white p-1.5 rounded-md hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Open Navigation Menu">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                 </button>
                 {% endif %}
 
-                <a href="{% if request.user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="flex items-center space-x-3 group focus:outline-none">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-500 flex items-center justify-center text-white text-xl font-black shadow-lg shadow-blue-500/30 group-hover:scale-105 transition-transform duration-200" aria-hidden="true">
-                        🎓
+                <a href="{% if request.user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="flex items-center space-x-2.5 group focus:outline-none">
+                    <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-sm" aria-hidden="true">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                        </svg>
                     </div>
-                    <div>
-                        <span class="text-xl font-extrabold tracking-tight text-white flex items-center gap-1">
-                            IIMT<span class="gradient-text-electric">MANIA</span>
+                    <div class="leading-none">
+                        <span class="text-base font-bold tracking-tight text-white flex items-center gap-1">
+                            EduSphere
                         </span>
-                        <span class="block text-[9px] uppercase tracking-widest text-slate-400 font-bold -mt-0.5">IIMT University Community</span>
+                        <span class="block text-[10px] tracking-wider text-slate-400 font-medium mt-0.5">IIMT UNIVERSITY</span>
                     </div>
                 </a>
             </div>
 
             <!-- Desktop Nav Links -->
-            <nav class="hidden md:flex items-center space-x-1 lg:space-x-2" aria-label="Main Navigation">
-                <a href="{% url 'home' %}" class="px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/5 transition-all">
+            <nav class="hidden md:flex items-center space-x-1" aria-label="Main Navigation">
+                <a href="{% url 'home' %}" class="px-3 py-1.5 rounded-md text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors">
                     Home
                 </a>
                 {% if request.user.is_authenticated %}
-                <a href="{% url 'dashboard' %}" class="px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/5 transition-all">
+                <a href="{% url 'dashboard' %}" class="px-3 py-1.5 rounded-md text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors">
                     Dashboard
                 </a>
-                <a href="{% url 'assignment_list' %}" class="px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/5 transition-all">
-                    Assignments & Events
+                <a href="{% url 'assignment_list' %}" class="px-3 py-1.5 rounded-md text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors">
+                    Assignments
                 </a>
-                <a href="{% url 'announcement_list' %}" class="px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/5 transition-all">
+                <a href="{% url 'announcement_list' %}" class="px-3 py-1.5 rounded-md text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors">
                     Notices
                 </a>
-                <a href="{% url 'material_list' %}" class="px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/5 transition-all">
-                    Study Materials
+                <a href="{% url 'material_list' %}" class="px-3 py-1.5 rounded-md text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors">
+                    Materials
                 </a>
-                <a href="{% url 'attendance_dashboard' %}" class="px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/5 transition-all">
+                <a href="{% url 'attendance_dashboard' %}" class="px-3 py-1.5 rounded-md text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors">
                     Attendance
                 </a>
                 {% else %}
-                <a href="{% url 'announcement_list' %}" class="px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/5 transition-all">
-                    Announcements
+                <a href="{% url 'announcement_list' %}" class="px-3 py-1.5 rounded-md text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors">
+                    Campus Notices
                 </a>
-                <a href="{% url 'compliance:terms_of_service' %}" class="px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/5 transition-all">
-                    Campus Code
+                <a href="{% url 'compliance:terms_of_service' %}" class="px-3 py-1.5 rounded-md text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors">
+                    Terms
                 </a>
                 {% endif %}
             </nav>
 
-            <!-- User Status & Action Buttons -->
-            <div class="flex items-center space-x-3">
+            <!-- User Status & Actions -->
+            <div class="flex items-center space-x-2.5">
                 {% if request.user.is_authenticated %}
                     <!-- Role Pill Badge -->
-                    <span class="hidden sm:inline-flex badge-glass {% if request.user.is_admin_role %}badge-glass-violet{% elif request.user.is_teacher_role %}badge-glass-emerald{% else %}badge-glass-blue{% endif %} text-[10px]">
+                    <span class="hidden sm:inline-flex app-badge {% if request.user.is_admin_role %}app-badge-slate{% elif request.user.is_teacher_role %}app-badge-emerald{% else %}app-badge-blue{% endif %} text-[11px]">
                         {{ request.user.get_role_display }}
                     </span>
 
                     <!-- Notifications Bell Icon -->
-                    <a href="{% url 'notification_list' %}" class="relative p-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-all focus:outline-none focus:ring-2 focus:ring-blue-400" aria-label="Notifications">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                    <a href="{% url 'notification_list' %}" class="relative p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-slate-800/60 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Notifications">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
                         {% if unread_count > 0 %}
-                        <span class="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-black text-white ring-2 ring-slate-900">
+                        <span class="absolute top-1 right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-blue-500 text-[9px] font-bold text-white">
                             {{ unread_count }}
                         </span>
                         {% endif %}
                     </a>
 
-                    <!-- Profile Quick Button -->
-                    <a href="{% url 'profile' %}" class="flex items-center space-x-2 p-1.5 rounded-xl hover:bg-white/5 border border-white/10 transition-all focus:outline-none focus:ring-2 focus:ring-blue-400">
-                        <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center text-xs font-bold overflow-hidden" aria-hidden="true">
+                    <!-- Profile Link -->
+                    <a href="{% url 'profile' %}" class="flex items-center space-x-2 p-1 rounded-md hover:bg-slate-800/60 transition-colors focus:outline-none">
+                        <div class="w-6 h-6 rounded-md bg-slate-800 text-slate-200 border border-slate-700 flex items-center justify-center text-xs font-semibold overflow-hidden" aria-hidden="true">
                             {% if request.user.avatar %}
                                 <img src="{{ request.user.avatar.url }}" alt="" class="w-full h-full object-cover">
                             {% else %}
                                 {{ request.user.username|slice:":1"|upper }}
                             {% endif %}
                         </div>
-                        <span class="hidden md:inline text-xs font-semibold text-slate-200">{{ request.user.first_name|default:request.user.username }}</span>
+                        <span class="hidden md:inline text-xs font-medium text-slate-200">{{ request.user.first_name|default:request.user.username }}</span>
                     </a>
 
                     <!-- Logout Button -->
                     <form action="{% url 'logout' %}" method="post" class="inline m-0">
                         {% csrf_token %}
-                        <button type="submit" class="p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-all focus:outline-none" title="Log Out" aria-label="Log Out">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                        <button type="submit" class="p-1.5 rounded-md text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors focus:outline-none" title="Log Out" aria-label="Log Out">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                         </button>
                     </form>
                 {% else %}
-                    <a href="{% url 'login' %}" class="glass-btn glass-btn-primary text-xs py-2 px-4 rounded-xl">
-                        <span>Sign In with OTP</span>
-                        <span aria-hidden="true">&rarr;</span>
+                    <a href="{% url 'login' %}" class="app-btn app-btn-primary text-xs py-1.5 px-3 rounded-md">
+                        <span>Sign In</span>
                     </a>
                 {% endif %}
             </div>

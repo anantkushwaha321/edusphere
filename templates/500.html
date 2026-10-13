@@ -1,32 +1,26 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-[#070A13] text-[#F5F7FF]">
+<html lang="en" class="h-full bg-[#090D16] text-[#F8FAFC]">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>500 — Server Incident | IIMTMANIA</title>
+    <title>500 — Server Incident | EduSphere</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{% static 'css/design-system.css' %}">
-    <link rel="stylesheet" href="{% static 'css/liquid-glass.css' %}">
 </head>
-<body class="min-h-full flex items-center justify-center p-4 bg-[#070A13] text-[#F5F7FF] font-sans antialiased relative">
-    <div class="glass-panel max-w-lg w-full text-center p-8 sm:p-12 rounded-3xl border border-white/10 space-y-6 shadow-2xl relative z-10">
-        <div class="inline-flex w-16 h-16 rounded-2xl bg-rose-500/20 text-rose-400 items-center justify-center text-3xl font-black border border-rose-500/30">
-            ⚠️
-        </div>
-        <div class="space-y-2">
-            <span class="badge-glass badge-glass-rose text-xs font-mono font-bold">ERROR 500</span>
-            <h1 class="text-3xl sm:text-4xl font-black text-white">System Error</h1>
-            <p class="text-xs sm:text-sm text-slate-300 max-w-md mx-auto leading-relaxed">
-                An unexpected condition was encountered on the campus cluster. The incident has been logged for engineering review.
-            </p>
-        </div>
-        <div class="pt-4 flex flex-wrap items-center justify-center gap-3">
-            <a href="/" class="glass-btn glass-btn-primary px-6 py-2.5 rounded-xl text-xs font-bold inline-flex items-center space-x-1.5">
+<body class="min-h-full flex items-center justify-center p-4 bg-[#090D16] text-[#F8FAFC] font-sans antialiased relative">
+    <div class="app-card max-w-md w-full text-center p-6 sm:p-8 space-y-4">
+        <span class="app-badge app-badge-rose text-xs font-mono font-semibold">500</span>
+        <h1 class="text-xl font-bold text-white">System Error</h1>
+        <p class="text-xs text-slate-400 leading-relaxed">
+            An unexpected error occurred while processing your request. The event has been logged for system administrator review.
+        </p>
+        <div class="pt-2 flex flex-wrap items-center justify-center gap-2">
+            <a href="/" class="app-btn app-btn-primary text-xs py-1.5 px-3 rounded-md">
                 <span>&larr; Return to Home</span>
             </a>
-            <a href="mailto:privacy@iimtindia.net" class="glass-btn glass-btn-secondary px-5 py-2.5 rounded-xl text-xs font-semibold">
-                <span>Contact Support</span>
+            <a href="mailto:privacy@iimtindia.net" class="app-btn app-btn-secondary text-xs py-1.5 px-3 rounded-md">
+                <span>Contact Administrator</span>
             </a>
         </div>
     </div>

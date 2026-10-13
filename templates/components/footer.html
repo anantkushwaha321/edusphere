@@ -1,66 +1,69 @@
-<footer class="glass-panel border-t border-white/10 mt-16 text-xs text-slate-400 py-12 px-6 sm:px-10" role="contentinfo">
+<footer class="border-t border-[#1E293B] bg-[#090D16] mt-16 text-xs text-slate-400 py-10 px-6 sm:px-10" role="contentinfo">
     <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
         <!-- University & Platform Identity -->
-        <div class="space-y-3 md:col-span-1">
-            <div class="flex items-center space-x-2.5">
-                <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-violet-500 flex items-center justify-center text-white text-base font-bold shadow-md shadow-blue-500/20" aria-hidden="true">
-                    🎓
+        <div class="space-y-2 md:col-span-1">
+            <div class="flex items-center space-x-2">
+                <div class="w-6 h-6 rounded-md bg-blue-600 flex items-center justify-center text-white" aria-hidden="true">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                    </svg>
                 </div>
-                <span class="font-extrabold text-lg text-white tracking-tight">IIMT<span class="gradient-text-electric">MANIA</span></span>
+                <span class="font-bold text-sm text-white tracking-tight">EduSphere</span>
             </div>
             <p class="text-xs text-slate-400 leading-relaxed">
-                The premier digital community and academic operations ecosystem for <strong>IIMT UNIVERSITY</strong> students, faculty, and administrators.
+                Smart Academic Management System for <strong>IIMT UNIVERSITY</strong>. Centralized management of curriculum, roll-call attendance, and assignment evaluation.
             </p>
             <p class="text-[11px] text-slate-500">
-                'O' Pocket, Ganga Nagar, Meerut, Uttar Pradesh 250001, India
+                'O' Pocket, Ganga Nagar, Meerut, UP 250001
             </p>
         </div>
 
         <!-- Academic Portals -->
-        <div class="space-y-2.5">
-            <h4 class="font-bold text-white text-xs uppercase tracking-wider">Campus Portals</h4>
+        <div class="space-y-2">
+            <h4 class="font-semibold text-slate-200 text-xs uppercase tracking-wider">Navigation</h4>
             <ul class="space-y-1.5 text-xs">
                 {% if request.user.is_authenticated %}
-                <li><a href="{% url 'dashboard' %}" class="hover:text-blue-400 transition-colors">Role Dashboard</a></li>
-                <li><a href="{% url 'my_report_card' %}" class="hover:text-blue-400 transition-colors">Academic Transcripts</a></li>
-                <li><a href="{% url 'attendance_dashboard' %}" class="hover:text-blue-400 transition-colors">Attendance Register</a></li>
-                <li><a href="{% url 'profile' %}" class="hover:text-blue-400 transition-colors">Identity Profile</a></li>
+                <li><a href="{% url 'dashboard' %}" class="hover:text-slate-200 transition-colors">Role Dashboard</a></li>
+                <li><a href="{% url 'assignment_list' %}" class="hover:text-slate-200 transition-colors">Assignments & Tasks</a></li>
+                <li><a href="{% url 'attendance_dashboard' %}" class="hover:text-slate-200 transition-colors">Attendance Register</a></li>
+                <li><a href="{% url 'profile' %}" class="hover:text-slate-200 transition-colors">Account Settings</a></li>
                 {% else %}
-                <li><a href="{% url 'login' %}" class="hover:text-blue-400 transition-colors">Student & Faculty Sign In</a></li>
-                <li><a href="{% url 'announcement_list' %}" class="hover:text-blue-400 transition-colors">Campus Notices</a></li>
-                <li><a href="{% url 'login' %}" class="hover:text-blue-400 transition-colors">New Registration</a></li>
+                <li><a href="{% url 'login' %}" class="hover:text-slate-200 transition-colors">Institutional Sign In</a></li>
+                <li><a href="{% url 'announcement_list' %}" class="hover:text-slate-200 transition-colors">Campus Notices</a></li>
+                <li><a href="{% url 'course_list' %}" class="hover:text-slate-200 transition-colors">Course Catalog</a></li>
                 {% endif %}
             </ul>
         </div>
 
         <!-- Compliance & Legal Policies -->
-        <div class="space-y-2.5">
-            <h4 class="font-bold text-white text-xs uppercase tracking-wider">Policies & Standards</h4>
+        <div class="space-y-2">
+            <h4 class="font-semibold text-slate-200 text-xs uppercase tracking-wider">Policies & Standards</h4>
             <ul class="space-y-1.5 text-xs">
-                <li><a href="{% url 'compliance:privacy_policy' %}" class="hover:text-blue-400 transition-colors">Privacy Policy (FERPA & GDPR)</a></li>
-                <li><a href="{% url 'compliance:terms_of_service' %}" class="hover:text-blue-400 transition-colors">Terms of Service & Campus Code</a></li>
-                <li><a href="{% url 'compliance:cookie_policy' %}" class="hover:text-blue-400 transition-colors">Cookie Transparency Policy</a></li>
-                <li><a href="{% url 'compliance:refund_policy' %}" class="hover:text-blue-400 transition-colors">Tuition Refund & Zero Fees</a></li>
-                <li><a href="{% url 'compliance:accessibility_statement' %}" class="hover:text-blue-400 transition-colors">Accessibility (WCAG 2.1 AA)</a></li>
+                <li><a href="{% url 'compliance:privacy_policy' %}" class="hover:text-slate-200 transition-colors">Privacy Policy</a></li>
+                <li><a href="{% url 'compliance:terms_of_service' %}" class="hover:text-slate-200 transition-colors">Terms of Service</a></li>
+                <li><a href="{% url 'compliance:cookie_policy' %}" class="hover:text-slate-200 transition-colors">Cookie Policy</a></li>
+                <li><a href="{% url 'compliance:refund_policy' %}" class="hover:text-slate-200 transition-colors">Tuition Refund Policy</a></li>
+                <li><a href="{% url 'compliance:accessibility_statement' %}" class="hover:text-slate-200 transition-colors">Accessibility (WCAG 2.1 AA)</a></li>
             </ul>
         </div>
 
         <!-- Data Subject Rights & Settings -->
-        <div class="space-y-2.5">
-            <h4 class="font-bold text-white text-xs uppercase tracking-wider">Data Rights & Contact</h4>
+        <div class="space-y-2">
+            <h4 class="font-semibold text-slate-200 text-xs uppercase tracking-wider">Data Rights</h4>
             <ul class="space-y-1.5 text-xs">
-                <li><a href="{% url 'compliance:data_portal' %}" class="hover:text-blue-400 transition-colors">Export & Delete My Data</a></li>
-                <li><a href="{% url 'compliance:email_preferences' %}" class="hover:text-blue-400 transition-colors">Email & Notification Preferences</a></li>
-                <li><a href="{% url 'compliance:parental_consent' %}" class="hover:text-blue-400 transition-colors">Parental Consent (COPPA)</a></li>
-                <li><button type="button" onclick="window.openCookiePreferencesModal && window.openCookiePreferencesModal()" class="text-blue-400 hover:text-blue-300 underline font-semibold focus:outline-none">⚙️ Cookie Settings</button></li>
-                <li class="pt-2 text-[11px] text-slate-500">DPO: <a href="mailto:privacy@iimtindia.net" class="text-blue-400 hover:underline">privacy@iimtindia.net</a></li>
+                <li><a href="{% url 'compliance:data_portal' %}" class="hover:text-slate-200 transition-colors">Export & Erase Data (GDPR)</a></li>
+                <li><a href="{% url 'compliance:email_preferences' %}" class="hover:text-slate-200 transition-colors">Notification Preferences</a></li>
+                <li><a href="{% url 'compliance:parental_consent' %}" class="hover:text-slate-200 transition-colors">Parental Consent (COPPA)</a></li>
+                <li><button type="button" onclick="window.openCookiePreferencesModal && window.openCookiePreferencesModal()" class="text-slate-300 hover:text-white underline focus:outline-none">Cookie Settings</button></li>
+                <li class="pt-1 text-[11px] text-slate-500">Contact: <a href="mailto:privacy@iimtindia.net" class="text-blue-400 hover:underline">privacy@iimtindia.net</a></li>
             </ul>
         </div>
     </div>
 
     <!-- Bottom Copyright Bar -->
-    <div class="max-w-7xl mx-auto pt-8 mt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 gap-2">
-        <p>&copy; 2026 IIMT UNIVERSITY. All rights reserved. Powered by <strong>IIMTMANIA</strong> Liquid Glass Platform.</p>
-        <p>UGC Recognized &bull; NAAC Accredited &bull; Meerut, India</p>
+    <div class="max-w-7xl mx-auto pt-6 mt-6 border-t border-[#1E293B] flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 gap-2">
+        <p>&copy; 2026 IIMT UNIVERSITY. EduSphere Smart Academic Management System.</p>
+        <p>UGC Recognized &bull; NAAC Accredited &bull; Meerut, UP, India</p>
     </div>
 </footer>

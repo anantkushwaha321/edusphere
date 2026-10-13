@@ -1,81 +1,81 @@
 {% extends 'base.html' %}
 
-{% block title %}Study Materials & Resources — IIMTMANIA | IIMT UNIVERSITY{% endblock %}
+{% block title %}Study Materials & Resources — EduSphere | IIMT UNIVERSITY{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
-    <!-- Header with Filters & Upload (Liquid Glass) -->
-    <div class="glass-panel p-5 rounded-2xl border border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <form method="GET" class="flex flex-wrap items-center gap-3 flex-1">
+    <!-- Header with Filters & Upload -->
+    <div class="app-card p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <form method="GET" class="flex flex-wrap items-center gap-2.5 flex-1">
             <div class="relative flex-1 min-w-[200px] max-w-sm">
                 <input type="text" name="q" value="{{ search_query }}" placeholder="Search by title, module, keyword..." 
-                       class="glass-input w-full pl-9 pr-4 py-2 rounded-xl text-xs text-white placeholder-slate-400 focus:outline-none">
-                <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                       class="app-input w-full pl-8 pr-3 py-1.5 rounded-md text-xs">
+                <svg class="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
             <label for="courseFilterMat" class="sr-only">Filter by Course</label>
-            <select id="courseFilterMat" name="course" onchange="this.form.submit()" class="glass-input py-2 px-3.5 rounded-xl text-xs text-white bg-[#0D1222] border-white/10 focus:outline-none">
-                <option value="" class="bg-[#070A13]">All Courses</option>
+            <select id="courseFilterMat" name="course" onchange="this.form.submit()" class="app-input py-1.5 px-3 rounded-md text-xs bg-[#131D33]">
+                <option value="" class="bg-[#090D16]">All Courses</option>
                 {% for c in courses %}
-                <option value="{{ c.id }}" class="bg-[#070A13]" {% if selected_course == c.id|stringformat:"i" %}selected{% endif %}>{{ c.code }} - {{ c.name }}</option>
+                <option value="{{ c.id }}" class="bg-[#090D16]" {% if selected_course == c.id|stringformat:"i" %}selected{% endif %}>{{ c.code }} - {{ c.name }}</option>
                 {% endfor %}
             </select>
             {% if search_query or selected_course %}
-            <a href="{% url 'material_list' %}" class="text-xs text-rose-400 hover:text-rose-300 font-semibold underline">Clear Filters</a>
+            <a href="{% url 'material_list' %}" class="text-xs text-rose-400 hover:text-rose-300 font-medium underline">Clear Filter</a>
             {% endif %}
         </form>
 
         {% if request.user.is_teacher_role or request.user.is_admin_role %}
         <div>
-            <a href="{% url 'material_upload' %}" class="glass-btn glass-btn-primary px-4 py-2.5 rounded-xl text-xs font-bold inline-flex items-center space-x-1.5 shadow-md shadow-blue-600/30">
+            <a href="{% url 'material_upload' %}" class="app-btn app-btn-primary text-xs py-1.5 px-3 rounded-md inline-flex items-center space-x-1">
                 <span>+ Upload Material</span>
             </a>
         </div>
         {% endif %}
     </div>
 
-    <!-- Materials Grid (Spotlight Liquid Glass) -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Materials Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {% for m in materials %}
-        <div class="glass-card spotlight-card rounded-2xl p-6 flex flex-col justify-between hover-lift">
+        <div class="app-card p-4 flex flex-col justify-between">
             <div>
-                <div class="flex items-center justify-between mb-3">
-                    <span class="badge-glass badge-glass-blue text-xs font-mono font-bold">{{ m.course.code }}</span>
-                    <span class="badge-glass badge-glass-violet text-[10px] font-bold uppercase tracking-wider font-mono">{{ m.file_extension|upper }}</span>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="app-badge app-badge-blue text-[11px] font-mono">{{ m.course.code }}</span>
+                    <span class="app-badge app-badge-slate text-[10px] font-mono uppercase">{{ m.file_extension|upper }}</span>
                 </div>
-                <h3 class="text-base font-bold text-white">{{ m.title }}</h3>
-                <span class="inline-block text-xs font-semibold text-blue-400 mt-1">{{ m.unit_module }}</span>
-                <p class="text-xs text-slate-300 mt-1 line-clamp-2 leading-relaxed">{{ m.description|default:"No description provided." }}</p>
+                <h3 class="text-sm font-semibold text-white">{{ m.title }}</h3>
+                <span class="inline-block text-xs text-blue-400 mt-0.5 font-medium">{{ m.unit_module }}</span>
+                <p class="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">{{ m.description|default:"No description provided." }}</p>
 
-                <div class="mt-4 pt-3 border-t border-white/10 text-[11px] text-slate-400 flex items-center justify-between">
-                    <span>Uploaded by <strong class="text-slate-300">{{ m.uploaded_by.user.get_full_name|default:"Faculty" }}</strong></span>
-                    <span class="font-mono">{{ m.uploaded_at|date:"M d, Y" }}</span>
+                <div class="mt-4 pt-3 border-t border-[#1E293B] text-[11px] text-slate-400 flex items-center justify-between">
+                    <span>Uploaded by <strong class="text-slate-200">{{ m.uploaded_by.user.get_full_name|default:"Faculty" }}</strong></span>
+                    <span class="font-mono text-slate-500">{{ m.uploaded_at|date:"M d, Y" }}</span>
                 </div>
             </div>
 
-            <div class="mt-5 pt-3 border-t border-white/10 flex items-center justify-between">
+            <div class="mt-4 pt-3 border-t border-[#1E293B] flex items-center justify-between text-xs">
                 <div>
                     {% if m.file %}
-                    <a href="{% url 'material_download' pk=m.id %}" class="glass-btn glass-btn-primary px-3 py-1.5 rounded-lg text-xs font-bold inline-flex items-center space-x-1">
-                        <span>📥 Download</span>
-                        {% if m.download_count > 0 %}<span class="text-[10px] text-blue-200 font-mono">({{ m.download_count }})</span>{% endif %}
+                    <a href="{% url 'material_download' pk=m.id %}" class="app-btn app-btn-primary py-1 px-2.5 rounded text-xs inline-flex items-center space-x-1">
+                        <span>Download</span>
+                        {% if m.download_count > 0 %}<span class="text-[10px] opacity-80 font-mono">({{ m.download_count }})</span>{% endif %}
                     </a>
                     {% elif m.external_link %}
-                    <a href="{{ m.external_link }}" target="_blank" class="glass-btn glass-btn-secondary px-3 py-1.5 rounded-lg text-xs font-bold inline-flex items-center space-x-1">
-                        <span>🔗 Open Link</span>
+                    <a href="{{ m.external_link }}" target="_blank" class="app-btn app-btn-secondary py-1 px-2.5 rounded text-xs inline-flex items-center space-x-1">
+                        <span>External Link</span>
                     </a>
                     {% endif %}
                 </div>
 
                 {% if request.user.is_admin_role or request.user.teacher_profile == m.uploaded_by %}
-                <a href="{% url 'material_delete' pk=m.id %}" class="text-xs text-rose-400 hover:text-rose-300 font-semibold" onclick="return confirm('Delete this study material?')">
+                <a href="{% url 'material_delete' pk=m.id %}" class="text-xs text-rose-400 hover:text-rose-300 font-medium" onclick="return confirm('Delete this study material?')">
                     Delete
                 </a>
                 {% endif %}
             </div>
         </div>
         {% empty %}
-        <div class="col-span-3 glass-card p-8 rounded-2xl text-center text-slate-400">
-            No study materials found for this selection.
+        <div class="col-span-3 app-card p-6 text-center text-xs text-slate-400">
+            No study materials found matching criteria.
         </div>
         {% endfor %}
     </div>

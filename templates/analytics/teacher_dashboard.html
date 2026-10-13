@@ -1,139 +1,126 @@
 {% extends 'base.html' %}
 
-{% block title %}Faculty Dashboard — IIMTMANIA | IIMT UNIVERSITY{% endblock %}
+{% block title %}Faculty Workspace — EduSphere | IIMT UNIVERSITY{% endblock %}
 
 {% block content %}
-<div class="space-y-8">
-    <!-- Header Welcome Banner (Dark Liquid Glass) -->
-    <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+<div class="space-y-6">
+    <!-- Header Welcome Banner -->
+    <div class="app-card p-5 sm:p-6 border border-[#1E293B] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-card border-emerald-500/30 text-[10px] font-bold text-emerald-300 mb-2">
-                <span>Faculty Workspace</span>
-                <span>•</span>
-                <span>{{ teacher.designation|default:"Academic Faculty" }}</span>
+            <div class="flex items-center space-x-2 text-xs text-slate-400 mb-1">
+                <span>{{ teacher.department.name|default:"Academics" }}</span>
+                <span>&bull;</span>
+                <span>{{ teacher.designation|default:"Faculty Member" }}</span>
             </div>
-            <h1 class="text-2xl sm:text-3xl font-black text-white">Welcome, Prof. {{ request.user.first_name }}! 👋</h1>
-            <p class="text-xs text-slate-300 mt-1">
-                Department: <span class="text-emerald-300 font-semibold">{{ teacher.department.name|default:"Academics" }}</span> &bull; 
-                Staff ID: <span class="font-mono text-slate-300">{{ teacher.employee_id|default:request.user.username }}</span>
+            <h1 class="text-xl font-bold text-white">Prof. {{ request.user.first_name }}</h1>
+            <p class="text-xs text-slate-400 mt-0.5">
+                Staff ID: <span class="font-mono text-slate-200">{{ teacher.employee_id|default:request.user.username }}</span> &bull; 
+                {{ assigned_courses.count }} Assigned Courses
             </p>
         </div>
-        <div class="flex flex-wrap items-center gap-3">
-            <a href="{% url 'take_attendance' %}" class="glass-btn glass-btn-primary px-4 py-2.5 rounded-xl text-xs font-bold inline-flex items-center space-x-2">
-                <span>📋 Take Attendance</span>
+        <div class="flex flex-wrap items-center gap-2">
+            <a href="{% url 'take_attendance' %}" class="app-btn app-btn-primary text-xs py-2 px-3 rounded-md inline-flex items-center space-x-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                <span>Take Attendance</span>
             </a>
-            <a href="{% url 'assignment_create' %}" class="glass-btn glass-btn-secondary px-4 py-2.5 rounded-xl text-xs font-semibold">
-                <span>+ New Assignment</span>
+            <a href="{% url 'assignment_create' %}" class="app-btn app-btn-secondary text-xs py-2 px-3 rounded-md">
+                <span>+ Assignment</span>
             </a>
-            <a href="{% url 'material_upload' %}" class="glass-btn glass-btn-secondary px-4 py-2.5 rounded-xl text-xs font-semibold">
-                <span>📤 Upload Notes</span>
+            <a href="{% url 'material_upload' %}" class="app-btn app-btn-secondary text-xs py-2 px-3 rounded-md">
+                <span>Upload Notes</span>
             </a>
         </div>
     </div>
 
-    <!-- Quick KPI Cards (Spotlight Liquid Glass) -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <div class="glass-card spotlight-card p-6 rounded-2xl flex items-center justify-between">
-            <div>
-                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Assigned Courses</p>
-                <h3 class="text-3xl font-black text-white mt-1">{{ assigned_courses.count }}</h3>
-                <span class="text-xs text-blue-400 font-semibold mt-1 inline-block">Active this semester</span>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-xl font-bold border border-blue-500/30">
-                📖
-            </div>
+    <!-- Faculty Metric Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="app-card p-4">
+            <span class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Assigned Courses</span>
+            <div class="text-2xl font-bold text-white mt-1 font-mono">{{ assigned_courses.count }}</div>
+            <span class="text-xs text-slate-500 mt-0.5 inline-block">Active this semester</span>
         </div>
 
-        <div class="glass-card spotlight-card p-6 rounded-2xl flex items-center justify-between">
-            <div>
-                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Pending Submissions</p>
-                <h3 class="text-3xl font-black {% if pending_count > 0 %}text-amber-400{% else %}text-white{% endif %} mt-1">{{ pending_count }}</h3>
-                <span class="text-xs text-amber-400 font-semibold mt-1 inline-block">Requires evaluation</span>
+        <div class="app-card p-4">
+            <span class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Pending Evaluations</span>
+            <div class="text-2xl font-bold mt-1 font-mono {% if pending_count > 0 %}text-amber-400{% else %}text-white{% endif %}">
+                {{ pending_count }}
             </div>
-            <div class="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl font-bold border border-amber-500/30">
-                ✍️
-            </div>
+            <span class="text-xs text-slate-500 mt-0.5 inline-block">Submissions awaiting review</span>
         </div>
 
-        <div class="glass-card spotlight-card p-6 rounded-2xl flex items-center justify-between">
-            <div>
-                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Active Assignments</p>
-                <h3 class="text-3xl font-black text-white mt-1">{{ active_assignments_count }}</h3>
-                <span class="text-xs text-emerald-400 font-semibold mt-1 inline-block">Open for student submissions</span>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl font-bold border border-emerald-500/30">
-                📝
-            </div>
+        <div class="app-card p-4">
+            <span class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Active Assignments</span>
+            <div class="text-2xl font-bold text-white mt-1 font-mono">{{ active_assignments_count }}</div>
+            <span class="text-xs text-slate-500 mt-0.5 inline-block">Open for student submissions</span>
         </div>
     </div>
 
-    <!-- Assigned Courses Grid -->
-    <div>
-        <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-bold text-white">My Academic Courses</h2>
-            <a href="{% url 'course_list' %}" class="text-xs text-blue-400 hover:text-blue-300 font-semibold">All Courses &rarr;</a>
+    <!-- Assigned Courses Roster -->
+    <div class="space-y-3">
+        <div class="flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-white">Course Roster</h2>
+            <a href="{% url 'course_list' %}" class="text-xs text-blue-400 hover:text-blue-300 font-medium">All Courses &rarr;</a>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {% for course in assigned_courses %}
-            <div class="glass-card spotlight-card p-6 rounded-2xl flex flex-col justify-between hover-lift">
+            <div class="app-card p-4 flex flex-col justify-between">
                 <div>
-                    <div class="flex items-center justify-between mb-3">
-                        <span class="badge-glass badge-glass-blue text-xs font-mono font-bold">{{ course.code }}</span>
-                        <span class="text-xs text-slate-400 font-medium">{{ course.credits }} Credits</span>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="app-badge app-badge-blue text-[11px] font-mono">{{ course.code }}</span>
+                        <span class="text-[11px] text-slate-500 font-mono">{{ course.credits }} Credits</span>
                     </div>
-                    <h3 class="text-base font-bold text-white">{{ course.name }}</h3>
+                    <h3 class="text-sm font-semibold text-white">{{ course.name }}</h3>
                     <p class="text-xs text-slate-400 mt-1 line-clamp-2">{{ course.description|default:"No description provided." }}</p>
-                    <div class="mt-4 flex items-center space-x-2 text-xs text-slate-300">
-                        <span class="font-bold text-blue-400 font-mono">{{ course.active_enrollments_count }}</span>
-                        <span class="text-slate-400">Students Enrolled</span>
+                    <div class="mt-3 text-xs text-slate-400">
+                        <span class="font-medium text-slate-200 font-mono">{{ course.active_enrollments_count }}</span> Students Enrolled
                     </div>
                 </div>
-                <div class="mt-6 pt-4 border-t border-white/10 grid grid-cols-3 gap-2">
-                    <a href="{% url 'take_attendance' %}?course={{ course.id }}" class="text-center py-2 px-2 glass-btn glass-btn-secondary rounded-lg text-xs font-semibold">
+                <div class="mt-4 pt-3 border-t border-[#1E293B] grid grid-cols-3 gap-1.5 text-center">
+                    <a href="{% url 'take_attendance' %}?course={{ course.id }}" class="app-btn app-btn-secondary text-[11px] py-1 px-1 rounded">
                         Attendance
                     </a>
-                    <a href="{% url 'course_gradebook' course_id=course.id %}" class="text-center py-2 px-2 glass-btn glass-btn-secondary rounded-lg text-xs font-semibold">
+                    <a href="{% url 'course_gradebook' course_id=course.id %}" class="app-btn app-btn-secondary text-[11px] py-1 px-1 rounded">
                         Gradebook
                     </a>
-                    <a href="{% url 'course_detail' pk=course.id %}" class="text-center py-2 px-2 glass-btn glass-btn-secondary rounded-lg text-xs font-semibold">
+                    <a href="{% url 'course_detail' pk=course.id %}" class="app-btn app-btn-secondary text-[11px] py-1 px-1 rounded">
                         Details
                     </a>
                 </div>
             </div>
             {% empty %}
-            <div class="col-span-3 glass-card p-8 rounded-2xl text-center text-slate-400">
-                You do not have any courses assigned yet. Contact the academic administration.
+            <div class="col-span-3 app-card p-6 text-center text-xs text-slate-400">
+                You do not have any courses assigned for this semester.
             </div>
             {% endfor %}
         </div>
     </div>
 
-    <!-- Pending Evaluations Stream -->
-    <div class="glass-card p-6 rounded-2xl">
-        <h3 class="text-base font-bold text-white mb-4 flex items-center justify-between">
-            <span>Submissions Awaiting Grading</span>
-            <span class="text-xs text-amber-400 font-semibold font-mono">{{ pending_count }} pending</span>
-        </h3>
-        <div class="divide-y divide-white/10">
+    <!-- Pending Evaluations Queue -->
+    <div class="app-card p-5">
+        <div class="flex items-center justify-between mb-3 border-b border-[#1E293B] pb-2">
+            <h3 class="text-sm font-semibold text-white">Submissions Awaiting Grading</h3>
+            <span class="text-xs text-amber-400 font-medium font-mono">{{ pending_count }} pending</span>
+        </div>
+        <div class="divide-y divide-[#1E293B]">
             {% for sub in pending_submissions %}
-            <div class="py-3.5 flex items-center justify-between gap-3">
+            <div class="py-2.5 flex items-center justify-between gap-3">
                 <div class="min-w-0 pr-2">
                     <div class="flex items-center space-x-2">
-                        <span class="badge-glass badge-glass-blue text-[10px] font-mono">{{ sub.assignment.course.code }}</span>
-                        <span class="text-xs font-bold text-white">{{ sub.student.user.get_full_name|default:sub.student.user.username }}</span>
-                        <span class="text-[10px] text-slate-400 font-mono">({{ sub.student.roll_number }})</span>
+                        <span class="app-badge app-badge-blue text-[10px] font-mono">{{ sub.assignment.course.code }}</span>
+                        <span class="text-xs font-medium text-white">{{ sub.student.user.get_full_name|default:sub.student.user.username }}</span>
+                        <span class="text-[11px] text-slate-400 font-mono">({{ sub.student.roll_number }})</span>
                     </div>
-                    <p class="text-xs text-slate-300 font-medium truncate mt-1">{{ sub.assignment.title }}</p>
-                    <p class="text-[11px] text-slate-400 mt-0.5">Submitted {{ sub.submitted_at|timesince }} ago</p>
+                    <p class="text-xs text-slate-300 truncate mt-0.5">{{ sub.assignment.title }}</p>
+                    <span class="text-[11px] text-slate-500 font-mono">Submitted {{ sub.submitted_at|timesince }} ago</span>
                 </div>
                 <div>
-                    <a href="{% url 'submission_grade' pk=sub.id %}" class="glass-btn glass-btn-primary px-3 py-1.5 rounded-lg text-xs font-bold inline-flex items-center">
-                        Grade Now &rarr;
+                    <a href="{% url 'submission_grade' pk=sub.id %}" class="app-btn app-btn-primary text-xs py-1 px-2.5 rounded">
+                        Grade &rarr;
                     </a>
                 </div>
             </div>
             {% empty %}
-            <p class="text-xs text-slate-400 py-6 text-center">🎉 All submissions are currently graded and up to date!</p>
+            <p class="text-xs text-slate-500 py-4 text-center">All assignment submissions have been graded.</p>
             {% endfor %}
         </div>
     </div>
