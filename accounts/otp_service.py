@@ -1,0 +1,261 @@
+import secrets
+import logging
+import datetime
+from typing import Optional, Tuple
+from django.utils import timezone
+from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.contrib.auth.hashers import make_password
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
+from .models import EmailOTPChallenge, User
+
+logger = logging.getLogger(__name__)
+
+OTP_EXPIRY_MINUTES = 5
+RESEND_COOLDOWN_SECONDS = 60
+MAX_ATTEMPTS_PER_CHALLENGE = 5
+MAX_HOURLY_REQUESTS_PER_EMAIL = 5
+MAX_HOURLY_REQUESTS_PER_IP = 15
+
+
+class OTPError(Exception):
+    """Custom exception for OTP domain errors."""
+    def __init__(self, message: str, code: str = 'invalid', status_code: int = 400):
+        super().__init__(message)
+        self.message = message
+        self.code = code
+        self.status_code = status_code
+
+
+def normalize_email(email: str) -> str:
+    """Normalize and validate email address."""
+    if not email or not isinstance(email, str):
+        raise OTPError("Please provide a valid email address.", code="invalid_email")
+    normalized = email.strip().lower()
+    try:
+        validate_email(normalized)
+    except ValidationError:
+        raise OTPError("Invalid email address format.", code="invalid_email")
+    return normalized
+
+
+def generate_cryptographic_otp(length: int = 6) -> str:
+    """Generate a cryptographically secure random numeric OTP."""
+    digits = "0123456789"
+    return "".join(secrets.choice(digits) for _ in range(length))
+
+
+def check_rate_limits(email: str, ip_address: Optional[str] = None):
+    """Enforce rate limits on OTP generation to prevent abuse."""
+    one_hour_ago = timezone.now() - datetime.timedelta(hours=1)
+
+    # Hourly limit per email
+    email_requests_count = EmailOTPChallenge.objects.filter(
+        email=email,
+        created_at__gte=one_hour_ago
+    ).count()
+    if email_requests_count >= MAX_HOURLY_REQUESTS_PER_EMAIL:
+        raise OTPError(
+            "Too many OTP requests for this email address. Please try again in an hour.",
+            code="rate_limit_email",
+            status_code=429
+        )
+
+    # Hourly limit per IP
+    if ip_address:
+        ip_requests_count = EmailOTPChallenge.objects.filter(
+            ip_address=ip_address,
+            created_at__gte=one_hour_ago
+        ).count()
+        if ip_requests_count >= MAX_HOURLY_REQUESTS_PER_IP:
+            raise OTPError(
+                "Too many verification requests from this network. Please try again later.",
+                code="rate_limit_ip",
+                status_code=429
+            )
+
+
+def check_resend_cooldown(email: str):
+    """Verify that user has respected the 60-second cooldown."""
+    latest = EmailOTPChallenge.objects.filter(email=email).order_by('-created_at').first()
+    if latest:
+        seconds_since_last = (timezone.now() - latest.created_at).total_seconds()
+        if seconds_since_last < RESEND_COOLDOWN_SECONDS:
+            remaining = int(RESEND_COOLDOWN_SECONDS - seconds_since_last)
+            raise OTPError(
+                f"Please wait {remaining} seconds before requesting a new verification code.",
+                code="cooldown_active",
+                status_code=429
+            )
+
+
+def dispatch_otp_email(email: str, otp_code: str, purpose: str, user_name: Optional[str] = None) -> bool:
+    """Send formatted branded OTP email via Django's configured email backend."""
+    subject = f"Your IIMT UNIVERSITY Verification Code: {otp_code}"
+    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'IIMT UNIVERSITY Security <no-reply@iimtindia.net>')
+
+    context = {
+        'otp_code': otp_code,
+        'purpose': purpose,
+        'expires_minutes': OTP_EXPIRY_MINUTES,
+        'user_name': user_name,
+    }
+
+    html_message = render_to_string('accounts/otp_email.html', context)
+    text_message = (
+        f"Your IIMT UNIVERSITY verification code is: {otp_code}\n\n"
+        f"This code will expire in {OTP_EXPIRY_MINUTES} minutes.\n"
+        f"Do not share this code with anyone.\n\n"
+        f"IIMT UNIVERSITY Academic Administration"
+    )
+
+    msg = EmailMultiAlternatives(
+        subject=subject,
+        body=text_message,
+        from_email=from_email,
+        to=[email]
+    )
+    msg.attach_alternative(html_message, "text/html")
+
+    try:
+        msg.send(fail_silently=False)
+        return True
+    except Exception as e:
+        logger.error(f"Failed to dispatch OTP email to {email}: {e}")
+        # If in debug mode or testing, let console output be captured or log gracefully
+        if settings.DEBUG:
+            return True
+        raise OTPError(
+            "Unable to deliver verification email at this moment. Please check your address or contact support.",
+            code="delivery_failed",
+            status_code=500
+        )
+
+
+def create_otp_challenge(
+    email: str,
+    purpose: str = EmailOTPChallenge.Purpose.LOGIN,
+    ip_address: Optional[str] = None,
+    enforce_cooldown: bool = True
+) -> Tuple[EmailOTPChallenge, int]:
+    """
+    Creates a new secure OTP challenge, stores hashed OTP, and dispatches email.
+    Returns (challenge_object, remaining_cooldown_seconds).
+    """
+    normalized_email = normalize_email(email)
+
+    # Enforce rate limits & cooldown
+    if enforce_cooldown:
+        check_resend_cooldown(normalized_email)
+    check_rate_limits(normalized_email, ip_address)
+
+    # Invalidate previous unverified challenges for this email
+    EmailOTPChallenge.objects.filter(
+        email=normalized_email,
+        is_used=False
+    ).update(is_used=True)
+
+    # Locate user if existing
+    user = User.objects.filter(email__iexact=normalized_email, is_active=True).first()
+    user_name = user.get_full_name() or user.username if user else None
+
+    # Generate cryptographically secure OTP & hash
+    plain_otp = generate_cryptographic_otp(length=6)
+    hashed_otp = make_password(plain_otp)
+
+    now = timezone.now()
+    expires_at = now + datetime.timedelta(minutes=OTP_EXPIRY_MINUTES)
+
+    challenge = EmailOTPChallenge.objects.create(
+        email=normalized_email,
+        otp_hash=hashed_otp,
+        purpose=purpose,
+        user=user,
+        expires_at=expires_at,
+        attempts=0,
+        max_attempts=MAX_ATTEMPTS_PER_CHALLENGE,
+        is_verified=False,
+        is_used=False,
+        ip_address=ip_address
+    )
+
+    # Dispatch email (plain_otp is strictly used here and not saved)
+    dispatch_otp_email(
+        email=normalized_email,
+        otp_code=plain_otp,
+        purpose=purpose,
+        user_name=user_name
+    )
+
+    return challenge, RESEND_COOLDOWN_SECONDS
+
+
+def verify_otp_code(
+    email: str,
+    plain_otp: str,
+    purpose: Optional[str] = None,
+    mark_used: bool = True
+) -> Tuple[bool, EmailOTPChallenge, Optional[User]]:
+    """
+    Verifies an OTP against the latest valid challenge.
+    Returns (is_success, challenge, user).
+    Raises OTPError if expired, max attempts reached, or invalid.
+    """
+    normalized_email = normalize_email(email)
+    clean_otp = str(plain_otp).strip()
+
+    if not clean_otp or len(clean_otp) != 6 or not clean_otp.isdigit():
+        raise OTPError("Please enter a valid 6-digit verification code.", code="invalid_format")
+
+    # Look up the latest challenge for this email
+    qs = EmailOTPChallenge.objects.filter(email=normalized_email).order_by('-created_at')
+    if purpose:
+        qs = qs.filter(purpose=purpose)
+
+    challenge = qs.first()
+    if not challenge:
+        raise OTPError("No active verification code found for this email. Please request a new code.", code="no_challenge")
+
+    if challenge.is_used and challenge.is_verified:
+        raise OTPError("This verification code has already been used. Please request a new code.", code="already_used")
+
+    if challenge.is_expired:
+        raise OTPError("This verification code has expired. Please request a new code.", code="expired")
+
+    if challenge.attempts >= challenge.max_attempts:
+        challenge.is_used = True
+        challenge.save(update_fields=['is_used'])
+        raise OTPError("Too many incorrect attempts. This code is now invalid. Please request a new code.", code="max_attempts_exceeded")
+
+    # If already verified in step 1 and awaiting profile completion
+    if challenge.is_verified and not challenge.is_used:
+        from django.contrib.auth.hashers import check_password
+        if not check_password(clean_otp, challenge.otp_hash):
+            raise OTPError("Incorrect verification code.", code="incorrect_otp")
+        if mark_used:
+            challenge.is_used = True
+            challenge.save(update_fields=['is_used'])
+        user = challenge.user or User.objects.filter(email__iexact=normalized_email, is_active=True).first()
+        return True, challenge, user
+
+    # Perform verification
+    success = challenge.verify(clean_otp, mark_used=mark_used)
+    if not success:
+        remaining_attempts = max(0, challenge.max_attempts - challenge.attempts)
+        if remaining_attempts == 0:
+            challenge.is_used = True
+            challenge.save(update_fields=['is_used'])
+            raise OTPError("Maximum attempts reached. This verification code has been invalidated.", code="max_attempts_exceeded")
+        raise OTPError(
+            f"Incorrect verification code. {remaining_attempts} attempt{'s' if remaining_attempts != 1 else ''} remaining.",
+            code="incorrect_otp"
+        )
+
+    # Look up matching user
+    user = challenge.user
+    if not user:
+        user = User.objects.filter(email__iexact=normalized_email, is_active=True).first()
+
+    return True, challenge, user

@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Cookie Policy — IIMT UNIVERSITY{% endblock %}
+{% block header_title %}Cookie Policy & Transparency{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto bg-white p-8 sm:p-12 rounded-3xl border border-slate-200/80 shadow-sm space-y-8 text-slate-700">
+    <div class="border-b border-slate-200 pb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold mb-3">
+                <span>🍪 ePrivacy & GDPR Cookie Transparency</span>
+            </div>
+            <h1 class="text-3xl font-black text-slate-900 tracking-tight">Cookie Policy</h1>
+            <p class="text-xs text-slate-500 mt-2 font-mono">Last Updated: {{ last_updated }}</p>
+        </div>
+        <div>
+            <button type="button" onclick="window.openCookiePreferencesModal && window.openCookiePreferencesModal()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs shadow-md transition-colors">
+                ⚙️ Adjust Cookie Preferences
+            </button>
+        </div>
+    </div>
+
+    <section class="space-y-3">
+        <h2 class="text-lg font-bold text-slate-900">1. What Are Cookies?</h2>
+        <p class="text-sm leading-relaxed">
+            Cookies are small text data files stored on your local browser by web applications. They allow websites to remember your login session, prevent cross-site request forgery attacks, and persist your display preferences.
+        </p>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-lg font-bold text-slate-900">2. Cookies Used by IIMT UNIVERSITY</h2>
+        <p class="text-sm leading-relaxed">
+            IIMT UNIVERSITY categorizes its cookies into three clear levels. We <strong>never</strong> use third-party behavioral advertising or cross-site tracking cookies.
+        </p>
+
+        <div class="overflow-x-auto pt-2">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-200 font-bold text-slate-700 uppercase">
+                        <th class="py-2.5 px-3">Cookie Name</th>
+                        <th class="py-2.5 px-3">Category</th>
+                        <th class="py-2.5 px-3">Duration</th>
+                        <th class="py-2.5 px-3">Purpose & Description</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    <tr>
+                        <td class="py-2.5 px-3 font-mono font-bold text-indigo-700">sessionid</td>
+                        <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">Essential</span></td>
+                        <td class="py-2.5 px-3">2 Weeks</td>
+                        <td class="py-2.5 px-3">Maintains authenticated user session across secure academic dashboard views.</td>
+                    </tr>
+                    <tr>
+                        <td class="py-2.5 px-3 font-mono font-bold text-indigo-700">csrftoken</td>
+                        <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">Essential</span></td>
+                        <td class="py-2.5 px-3">1 Year</td>
+                        <td class="py-2.5 px-3">Cryptographic protection against Cross-Site Request Forgery (CSRF) form attacks.</td>
+                    </tr>
+                    <tr>
+                        <td class="py-2.5 px-3 font-mono font-bold text-indigo-700">IIMT UNIVERSITY_cookie_consent_v1</td>
+                        <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800">Functional</span></td>
+                        <td class="py-2.5 px-3">1 Year (localStorage)</td>
+                        <td class="py-2.5 px-3">Stores your authorized cookie choices so you are not prompted repeatedly.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-lg font-bold text-slate-900">3. How to Control Cookies in Your Browser</h2>
+        <p class="text-sm leading-relaxed">
+            In addition to our interactive preference manager, you can delete or block cookies directly through your browser settings:
+        </p>
+        <ul class="list-disc pl-5 text-sm space-y-1 text-slate-600">
+            <li><strong>Google Chrome:</strong> Settings &rarr; Privacy and security &rarr; Third-party cookies.</li>
+            <li><strong>Mozilla Firefox:</strong> Settings &rarr; Privacy & Security &rarr; Enhanced Tracking Protection.</li>
+            <li><strong>Apple Safari:</strong> Preferences &rarr; Privacy &rarr; Manage Website Data.</li>
+            <li><strong>Microsoft Edge:</strong> Settings &rarr; Cookies and site permissions &rarr; Manage and delete cookies.</li>
+        </ul>
+        <p class="text-xs text-slate-500 pt-1">
+            <em>Note: Disabling Strictly Necessary cookies (`sessionid` or `csrftoken`) will prevent you from logging into your IIMT UNIVERSITY dashboard.</em>
+        </p>
+    </section>
+</div>
+{% endblock %}

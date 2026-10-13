@@ -1,0 +1,598 @@
+import json
+import re
+import datetime
+from django.test import TestCase, Client
+from django.urls import reverse
+from django.core import mail
+from django.utils import timezone
+from django.contrib.auth.hashers import check_password
+
+from accounts.models import (
+    User,
+    StudentProfile,
+    TeacherProfile,
+    AdminProfile,
+    EmailOTPChallenge
+)
+from accounts.otp_service import (
+    create_otp_challenge,
+    verify_otp_code,
+    OTP_EXPIRY_MINUTES,
+    RESEND_COOLDOWN_SECONDS,
+    MAX_ATTEMPTS_PER_CHALLENGE,
+    MAX_HOURLY_REQUESTS_PER_EMAIL,
+    MAX_HOURLY_REQUESTS_PER_IP,
+    OTPError
+)
+from academics.models import Department, AcademicYear
+
+
+class OTPAuthenticationComprehensiveTests(TestCase):
+    """
+    Complete verification suite covering all 12 core requirements for the
+    EduSphere OTP-based authentication system.
+    """
+
+    def setUp(self):
+        self.client = Client()
+        # Create base academic fixtures required for profile creation and dashboards
+        self.department = Department.objects.create(
+            name="Computer Science & Engineering",
+            code="CSE",
+            description="Department of Computer Science"
+        )
+        self.academic_year = AcademicYear.objects.create(
+            name="2026-2027",
+            start_date=datetime.date(2026, 8, 1),
+            end_date=datetime.date(2027, 5, 31),
+            is_current=True
+        )
+
+        # Clear mailbox before each test
+        mail.outbox.clear()
+
+    def _extract_otp_from_mailbox(self) -> str:
+        """Helper to extract 6-digit OTP code from the latest dispatched email."""
+        self.assertGreater(len(mail.outbox), 0, "Expected an email to be dispatched in outbox.")
+        latest_email = mail.outbox[-1]
+        match = re.search(r'\b\d{6}\b', latest_email.subject)
+        if not match:
+            match = re.search(r'\b\d{6}\b', latest_email.body)
+        self.assertIsNotNone(match, "Could not extract 6-digit OTP from dispatched email.")
+        return match.group(0)
+
+    # -------------------------------------------------------------------------
+    # Scenario 1: New user requests an OTP
+    # Scenario 2: OTP email is delivered successfully
+    # -------------------------------------------------------------------------
+    def test_01_02_new_user_requests_otp_and_email_delivered(self):
+        """
+        Verify that when a new user requests an OTP:
+        1. An EmailOTPChallenge is created with purpose=REGISTER.
+        2. OTP is stored hashed and NOT leaked in plaintext or response.
+        3. A branded HTML email is dispatched with the OTP.
+        """
+        email = "newstudent@edusphere.edu"
+        response = self.client.post(
+            reverse('api_send_otp'),
+            data=json.dumps({'email': email}),
+            content_type='application/json'
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data['success'])
+        self.assertFalse(data['is_existing_user'])
+        self.assertEqual(data['purpose'], EmailOTPChallenge.Purpose.REGISTER)
+        self.assertIn('cooldown_seconds', data)
+        # Ensure plain OTP is NEVER leaked in API response
+        self.assertNotIn('otp', data)
+        self.assertNotIn('code', data.get('data', {}))
+
+        # Check database record
+        challenge = EmailOTPChallenge.objects.filter(email=email).first()
+        self.assertIsNotNone(challenge)
+        self.assertEqual(challenge.purpose, EmailOTPChallenge.Purpose.REGISTER)
+        self.assertFalse(challenge.is_verified)
+        self.assertFalse(challenge.is_used)
+        self.assertEqual(challenge.attempts, 0)
+        self.assertNotEqual(len(challenge.otp_hash), 6, "OTP hash must not be plain 6 digits.")
+        self.assertTrue(challenge.otp_hash.startswith(('pbkdf2_', 'argon2', 'bcrypt')))
+
+        # Scenario 2: Check email delivery in mail outbox
+        self.assertEqual(len(mail.outbox), 1)
+        sent_mail = mail.outbox[0]
+        self.assertIn(email, sent_mail.to)
+        self.assertIn("IIMT UNIVERSITY Verification Code", sent_mail.subject)
+        self.assertIn("expire in 5 minutes", sent_mail.body)
+
+        extracted_otp = self._extract_otp_from_mailbox()
+        self.assertEqual(len(extracted_otp), 6)
+        self.assertTrue(check_password(extracted_otp, challenge.otp_hash))
+
+    # -------------------------------------------------------------------------
+    # Scenario 3: Correct OTP verifies the email and registers new student
+    # -------------------------------------------------------------------------
+    def test_03_correct_otp_verifies_email_and_registers_student(self):
+        """
+        Verify that submitting the correct OTP validates email ownership,
+        prompts for student profile details, and securely creates the student account.
+        """
+        email = "alice.applicant@edusphere.edu"
+
+        # 1. Request OTP
+        self.client.post(
+            reverse('api_send_otp'),
+            data=json.dumps({'email': email}),
+            content_type='application/json'
+        )
+        plain_otp = self._extract_otp_from_mailbox()
+
+        # 2. Verify without registration details -> returns requires_registration: True
+        resp_prompt = self.client.post(
+            reverse('api_verify_otp'),
+            data=json.dumps({'email': email, 'otp': plain_otp}),
+            content_type='application/json'
+        )
+        self.assertEqual(resp_prompt.status_code, 200)
+        prompt_data = resp_prompt.json()
+        self.assertTrue(prompt_data['requires_registration'])
+        self.assertFalse(prompt_data['authenticated'])
+
+        # 3. Complete registration with profile data
+        resp_register = self.client.post(
+            reverse('api_verify_otp'),
+            data=json.dumps({
+                'email': email,
+                'otp': plain_otp,
+                'registration': {
+                    'first_name': 'Alice',
+                    'last_name': 'Applicant',
+                    'roll_number': 'CS2026-001',
+                    'department_id': self.department.id,
+                    'guardian_name': 'John Applicant',
+                    'guardian_phone': '+15551234567'
+                }
+            }),
+            content_type='application/json'
+        )
+        self.assertEqual(resp_register.status_code, 200)
+        reg_data = resp_register.json()
+        self.assertTrue(reg_data['success'])
+        self.assertTrue(reg_data['authenticated'])
+        self.assertEqual(reg_data['redirect_url'], reverse('student_dashboard'))
+
+        # Check DB user creation
+        new_user = User.objects.filter(email=email).first()
+        self.assertIsNotNone(new_user)
+        self.assertEqual(new_user.first_name, 'Alice')
+        self.assertEqual(new_user.last_name, 'Applicant')
+        self.assertEqual(new_user.role, User.Role.STUDENT)  # Locked to STUDENT
+        self.assertFalse(new_user.has_usable_password())
+
+        # Check student profile
+        profile = StudentProfile.objects.filter(user=new_user).first()
+        self.assertIsNotNone(profile)
+        self.assertEqual(profile.roll_number, 'CS2026-001')
+        self.assertEqual(profile.department, self.department)
+
+        # Challenge record should now be marked verified and used
+        challenge = EmailOTPChallenge.objects.filter(email=email).first()
+        self.assertTrue(challenge.is_verified)
+        self.assertTrue(challenge.is_used)
+
+    # -------------------------------------------------------------------------
+    # Scenario 4: Existing user logs in successfully
+    # -------------------------------------------------------------------------
+    def test_04_existing_user_logs_in_successfully(self):
+        """
+        Verify existing user receives an OTP with purpose=LOGIN and is
+        logged in immediately upon submitting the correct code.
+        """
+        email = "teacher.bob@edusphere.edu"
+        user = User.objects.create(
+            username="teacher_bob",
+            email=email,
+            first_name="Bob",
+            last_name="Roberts",
+            role=User.Role.TEACHER,
+            is_active=True
+        )
+        TeacherProfile.objects.create(user=user, employee_id="EMP-9001", department=self.department)
+
+        # 1. Request OTP
+        resp_send = self.client.post(
+            reverse('api_send_otp'),
+            data=json.dumps({'email': email}),
+            content_type='application/json'
+        )
+        self.assertEqual(resp_send.status_code, 200)
+        self.assertTrue(resp_send.json()['is_existing_user'])
+        self.assertEqual(resp_send.json()['purpose'], EmailOTPChallenge.Purpose.LOGIN)
+
+        # 2. Verify with correct OTP
+        plain_otp = self._extract_otp_from_mailbox()
+        resp_verify = self.client.post(
+            reverse('api_verify_otp'),
+            data=json.dumps({'email': email, 'otp': plain_otp}),
+            content_type='application/json'
+        )
+        self.assertEqual(resp_verify.status_code, 200)
+        verify_data = resp_verify.json()
+        self.assertTrue(verify_data['success'])
+        self.assertTrue(verify_data['authenticated'])
+        self.assertTrue(verify_data['is_existing_user'])
+        self.assertEqual(verify_data['redirect_url'], reverse('teacher_dashboard'))
+
+        # Check session is authenticated
+        self.assertEqual(int(self.client.session['_auth_user_id']), user.id)
+
+    # -------------------------------------------------------------------------
+    # Scenario 5: Incorrect OTP is rejected
+    # -------------------------------------------------------------------------
+    def test_05_incorrect_otp_is_rejected(self):
+        """
+        Verify that submitting an incorrect 6-digit OTP is rejected with
+        an appropriate 400 error and increments the challenge attempt count.
+        """
+        email = "student.test@edusphere.edu"
+        self.client.post(
+            reverse('api_send_otp'),
+            data=json.dumps({'email': email}),
+            content_type='application/json'
+        )
+
+        # Submit deliberately wrong OTP
+        wrong_otp = "000000"
+        resp_verify = self.client.post(
+            reverse('api_verify_otp'),
+            data=json.dumps({'email': email, 'otp': wrong_otp}),
+            content_type='application/json'
+        )
+        self.assertEqual(resp_verify.status_code, 400)
+        data = resp_verify.json()
+        self.assertFalse(data['success'])
+        self.assertEqual(data['code'], 'incorrect_otp')
+        self.assertIn('4 attempts remaining', data['message'])
+
+        challenge = EmailOTPChallenge.objects.filter(email=email).first()
+        self.assertEqual(challenge.attempts, 1)
+        self.assertFalse(challenge.is_verified)
+        self.assertFalse(challenge.is_used)
+
+    # -------------------------------------------------------------------------
+    # Scenario 6: Expired OTP is rejected
+    # -------------------------------------------------------------------------
+    def test_06_expired_otp_is_rejected(self):
+        """
+        Verify that an OTP older than 5 minutes is rejected as expired.
+        """
+        email = "student.expire@edusphere.edu"
+        self.client.post(
+            reverse('api_send_otp'),
+            data=json.dumps({'email': email}),
+            content_type='application/json'
+        )
+        plain_otp = self._extract_otp_from_mailbox()
+
+        # Fast forward time: age the challenge beyond 5 minutes
+        challenge = EmailOTPChallenge.objects.filter(email=email).first()
+        challenge.expires_at = timezone.now() - datetime.timedelta(seconds=1)
+        challenge.save(update_fields=['expires_at'])
+
+        resp_verify = self.client.post(
+            reverse('api_verify_otp'),
+            data=json.dumps({'email': email, 'otp': plain_otp}),
+            content_type='application/json'
+        )
+        self.assertEqual(resp_verify.status_code, 400)
+        data = resp_verify.json()
+        self.assertFalse(data['success'])
+        self.assertEqual(data['code'], 'expired')
+        self.assertIn("expired", data['message'].lower())
+
+    # -------------------------------------------------------------------------
+    # Scenario 7: Previously used OTP cannot be reused
+    # -------------------------------------------------------------------------
+    def test_07_previously_used_otp_cannot_be_reused(self):
+        """
+        Verify that once an OTP has been verified and used, replay attempts are blocked.
+        """
+        email = "student.replay@edusphere.edu"
+        user = User.objects.create(
+            username="student_replay",
+            email=email,
+            role=User.Role.STUDENT,
+            is_active=True
+        )
+        StudentProfile.objects.create(user=user, roll_number="REPLAY-01", department=self.department)
+
+        self.client.post(
+            reverse('api_send_otp'),
+            data=json.dumps({'email': email}),
+            content_type='application/json'
+        )
+        plain_otp = self._extract_otp_from_mailbox()
+
+        # First verification succeeds
+        resp1 = self.client.post(
+            reverse('api_verify_otp'),
+            data=json.dumps({'email': email, 'otp': plain_otp}),
+            content_type='application/json'
+        )
+        self.assertEqual(resp1.status_code, 200)
+
+        # Attempt replay with the same OTP
+        resp2 = self.client.post(
+            reverse('api_verify_otp'),
+            data=json.dumps({'email': email, 'otp': plain_otp}),
+            content_type='application/json'
+        )
+        self.assertEqual(resp2.status_code, 400)
+        data = resp2.json()
+        self.assertFalse(data['success'])
+        self.assertIn(data['code'], ['already_used', 'no_challenge'])
+
+    # -------------------------------------------------------------------------
+    # Scenario 8: Too many incorrect attempts are blocked
+    # -------------------------------------------------------------------------
+    def test_08_too_many_incorrect_attempts_blocked(self):
+        """
+        Verify that after 5 failed attempts, the challenge is invalidated
+        and subsequent attempts (even correct ones) are rejected.
+        """
+        email = "student.brute@edusphere.edu"
+        self.client.post(
+            reverse('api_send_otp'),
+            data=json.dumps({'email': email}),
+            content_type='application/json'
+        )
+        correct_otp = self._extract_otp_from_mailbox()
+
+        # Submit 5 incorrect attempts
+        for attempt in range(1, 5):
+            resp = self.client.post(
+                reverse('api_verify_otp'),
+                data=json.dumps({'email': email, 'otp': f"00000{attempt}"}),
+                content_type='application/json'
+            )
+            self.assertEqual(resp.status_code, 400)
+            self.assertEqual(resp.json()['code'], 'incorrect_otp')
+
+        # 5th failed attempt should trigger max_attempts_exceeded
+        resp5 = self.client.post(
+            reverse('api_verify_otp'),
+            data=json.dumps({'email': email, 'otp': "000005"}),
+            content_type='application/json'
+        )
+        self.assertEqual(resp5.status_code, 400)
+        self.assertEqual(resp5.json()['code'], 'max_attempts_exceeded')
+
+        # Challenge should now be marked is_used=True to permanently lock it
+        challenge = EmailOTPChallenge.objects.filter(email=email).first()
+        self.assertTrue(challenge.is_used)
+
+        # Even if attacker submits the correct code now, it must be rejected
+        resp_after = self.client.post(
+            reverse('api_verify_otp'),
+            data=json.dumps({'email': email, 'otp': correct_otp}),
+            content_type='application/json'
+        )
+        self.assertEqual(resp_after.status_code, 400)
+        self.assertEqual(resp_after.json()['code'], 'max_attempts_exceeded')
+
+    # -------------------------------------------------------------------------
+    # Scenario 9: Resend cooldown and rate limits work
+    # -------------------------------------------------------------------------
+    def test_09_resend_cooldown_and_rate_limits(self):
+        """
+        Verify:
+        a) 60-second resend cooldown is strictly enforced.
+        b) Hourly per-email rate limit (5 max) is enforced.
+        c) Hourly per-IP rate limit (15 max) is enforced.
+        """
+        email = "student.ratelimit@edusphere.edu"
+
+        # 1. Initial send request
+        resp1 = self.client.post(
+            reverse('api_send_otp'),
+            data=json.dumps({'email': email}),
+            content_type='application/json'
+        )
+        self.assertEqual(resp1.status_code, 200)
+
+        # 2. Immediate resend should trigger 429 cooldown error
+        resp_cooldown = self.client.post(
+            reverse('api_resend_otp'),
+            data=json.dumps({'email': email}),
+            content_type='application/json'
+        )
+        self.assertEqual(resp_cooldown.status_code, 429)
+        self.assertEqual(resp_cooldown.json()['code'], 'cooldown_active')
+
+        # 3. Simulate passage of 60 seconds by backdating existing challenges
+        EmailOTPChallenge.objects.filter(email=email).update(
+            created_at=timezone.now() - datetime.timedelta(seconds=70)
+        )
+
+        # Resend now works after cooldown
+        resp_resend = self.client.post(
+            reverse('api_resend_otp'),
+            data=json.dumps({'email': email}),
+            content_type='application/json'
+        )
+        self.assertEqual(resp_resend.status_code, 200)
+
+        # 4. Hourly Email Rate Limit (MAX_HOURLY_REQUESTS_PER_EMAIL = 5)
+        # Create additional backdated challenges to reach limit
+        now = timezone.now()
+        for i in range(3):
+            EmailOTPChallenge.objects.create(
+                email=email,
+                otp_hash="mock_hash",
+                expires_at=now + datetime.timedelta(minutes=5),
+                created_at=now - datetime.timedelta(seconds=120 + i * 10)
+            )
+
+        # Email has 5 challenges within the hour now. The 6th attempt must be rate-limited:
+        EmailOTPChallenge.objects.filter(email=email).order_by('-created_at').first()
+        # Ensure latest challenge is older than 60s to bypass cooldown check
+        EmailOTPChallenge.objects.filter(email=email).update(
+            created_at=timezone.now() - datetime.timedelta(seconds=65)
+        )
+
+        resp_limit = self.client.post(
+            reverse('api_send_otp'),
+            data=json.dumps({'email': email}),
+            content_type='application/json'
+        )
+        self.assertEqual(resp_limit.status_code, 429)
+        self.assertEqual(resp_limit.json()['code'], 'rate_limit_email')
+
+        # 5. IP Rate Limit (MAX_HOURLY_REQUESTS_PER_IP = 15)
+        ip = "192.168.10.50"
+        for i in range(15):
+            EmailOTPChallenge.objects.create(
+                email=f"ip_test_{i}@edusphere.edu",
+                otp_hash="mock_hash",
+                ip_address=ip,
+                expires_at=now + datetime.timedelta(minutes=5),
+                created_at=now - datetime.timedelta(seconds=100)
+            )
+
+        resp_ip_limit = self.client.post(
+            reverse('api_send_otp'),
+            data=json.dumps({'email': 'fresh_email@edusphere.edu'}),
+            content_type='application/json',
+            REMOTE_ADDR=ip
+        )
+        self.assertEqual(resp_ip_limit.status_code, 429)
+        self.assertEqual(resp_ip_limit.json()['code'], 'rate_limit_ip')
+
+    # -------------------------------------------------------------------------
+    # Scenario 10: Unauthenticated users cannot access protected pages or APIs
+    # -------------------------------------------------------------------------
+    def test_10_unauthenticated_users_cannot_access_protected_pages(self):
+        """
+        Verify that protected dashboards, user profiles, and user management
+        redirect unauthenticated users to the login page.
+        """
+        protected_urls = [
+            reverse('dashboard'),
+            reverse('admin_dashboard'),
+            reverse('teacher_dashboard'),
+            reverse('student_dashboard'),
+            reverse('profile'),
+            reverse('user_list'),
+        ]
+
+        for url in protected_urls:
+            resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 302, f"Expected 302 redirect for {url}")
+            self.assertTrue(resp.url.startswith(reverse('login')))
+
+        # Check /api/auth/me/ returns authenticated: False
+        resp_me = self.client.get(reverse('api_me'))
+        self.assertEqual(resp_me.status_code, 200)
+        self.assertFalse(resp_me.json()['authenticated'])
+
+    # -------------------------------------------------------------------------
+    # Scenario 11: Students, teachers, and administrators reach correct dashboards
+    # -------------------------------------------------------------------------
+    def test_11_role_based_dashboards_access_control(self):
+        """
+        Verify:
+        - Admin user reaches admin dashboard.
+        - Teacher user reaches teacher dashboard.
+        - Student user reaches student dashboard.
+        - Cross-role access is restricted (student cannot access admin or teacher dashboard).
+        """
+        admin = User.objects.create(
+            username="admin_user",
+            email="admin.test@edusphere.edu",
+            role=User.Role.ADMIN,
+            is_active=True
+        )
+        AdminProfile.objects.create(user=admin)
+
+        teacher = User.objects.create(
+            username="teacher_user",
+            email="teacher.test@edusphere.edu",
+            role=User.Role.TEACHER,
+            is_active=True
+        )
+        TeacherProfile.objects.create(user=teacher, employee_id="TCH-100", department=self.department)
+
+        student = User.objects.create(
+            username="student_user",
+            email="student.test@edusphere.edu",
+            role=User.Role.STUDENT,
+            is_active=True
+        )
+        StudentProfile.objects.create(user=student, roll_number="STU-100", department=self.department)
+
+        # Test Admin
+        self.client.force_login(admin)
+        resp = self.client.get(reverse('dashboard'))
+        self.assertRedirects(resp, reverse('admin_dashboard'))
+        resp_admin = self.client.get(reverse('admin_dashboard'))
+        self.assertEqual(resp_admin.status_code, 200)
+        self.client.logout()
+
+        # Test Teacher
+        self.client.force_login(teacher)
+        resp = self.client.get(reverse('dashboard'))
+        self.assertRedirects(resp, reverse('teacher_dashboard'))
+        resp_teacher = self.client.get(reverse('teacher_dashboard'))
+        self.assertEqual(resp_teacher.status_code, 200)
+        self.client.logout()
+
+        # Test Student
+        self.client.force_login(student)
+        resp = self.client.get(reverse('dashboard'))
+        self.assertRedirects(resp, reverse('student_dashboard'))
+        resp_student = self.client.get(reverse('student_dashboard'))
+        self.assertEqual(resp_student.status_code, 200)
+
+        # Ensure student cannot access admin or teacher dashboard (redirects to their own student dashboard)
+        resp_unauth_admin = self.client.get(reverse('admin_dashboard'), follow=True)
+        self.assertRedirects(resp_unauth_admin, reverse('student_dashboard'))
+        resp_unauth_teacher = self.client.get(reverse('teacher_dashboard'), follow=True)
+        self.assertRedirects(resp_unauth_teacher, reverse('student_dashboard'))
+        self.client.logout()
+
+    # -------------------------------------------------------------------------
+    # Scenario 12: Logout invalidates the authenticated session
+    # -------------------------------------------------------------------------
+    def test_12_logout_invalidates_session(self):
+        """
+        Verify that calling POST /api/auth/logout/ clears the authenticated session,
+        resets /api/auth/me/, and blocks subsequent dashboard access.
+        """
+        user = User.objects.create(
+            username="logout_user",
+            email="logout@edusphere.edu",
+            role=User.Role.STUDENT,
+            is_active=True
+        )
+        StudentProfile.objects.create(user=user, roll_number="STU-LOGOUT", department=self.department)
+
+        self.client.force_login(user)
+
+        # Confirm user is authenticated
+        resp_me1 = self.client.get(reverse('api_me'))
+        self.assertTrue(resp_me1.json()['authenticated'])
+
+        # Execute API logout
+        resp_logout = self.client.post(reverse('api_logout'))
+        self.assertEqual(resp_logout.status_code, 200)
+        self.assertTrue(resp_logout.json()['success'])
+
+        # Confirm user is now unauthenticated
+        resp_me2 = self.client.get(reverse('api_me'))
+        self.assertFalse(resp_me2.json()['authenticated'])
+
+        # Attempt accessing dashboard -> should redirect to login
+        resp_dash = self.client.get(reverse('dashboard'))
+        self.assertEqual(resp_dash.status_code, 302)
+        self.assertTrue(resp_dash.url.startswith(reverse('login')))

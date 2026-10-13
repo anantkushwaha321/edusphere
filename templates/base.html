@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="IIMT UNIVERSITY — Smart Academic Management System. Role-based portals for students, faculty, and administrators.">
+    <title>{% block title %}IIMT UNIVERSITY — Smart Academic Management System{% endblock %}</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Screen Reader Accessible utility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+        .focus\:not-sr-only:focus {
+            position: static;
+            width: auto;
+            height: auto;
+            padding: 0.75rem 1rem;
+            margin: 0;
+            overflow: visible;
+            clip: auto;
+            white-space: normal;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white !important; }
+            .shadow, .shadow-sm, .shadow-md, .shadow-lg { box-shadow: none !important; }
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col font-sans text-slate-800 antialiased selection:bg-indigo-500 selection:text-white">
+
+    <!-- Keyboard Accessibility: Skip to Content Bypass Link -->
+    <a href="#main-content" class="sr-only focus:not-sr-only fixed top-3 left-3 z-50 bg-indigo-700 text-white rounded-xl shadow-xl font-bold text-xs ring-2 ring-white transition-all">
+        Skip to main content &rarr;
+    </a>
+
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar" class="no-print fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 text-slate-200 flex flex-col transition-transform duration-200 ease-in-out md:static md:translate-x-0 -translate-x-full" aria-label="Main Navigation">
+            <!-- Brand Header -->
+            <div class="flex items-center justify-between h-16 px-6 bg-slate-950 border-b border-slate-800">
+                <a href="{% url 'dashboard' %}" class="flex items-center space-x-3 focus:outline-none focus:ring-2 focus:ring-indigo-400 rounded-lg">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-400 flex items-center justify-center text-white font-bold shadow-md shadow-brand-500/20 text-lg" aria-hidden="true">
+                        🎓
+                    </div>
+                    <span class="font-extrabold text-xl tracking-tight text-white">IIMT <span class="text-brand-400">UNIVERSITY</span></span>
+                </a>
+                <button id="closeSidebarBtn" class="md:hidden text-slate-400 hover:text-white p-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-white" aria-label="Close navigation sidebar">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Role Badge & User Identity -->
+            <div class="px-6 py-4 border-b border-slate-800/60 bg-slate-900/50">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-100 font-bold overflow-hidden" aria-hidden="true">
+                        {% if request.user.avatar %}
+                            <img src="{{ request.user.avatar.url }}" alt="Avatar for {{ request.user.username }}" class="w-full h-full object-cover">
+                        {% else %}
+                            {{ request.user.first_name|default:request.user.username|slice:":1"|upper }}
+                        {% endif %}
+                    </div>
+                    <div class="overflow-hidden">
+                        <h4 class="text-sm font-semibold text-white truncate">{{ request.user.get_full_name|default:request.user.username }}</h4>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold 
+                            {% if request.user.is_admin_role %}bg-purple-900/80 text-purple-200 border border-purple-600
+                            {% elif request.user.is_teacher_role %}bg-emerald-900/80 text-emerald-200 border border-emerald-600
+                            {% else %}bg-blue-900/80 text-blue-200 border border-blue-600{% endif %}">
+                            {{ request.user.get_role_display }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nav Links -->
+            <nav class="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto" aria-label="Navigation links">
+                <a href="{% url 'dashboard' %}" class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-slate-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 {% if request.resolver_match.url_name == 'dashboard' or 'dashboard' in request.resolver_match.url_name %}bg-brand-600 text-white shadow-sm{% endif %}">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                    Dashboard
+                </a>
+
+                {% if request.user.is_admin_role %}
+                <a href="{% url 'user_list' %}" class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-slate-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 {% if 'user' in request.resolver_match.url_name and 'profile' not in request.resolver_match.url_name %}bg-brand-600 text-white{% endif %}">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    User Management
+                </a>
+                <a href="{% url 'department_list' %}" class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-slate-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 {% if 'department' in request.resolver_match.url_name %}bg-brand-600 text-white{% endif %}">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    Departments
+                </a>
+                {% endif %}
+
+                <a href="{% url 'course_list' %}" class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-slate-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 {% if 'course' in request.resolver_match.url_name and 'gradebook' not in request.resolver_match.url_name %}bg-brand-600 text-white{% endif %}">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    Courses & Curriculum
+                </a>
+
+                <a href="{% url 'assignment_list' %}" class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-slate-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 {% if 'assignment' in request.resolver_match.url_name or 'submission' in request.resolver_match.url_name %}bg-brand-600 text-white{% endif %}">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                    Assignments
+                </a>
+
+                <a href="{% url 'attendance_dashboard' %}" class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-slate-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 {% if 'attendance' in request.resolver_match.url_name %}bg-brand-600 text-white{% endif %}">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    Attendance
+                </a>
+
+                <a href="{% url 'material_list' %}" class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-slate-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 {% if 'material' in request.resolver_match.url_name %}bg-brand-600 text-white{% endif %}">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                    Study Materials
+                </a>
+
+                {% if request.user.is_student_role %}
+                <a href="{% url 'my_report_card' %}" class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-slate-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 {% if 'report' in request.resolver_match.url_name %}bg-brand-600 text-white{% endif %}">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    My Report Card
+                </a>
+                {% endif %}
+
+                <a href="{% url 'announcement_list' %}" class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-slate-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 {% if 'announcement' in request.resolver_match.url_name %}bg-brand-600 text-white{% endif %}">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg>
+                    Announcements
+                </a>
+
+                {% if request.user.is_admin_role %}
+                <a href="{% url 'activity_log_list' %}" class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-slate-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 {% if 'activity' in request.resolver_match.url_name %}bg-brand-600 text-white{% endif %}">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Activity Logs
+                </a>
+                {% endif %}
+
+                <div class="pt-3 border-t border-slate-800">
+                    <a href="{% url 'compliance:data_portal' %}" class="flex items-center px-3 py-2 rounded-lg text-xs font-semibold text-slate-300 hover:bg-slate-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 {% if 'compliance' in request.resolver_match.url_name %}bg-slate-800 text-white{% endif %}">
+                        <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                        Privacy & Data Rights
+                    </a>
+                </div>
+            </nav>
+
+            <!-- Bottom User Links -->
+            <div class="p-4 border-t border-slate-800 space-y-1">
+                <a href="{% url 'profile' %}" class="flex items-center px-3 py-2 rounded-lg text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    Profile & Settings
+                </a>
+                <a href="{% url 'logout' %}" class="flex items-center px-3 py-2 rounded-lg text-xs text-rose-300 hover:bg-rose-950/40 hover:text-rose-200 transition-colors focus:outline-none focus:ring-2 focus:ring-rose-400">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    Sign Out
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            <!-- Header -->
+            <header class="no-print h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 z-10">
+                <div class="flex items-center space-x-3">
+                    <button id="openSidebarBtn" class="md:hidden text-slate-700 hover:text-slate-900 p-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" aria-label="Open navigation sidebar">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    </button>
+                    <h1 class="text-xl font-bold text-slate-900 truncate">{% block header_title %}Dashboard{% endblock %}</h1>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <!-- Notifications -->
+                    <div class="relative">
+                        <a href="{% url 'notification_list' %}" class="relative p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-full transition-colors flex items-center focus:outline-none focus:ring-2 focus:ring-indigo-500" aria-label="Notifications {% if unread_count > 0 %}({{ unread_count }} unread){% endif %}">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                            {% if unread_count > 0 %}
+                            <span class="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-600 text-[10px] font-bold text-white ring-2 ring-white">
+                                {{ unread_count }}
+                            </span>
+                            {% endif %}
+                        </a>
+                    </div>
+
+                    <!-- User Quick Menu -->
+                    <a href="{% url 'profile' %}" class="flex items-center space-x-2 text-sm text-slate-800 hover:text-indigo-600 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-lg p-1">
+                        <div class="w-8 h-8 rounded-full bg-brand-100 text-brand-800 flex items-center justify-center font-bold text-sm border border-brand-200" aria-hidden="true">
+                            {{ request.user.username|slice:":1"|upper }}
+                        </div>
+                        <span class="hidden sm:inline font-semibold text-slate-800">{{ request.user.get_full_name|default:request.user.username }}</span>
+                    </a>
+                </div>
+            </header>
+
+            <!-- Alerts / Messages -->
+            <div class="no-print" role="status" aria-live="polite">
+                {% if messages %}
+                <div class="px-6 pt-4 space-y-2">
+                    {% for message in messages %}
+                    <div class="flex items-center justify-between p-4 rounded-xl border shadow-sm {% if message.tags == 'error' %}bg-rose-50 border-rose-300 text-rose-900{% elif message.tags == 'success' %}bg-emerald-50 border-emerald-300 text-emerald-900{% elif message.tags == 'warning' %}bg-amber-50 border-amber-300 text-amber-900{% else %}bg-indigo-50 border-indigo-300 text-indigo-900{% endif %}">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-lg" aria-hidden="true">
+                                {% if message.tags == 'error' %}⚠️{% elif message.tags == 'success' %}✅{% elif message.tags == 'warning' %}🔔{% else %}ℹ️{% endif %}
+                            </span>
+                            <p class="text-sm font-semibold">{{ message }}</p>
+                        </div>
+                        <button onclick="this.parentElement.remove()" class="text-slate-500 hover:text-slate-800 p-1 rounded focus:outline-none focus:ring-2 focus:ring-slate-500" aria-label="Dismiss message">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Page Body -->
+            <main id="main-content" tabindex="-1" class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-slate-50 focus:outline-none">
+                {% block content %}{% endblock %}
+
+                <!-- Institutional Business Details & Compliance Footer -->
+                <footer class="no-print mt-16 pt-8 border-t border-slate-200 text-xs text-slate-600 space-y-4" role="contentinfo">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Entity Details -->
+                        <div class="space-y-1">
+                            <div class="flex items-center space-x-2">
+                                <span class="font-black text-slate-900 text-sm">IIMT UNIVERSITY</span>
+                            </div>
+                            <p class="text-[11px] text-slate-600">Transforming Education, Empowering Minds</p>
+                            <p class="text-[11px] text-slate-500">'O' Pocket, Ganga Nagar, Meerut, Uttar Pradesh 250001, India</p>
+                            <p class="text-[11px] text-slate-500">UGC Recognized &bull; NAAC Accredited &bull; info@iimtindia.net</p>
+                        </div>
+
+                        <!-- Legal & Compliance Links -->
+                        <div class="space-y-1">
+                            <span class="font-bold text-slate-900 block text-xs">Legal & Regulatory Policies</span>
+                            <ul class="space-y-1 text-[11px] text-slate-600">
+                                <li><a href="{% url 'compliance:privacy_policy' %}" class="hover:text-indigo-600 underline">Privacy Policy (GDPR / FERPA / CCPA)</a></li>
+                                <li><a href="{% url 'compliance:terms_of_service' %}" class="hover:text-indigo-600 underline">Terms of Service & Honor Code</a></li>
+                                <li><a href="{% url 'compliance:cookie_policy' %}" class="hover:text-indigo-600 underline">Cookie Policy & Usage Transparency</a></li>
+                                <li><a href="{% url 'compliance:refund_policy' %}" class="hover:text-indigo-600 underline">Refund Policy & Zero Hidden Fees</a></li>
+                            </ul>
+                        </div>
+
+                        <!-- Data Rights & Accessibility -->
+                        <div class="space-y-1">
+                            <span class="font-bold text-slate-900 block text-xs">Data Rights & Accommodations</span>
+                            <ul class="space-y-1 text-[11px] text-slate-600">
+                                <li><a href="{% url 'compliance:data_portal' %}" class="hover:text-indigo-600 underline">Exercise Data Portability & Deletion</a></li>
+                                <li><a href="{% url 'compliance:email_preferences' %}" class="hover:text-indigo-600 underline">Email & Communication Preferences</a></li>
+                                <li><a href="{% url 'compliance:parental_consent' %}" class="hover:text-indigo-600 underline">COPPA Parental Consent Portal</a></li>
+                                <li><a href="{% url 'compliance:accessibility_statement' %}" class="hover:text-indigo-600 underline">Accessibility Statement (WCAG 2.1 AA)</a></li>
+                                <li><button type="button" onclick="window.openCookiePreferencesModal && window.openCookiePreferencesModal()" class="text-indigo-600 hover:text-indigo-800 underline font-semibold focus:outline-none">⚙️ Cookie Settings</button></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 gap-2">
+                        <p>&copy; 2026 IIMT UNIVERSITY. All rights reserved. Academic Management System.</p>
+                        <p>DPO Contact: <a href="mailto:privacy@iimtindia.net" class="text-indigo-600 underline">privacy@iimtindia.net</a></p>
+                    </div>
+                </footer>
+            </main>
+        </div>
+    </div>
+
+    <!-- Include Accessible Cookie Consent Banner Component -->
+    {% include 'compliance/cookie_banner.html' %}
+
+    <!-- Mobile Drawer & Keyboard Script -->
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const openBtn = document.getElementById('openSidebarBtn');
+        const closeBtn = document.getElementById('closeSidebarBtn');
+
+        if (openBtn) {
+            openBtn.addEventListener('click', () => {
+                sidebar.classList.remove('-translate-x-full');
+            });
+        }
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                sidebar.classList.add('-translate-x-full');
+            });
+        }
+
+        // Keyboard navigation: Escape key closes drawers and modals
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (sidebar && !sidebar.classList.contains('-translate-x-full') && window.innerWidth < 768) {
+                    sidebar.classList.add('-translate-x-full');
+                }
+                const modal = document.getElementById('cookiePreferencesModal');
+                if (modal && !modal.classList.contains('hidden')) {
+                    modal.classList.add('hidden');
+                }
+            }
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}User Profile — {{ target_user.get_full_name }}{% endblock %}
+{% block header_title %}User Account Detail{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- User Overview Card -->
+    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center space-x-4">
+            <div class="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-700 flex items-center justify-center font-black text-2xl border border-indigo-100">
+                {{ target_user.first_name|default:target_user.username|slice:":1"|upper }}
+            </div>
+            <div>
+                <h2 class="text-xl font-bold text-slate-900">{{ target_user.get_full_name|default:target_user.username }}</h2>
+                <p class="text-xs text-slate-500 font-mono">{{ target_user.email|default:"No email" }} &bull; @{{ target_user.username }}</p>
+                <div class="mt-2 flex items-center space-x-2">
+                    <span class="px-2 py-0.5 rounded text-xs font-bold bg-indigo-100 text-indigo-800">{{ target_user.get_role_display }}</span>
+                    {% if target_user.is_active %}
+                    <span class="text-xs text-emerald-600 font-semibold">&bull; Active</span>
+                    {% else %}
+                    <span class="text-xs text-rose-600 font-semibold">&bull; Deactivated</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div>
+            <a href="{% url 'user_list' %}" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all">Back to List</a>
+        </div>
+    </div>
+
+    <!-- Student Details -->
+    {% if target_user.is_student_role and target_user.student_profile %}
+    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+        <h3 class="text-base font-bold text-slate-900 border-b border-slate-100 pb-2">Enrolled Courses & Academic Load</h3>
+        <div class="divide-y divide-slate-100">
+            {% for enr in enrollments %}
+            <div class="py-2.5 flex items-center justify-between text-xs">
+                <div>
+                    <span class="font-bold text-indigo-700">{{ enr.course.code }}</span>
+                    <span class="font-semibold text-slate-800 ml-2">{{ enr.course.name }}</span>
+                </div>
+                <span class="text-slate-500">Enrolled {{ enr.enrolled_at|date:"M d, Y" }}</span>
+            </div>
+            {% empty %}
+            <p class="text-xs text-slate-400 py-2">No courses currently enrolled.</p>
+            {% endfor %}
+        </div>
+        <div class="pt-2">
+            <a href="{% url 'student_report_card' student_id=target_user.student_profile.id %}" class="inline-flex items-center text-xs font-bold text-indigo-600 hover:underline">
+                View Academic Report Card &rarr;
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Teacher Details -->
+    {% if target_user.is_teacher_role and target_user.teacher_profile %}
+    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+        <h3 class="text-base font-bold text-slate-900 border-b border-slate-100 pb-2">Faculty Assignments Created</h3>
+        <div class="divide-y divide-slate-100 text-xs">
+            {% for a in assignments_created %}
+            <div class="py-2.5 flex items-center justify-between">
+                <div>
+                    <span class="font-bold text-indigo-700">{{ a.course.code }}</span>
+                    <span class="font-semibold text-slate-800 ml-2">{{ a.title }}</span>
+                </div>
+                <span class="text-slate-500">{{ a.submissions.count }} Submissions</span>
+            </div>
+            {% empty %}
+            <p class="text-xs text-slate-400 py-2">No assignments authored yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

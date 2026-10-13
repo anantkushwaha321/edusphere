@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Announcements — IIMT UNIVERSITY{% endblock %}
+{% block header_title %}Campus Announcements & Notices{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-4xl mx-auto">
+    <!-- Filter and Broadcast Button -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm gap-4">
+        <form method="GET" class="flex items-center space-x-3">
+            <select name="priority" onchange="this.form.submit()" class="py-2 px-3 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                <option value="">All Priorities</option>
+                <option value="URGENT" {% if selected_priority == 'URGENT' %}selected{% endif %}>Urgent Only</option>
+                <option value="IMPORTANT" {% if selected_priority == 'IMPORTANT' %}selected{% endif %}>Important Only</option>
+                <option value="NORMAL" {% if selected_priority == 'NORMAL' %}selected{% endif %}>Normal Notices</option>
+            </select>
+            {% if selected_priority %}
+            <a href="{% url 'announcement_list' %}" class="text-xs text-rose-600 hover:underline font-semibold">Clear</a>
+            {% endif %}
+        </form>
+
+        {% if request.user.is_teacher_role or request.user.is_admin_role %}
+        <div>
+            <a href="{% url 'announcement_create' %}" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all inline-flex items-center space-x-1.5">
+                <span>+ Post Announcement</span>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Announcements Feed -->
+    <div class="space-y-4">
+        {% for a in announcements %}
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 sm:p-7 space-y-3 hover:border-slate-300 transition-all">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-black
+                        {% if a.priority == 'URGENT' %}bg-rose-100 text-rose-800 border border-rose-200
+                        {% elif a.priority == 'IMPORTANT' %}bg-amber-100 text-amber-800 border border-amber-200
+                        {% else %}bg-slate-100 text-slate-700{% endif %}">
+                        {{ a.get_priority_display }}
+                    </span>
+                    <span class="text-xs text-slate-400 font-medium">&bull; For: {{ a.get_target_audience_display }}</span>
+                </div>
+                <span class="text-xs text-slate-400 font-mono">{{ a.created_at|date:"M d, Y" }}</span>
+            </div>
+
+            <h3 class="text-lg font-bold text-slate-900">{{ a.title }}</h3>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">{{ a.content|linebreaks }}</p>
+
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+                <span>Posted by <strong class="text-slate-700">{{ a.author.get_full_name|default:a.author.username }}</strong></span>
+                {% if a.attachment %}
+                <a href="{{ a.attachment.url }}" download class="text-indigo-600 font-bold hover:underline inline-flex items-center space-x-1">
+                    <span>📎 Download Attachment</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-500">
+            No active announcements.
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

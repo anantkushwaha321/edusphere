@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}My Attendance — IIMT UNIVERSITY{% endblock %}
+{% block header_title %}Attendance Record & Compliance{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-5xl mx-auto">
+    <!-- Header Compliance Card -->
+    <div class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+        <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Overall Attendance Ratio</span>
+            <div class="flex items-center space-x-4 mt-1">
+                <span class="text-4xl font-black {% if is_overall_low %}text-rose-600{% else %}text-emerald-600{% endif %}">
+                    {{ overall_percentage }}%
+                </span>
+                <span class="px-3 py-1 rounded-xl text-xs font-bold {% if is_overall_low %}bg-rose-100 text-rose-800 border border-rose-200{% else %}bg-emerald-100 text-emerald-800 border border-emerald-200{% endif %}">
+                    {% if is_overall_low %}⚠️ Short Attendance Alert (<75%){% else %}✅ Satisfactory Compliance{% endif %}
+                </span>
+            </div>
+            <p class="text-xs text-slate-500 mt-2">Institutions enforce a mandatory minimum attendance threshold of 75% for exam eligibility.</p>
+        </div>
+    </div>
+
+    <!-- Course-by-Course Attendance Breakdown -->
+    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+        <h3 class="text-base font-bold text-slate-900 border-b border-slate-100 pb-2">Course-by-Course Attendance</h3>
+        <div class="space-y-4">
+            {% for c in course_stats %}
+            <div class="p-4 rounded-xl border border-slate-100 bg-slate-50 space-y-2">
+                <div class="flex items-center justify-between text-xs">
+                    <div>
+                        <span class="font-bold text-indigo-700">{{ c.course.code }}</span>
+                        <span class="font-semibold text-slate-800 ml-1">{{ c.course.name }}</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="font-bold {% if c.is_low %}text-rose-600{% else %}text-emerald-600{% endif %}">{{ c.percentage }}%</span>
+                        <span class="text-[10px] text-slate-400 block">({{ c.present_sessions }}/{{ c.total_sessions }} sessions attended)</span>
+                    </div>
+                </div>
+                <!-- Progress bar -->
+                <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                    <div class="h-2 rounded-full {% if c.is_low %}bg-rose-500{% else %}bg-emerald-500{% endif %}" style="width: {{ c.percentage }}%"></div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-xs text-slate-400">No attendance records logged yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Recent Session Logs -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div class="p-5 border-b border-slate-100">
+            <h3 class="text-sm font-bold text-slate-900">Recent Attendance Logs</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase">
+                        <th class="py-3 px-4">Date</th>
+                        <th class="py-3 px-4">Course</th>
+                        <th class="py-3 px-4">Topic Covered</th>
+                        <th class="py-3 px-4 text-center">Status</th>
+                        <th class="py-3 px-4">Remarks</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for rec in recent_records %}
+                    <tr class="hover:bg-slate-50/70">
+                        <td class="py-3 px-4 font-bold text-slate-800">{{ rec.session.date|date:"M d, Y" }}</td>
+                        <td class="py-3 px-4 font-semibold text-indigo-700">{{ rec.session.course.code }}</td>
+                        <td class="py-3 px-4 text-slate-600">{{ rec.session.topic_covered|default:"—" }}</td>
+                        <td class="py-3 px-4 text-center">
+                            <span class="inline-block px-2.5 py-0.5 rounded text-[10px] font-black
+                                {% if rec.status == 'PRESENT' %}bg-emerald-100 text-emerald-800
+                                {% elif rec.status == 'LATE' %}bg-amber-100 text-amber-800
+                                {% else %}bg-rose-100 text-rose-800{% endif %}">
+                                {{ rec.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-slate-400 italic">{{ rec.remarks|default:"None" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="py-6 text-center text-slate-400">No attendance session logs recorded.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

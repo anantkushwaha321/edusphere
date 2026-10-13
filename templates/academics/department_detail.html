@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ department.name }} — IIMT UNIVERSITY{% endblock %}
+{% block header_title %}Department: {{ department.name }} ({{ department.code }}){% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <div class="flex items-center space-x-2">
+                <span class="text-xs font-bold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 font-mono">{{ department.code }}</span>
+                <span class="text-xs text-slate-500">Established {{ department.created_at|date:"Y" }}</span>
+            </div>
+            <h2 class="text-xl font-bold text-slate-900 mt-1">{{ department.name }}</h2>
+            <p class="text-xs text-slate-500 mt-1">{{ department.description|default:"No description provided." }}</p>
+        </div>
+        <div class="flex items-center space-x-3">
+            <span class="text-xs text-slate-600 bg-slate-100 px-3 py-1.5 rounded-xl font-medium">
+                HOD: <span class="font-bold text-slate-800">{{ department.head_of_department.user.get_full_name|default:"Unassigned" }}</span>
+            </span>
+            <a href="{% url 'department_list' %}" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold">Back</a>
+        </div>
+    </div>
+
+    <!-- Courses in this department -->
+    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+        <h3 class="text-base font-bold text-slate-900 border-b border-slate-100 pb-2">Active Department Courses</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for c in courses %}
+            <div class="p-4 rounded-xl border border-slate-100 bg-slate-50 flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-bold text-indigo-600">{{ c.code }}</span>
+                    <h5 class="text-sm font-bold text-slate-800">{{ c.name }}</h5>
+                    <p class="text-xs text-slate-500 mt-0.5">Faculty: {{ c.teacher.user.get_full_name|default:"TBA" }}</p>
+                </div>
+                <a href="{% url 'course_detail' pk=c.id %}" class="text-xs font-bold text-indigo-600 hover:underline">View &rarr;</a>
+            </div>
+            {% empty %}
+            <p class="text-xs text-slate-400 py-2">No courses registered in this department.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

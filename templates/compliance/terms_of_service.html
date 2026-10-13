@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Terms of Service — IIMT UNIVERSITY{% endblock %}
+{% block header_title %}Institutional Terms of Service{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto bg-white p-8 sm:p-12 rounded-3xl border border-slate-200/80 shadow-sm space-y-8 text-slate-700">
+    <div class="border-b border-slate-200 pb-6">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold mb-3">
+            <span>📜 Academic Agreement & Usage Guidelines</span>
+        </div>
+        <h1 class="text-3xl font-black text-slate-900 tracking-tight">Terms of Service</h1>
+        <p class="text-xs text-slate-500 mt-2 font-mono">Effective: {{ last_updated }} &bull; Governing Entity: {{ institution_name }}</p>
+    </div>
+
+    <section class="space-y-3">
+        <h2 class="text-lg font-bold text-slate-900">1. Acceptance of Terms</h2>
+        <p class="text-sm leading-relaxed">
+            By logging into or accessing the <strong>IIMT UNIVERSITY Smart Academic Management System</strong>, you agree to be bound by these Terms of Service and all incorporated policies (including our Privacy Policy, Cookie Policy, and Refund Policy). These terms apply to all enrolled students, appointed faculty, administrators, and authorized guardians.
+        </p>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-lg font-bold text-slate-900">2. Academic Integrity & Acceptable Use</h2>
+        <p class="text-sm leading-relaxed">
+            IIMT UNIVERSITY is dedicated to upholding the highest standards of academic honesty. Users agree to adhere strictly to the following standards:
+        </p>
+        <ul class="list-disc pl-5 text-sm space-y-1.5 text-slate-600">
+            <li><strong>Authenticity of Submissions:</strong> Students must only submit their original work. Any unauthorized collaboration, plagiarism, or impersonation constitutes an honor code violation subject to institutional disciplinary review.</li>
+            <li><strong>Credential Confidentiality:</strong> Users are solely responsible for maintaining the confidentiality of their login credentials. Sharing access credentials with unauthorized third parties is strictly prohibited.</li>
+            <li><strong>System Security:</strong> Users may not probe, scan, or test the vulnerability of the IIMT UNIVERSITY system, tamper with attendance registers, or reverse engineer any backend service.</li>
+        </ul>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-lg font-bold text-slate-900">3. Absence of Dark Patterns & Fair Consumer Practices</h2>
+        <p class="text-sm leading-relaxed">
+            IIMT UNIVERSITY commits to clear, honest, and ethical software practices:
+        </p>
+        <ul class="list-disc pl-5 text-sm space-y-1.5 text-slate-600">
+            <li><strong>No Hidden Costs or Surcharges:</strong> All academic course fees, tuition, or examination expenses are disclosed transparently upfront without unexpected fees at checkout.</li>
+            <li><strong>No Deceptive Opt-Ins:</strong> Optional communications and notifications require genuine, explicit affirmative action; we never employ pre-checked consent boxes or misleading buttons.</li>
+            <li><strong>Unsubscribing & Rights:</strong> Users may opt out of non-essential communications with a single click at any time without punitive measures.</li>
+        </ul>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-lg font-bold text-slate-900">4. Intellectual Property Rights</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-1">
+            <div class="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100 space-y-1.5">
+                <h4 class="font-bold text-indigo-900">Student Ownership</h4>
+                <p class="text-slate-600 leading-relaxed">
+                    Students retain full copyright in their original assignment submissions, projects, and research papers. Students grant faculty a non-exclusive license solely for educational evaluation and grading.
+                </p>
+            </div>
+            <div class="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100 space-y-1.5">
+                <h4 class="font-bold text-indigo-900">Course Curricula & Materials</h4>
+                <p class="text-slate-600 leading-relaxed">
+                    Syllabi, lecture slide decks, handouts, and problem sets provided by faculty members remain the intellectual property of the institution and its faculty. Redistribution or commercial publication without authorization is prohibited.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-lg font-bold text-slate-900">5. Termination & Suspension</h2>
+        <p class="text-sm leading-relaxed">
+            Accounts may be deactivated upon completion of academic graduation, withdrawal from institution, or in response to substantiated breach of academic honor codes. Users wishing to initiate voluntary account deletion may submit a request via our <a href="{% url 'compliance:data_portal' %}" class="text-indigo-600 underline font-bold">Data Privacy Portal</a>.
+        </p>
+    </section>
+
+    <section class="space-y-3 border-t border-slate-200 pt-6">
+        <h2 class="text-lg font-bold text-slate-900">6. Governing Law & Dispute Resolution</h2>
+        <p class="text-sm leading-relaxed">
+            These terms are governed by the laws of the Commonwealth of Massachusetts and applicable federal educational regulations. For formal legal notices, contact our legal counsel at <a href="mailto:legal@IIMT UNIVERSITY.edu" class="text-indigo-600 underline font-bold">legal@IIMT UNIVERSITY.edu</a>.
+        </p>
+    </section>
+</div>
+{% endblock %}

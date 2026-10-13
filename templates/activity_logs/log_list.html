@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}System Audit Logs — IIMT UNIVERSITY{% endblock %}
+{% block header_title %}System Activity & Security Audit Trail ({{ total_count }}){% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Filters Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm gap-4">
+        <form method="GET" class="flex flex-wrap items-center gap-3 flex-1">
+            <div class="relative flex-1 min-w-[200px] max-w-sm">
+                <input type="text" name="q" value="{{ search_query }}" placeholder="Search action, details, user..." 
+                       class="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+            <select name="category" onchange="this.form.submit()" class="py-2 px-3 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                <option value="">All Categories</option>
+                {% for code, label in categories %}
+                <option value="{{ code }}" {% if category_filter == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            {% if search_query or category_filter %}
+            <a href="{% url 'activity_log_list' %}" class="text-xs text-rose-600 hover:underline font-semibold">Clear Filters</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Audit Logs Table -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
+                        <th class="py-3 px-4">Timestamp</th>
+                        <th class="py-3 px-4">User</th>
+                        <th class="py-3 px-4">Category</th>
+                        <th class="py-3 px-4">Action Summary</th>
+                        <th class="py-3 px-4">IP Address</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for log in page_obj %}
+                    <tr class="hover:bg-slate-50/70">
+                        <td class="py-3.5 px-4 font-mono text-slate-500">
+                            {{ log.timestamp|date:"Y-m-d H:i:s" }}
+                        </td>
+                        <td class="py-3.5 px-4">
+                            {% if log.user %}
+                            <span class="font-bold text-slate-900">{{ log.user.get_full_name|default:log.user.username }}</span>
+                            <span class="block text-[10px] text-slate-400 font-mono">@{{ log.user.username }}</span>
+                            {% else %}
+                            <span class="text-slate-400 italic">Anonymous/System</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3.5 px-4">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold
+                                {% if log.category == 'AUTH' %}bg-purple-100 text-purple-800
+                                {% elif log.category == 'GRADING' %}bg-emerald-100 text-emerald-800
+                                {% elif log.category == 'SUBMISSION' %}bg-blue-100 text-blue-800
+                                {% elif log.category == 'ATTENDANCE' %}bg-amber-100 text-amber-800
+                                {% else %}bg-slate-100 text-slate-700{% endif %}">
+                                {{ log.get_category_display }}
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-4 font-medium text-slate-800">
+                            {{ log.action }}
+                            {% if log.details %}
+                            <span class="block text-[11px] text-slate-500 font-normal mt-0.5">{{ log.details }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3.5 px-4 font-mono text-slate-400">
+                            {{ log.ip_address|default:"127.0.0.1" }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="py-8 text-center text-slate-400">No activity log entries found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if page_obj.has_other_pages %}
+        <div class="p-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <div>
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </div>
+            <div class="flex items-center space-x-2">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}&category={{ category_filter }}&q={{ search_query }}" class="px-3 py-1 bg-slate-100 rounded-lg hover:bg-slate-200 font-bold">Previous</a>
+                {% endif %}
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&category={{ category_filter }}&q={{ search_query }}" class="px-3 py-1 bg-slate-100 rounded-lg hover:bg-slate-200 font-bold">Next</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

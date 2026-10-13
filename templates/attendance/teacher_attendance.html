@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}Attendance Management — IIMT UNIVERSITY{% endblock %}
+{% block header_title %}Faculty Attendance Workspace{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Quick Launcher Header -->
+    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h2 class="text-base font-bold text-slate-900">Mark Course Roll-Call</h2>
+            <p class="text-xs text-slate-500">Record daily or lecture-wise student presence for your assigned courses.</p>
+        </div>
+        <div>
+            <a href="{% url 'take_attendance' %}" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all inline-flex items-center space-x-2">
+                <span>📋 Mark Today's Attendance</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Assigned Courses Attendance Shortcut Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for c in courses %}
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 flex flex-col justify-between hover:border-emerald-300 transition-all">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700">{{ c.code }}</span>
+                    <span class="text-xs text-slate-400">{{ c.active_enrollments_count }} Students</span>
+                </div>
+                <h3 class="text-base font-bold text-slate-900">{{ c.name }}</h3>
+                <p class="text-xs text-slate-500 mt-1">Sessions Conducted: <strong class="text-slate-800">{{ c.attendance_sessions.count }}</strong></p>
+            </div>
+            <div class="mt-6 pt-3 border-t border-slate-100 flex items-center justify-between">
+                <a href="{% url 'take_attendance' %}?course={{ c.id }}" class="text-xs font-bold text-emerald-600 hover:underline">
+                    Mark Attendance &rarr;
+                </a>
+                <a href="{% url 'export_attendance_csv' course_id=c.id %}" class="text-xs text-slate-500 hover:text-slate-800 font-semibold">
+                    Export Register CSV
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-3 bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-500">
+            No courses assigned.
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Recent Sessions Conducted -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+            <h3 class="text-sm font-bold text-slate-900">Recent Roll-Calls Conducted</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase">
+                        <th class="py-3 px-4">Date</th>
+                        <th class="py-3 px-4">Course</th>
+                        <th class="py-3 px-4">Topic Covered</th>
+                        <th class="py-3 px-4 text-center">Present %</th>
+                        <th class="py-3 px-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for s in recent_sessions %}
+                    <tr class="hover:bg-slate-50/70">
+                        <td class="py-3 px-4 font-bold text-slate-800">{{ s.date|date:"M d, Y" }}</td>
+                        <td class="py-3 px-4 font-semibold text-indigo-700">{{ s.course.code }}</td>
+                        <td class="py-3 px-4 text-slate-600">{{ s.topic_covered|default:"—" }}</td>
+                        <td class="py-3 px-4 text-center">
+                            <span class="inline-block px-2.5 py-0.5 rounded text-[10px] font-black bg-emerald-100 text-emerald-800">
+                                {{ s.present_percentage }}% Present
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-right">
+                            <a href="{% url 'attendance_session_detail' pk=s.id %}" class="font-bold text-indigo-600 hover:underline">
+                                View Register &rarr;
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="py-6 text-center text-slate-400">No sessions recorded.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

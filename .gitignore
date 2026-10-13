@@ -1,0 +1,46 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local Environment Variables & Secrets
+.env
+.env.local
+.env.*.local
+
+# Database
+*.sqlite3
+*.db
+
+# Media uploads (User submitted files)
+media/*
+!media/.gitkeep
+
+# Collected static files (Post-processed by WhiteNoise during build)
+staticfiles/
+
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv/
+
+# Logs
+*.log
+logs/
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Operating System files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Testing & Coverage
+.coverage
+htmlcov/
+.pytest_cache/

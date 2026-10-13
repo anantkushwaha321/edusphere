@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ assignment.title }} — IIMT UNIVERSITY{% endblock %}
+{% block header_title %}Assignment: {{ assignment.title }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-5xl mx-auto">
+    <!-- Assignment Overview Card -->
+    <div class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-4">
+            <div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-indigo-50 text-indigo-700 font-mono">{{ assignment.course.code }}</span>
+                    <span class="text-xs text-slate-500">{{ assignment.course.name }}</span>
+                </div>
+                <h2 class="text-xl sm:text-2xl font-black text-slate-900 mt-1">{{ assignment.title }}</h2>
+                <p class="text-xs text-slate-400 mt-0.5">Assigned by {{ assignment.teacher.user.get_full_name }} &bull; Posted {{ assignment.created_at|date:"M d, Y" }}</p>
+            </div>
+            <div class="flex flex-col sm:items-end text-xs space-y-1">
+                <span class="font-bold text-slate-700">Due Date: <span class="text-indigo-600 font-mono">{{ assignment.due_date|date:"M d, Y H:i" }}</span></span>
+                <span class="font-bold text-slate-700">Max Score: <span class="text-slate-900">{{ assignment.max_marks }} marks</span></span>
+                {% if assignment.is_past_due %}
+                <span class="text-rose-600 font-bold">⚠️ Submission window closed or late penalty applies</span>
+                {% else %}
+                <span class="text-emerald-600 font-bold">✅ Open for Submissions</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="prose prose-sm max-w-none text-slate-700 leading-relaxed text-sm">
+            {{ assignment.description|linebreaks }}
+        </div>
+
+        {% if assignment.attachment %}
+        <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-xs text-slate-500 font-medium">Assignment Brief File:</span>
+            <a href="{{ assignment.attachment.url }}" download class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-bold transition-all">
+                📎 Download Task Brief
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- STUDENT PERSPECTIVE: Submission & Feedback -->
+    {% if request.user.is_student_role %}
+    <div class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200/80 shadow-sm space-y-6">
+        <h3 class="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">My Submission Status</h3>
+
+        {% if submission and submission.status == 'GRADED' %}
+        <!-- Graded Result Box -->
+        <div class="p-6 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-emerald-800">Evaluated & Graded</span>
+                <span class="text-xs text-slate-500">Graded on {{ submission.graded_at|date:"M d, Y" }}</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="text-3xl font-black text-emerald-700">
+                    {{ submission.marks_obtained }} <span class="text-sm font-semibold text-emerald-600">/ {{ assignment.max_marks }}</span>
+                </div>
+                <div class="px-3 py-1 rounded-xl bg-emerald-200/80 text-emerald-900 font-black text-sm">
+                    Grade: {{ submission.letter_grade }} ({{ submission.percentage }}%)
+                </div>
+            </div>
+            {% if submission.feedback %}
+            <div class="pt-2 border-t border-emerald-200/60 text-xs text-emerald-900">
+                <span class="font-bold block mb-1">Teacher Feedback:</span>
+                <p class="italic bg-white/70 p-3 rounded-xl">{{ submission.feedback }}</p>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Student Submission Form -->
+        <form method="POST" action="{% url 'submission_submit' assignment_pk=assignment.id %}" enctype="multipart/form-data" class="space-y-4">
+            {% csrf_token %}
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Attached Solution File (Code / PDF / Archive)</label>
+                {{ submission_form.file }}
+                {% if submission.file %}
+                <p class="text-xs text-slate-500 mt-1">Currently uploaded: <a href="{{ submission.file.url }}" class="text-indigo-600 hover:underline font-bold">{{ submission.file.name }}</a></p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Submission Notes & Answers</label>
+                {{ submission_form.submission_text }}
+            </div>
+
+            <div class="pt-2 flex items-center justify-between">
+                <span class="text-xs text-slate-400">
+                    {% if submission %}Last submitted: {{ submission.submitted_at|date:"M d, Y H:i" }}{% endif %}
+                </span>
+                <button type="submit" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs shadow-md transition-all">
+                    {% if submission %}Update Submission{% else %}Submit Assignment{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- TEACHER & ADMIN PERSPECTIVE: Student Submissions Review Table -->
+    {% if request.user.is_teacher_role or request.user.is_admin_role %}
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+            <h3 class="text-base font-bold text-slate-900">Student Submissions ({{ all_submissions.count }})</h3>
+            <span class="text-xs text-slate-500">{{ assignment.graded_count }} of {{ all_submissions.count }} graded</span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
+                        <th class="py-3 px-4">Student</th>
+                        <th class="py-3 px-4">Status</th>
+                        <th class="py-3 px-4">Submitted At</th>
+                        <th class="py-3 px-4">Work / File</th>
+                        <th class="py-3 px-4 text-center">Score</th>
+                        <th class="py-3 px-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for sub in all_submissions %}
+                    <tr class="hover:bg-slate-50/70">
+                        <td class="py-3.5 px-4 font-semibold text-slate-900">
+                            {{ sub.student.user.get_full_name }}
+                            <span class="block text-[10px] text-slate-400 font-mono">{{ sub.student.roll_number }}</span>
+                        </td>
+                        <td class="py-3.5 px-4">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold
+                                {% if sub.status == 'GRADED' %}bg-emerald-100 text-emerald-800
+                                {% elif sub.status == 'LATE' %}bg-rose-100 text-rose-800
+                                {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                {{ sub.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-4 text-slate-500">
+                            {{ sub.submitted_at|date:"M d, H:i" }}
+                        </td>
+                        <td class="py-3.5 px-4">
+                            {% if sub.file %}
+                            <a href="{{ sub.file.url }}" target="_blank" class="text-indigo-600 hover:underline font-bold inline-flex items-center space-x-1">
+                                <span>📥 Download File</span>
+                            </a>
+                            {% elif sub.submission_text %}
+                            <span class="text-slate-600 truncate max-w-xs block">{{ sub.submission_text|truncatechars:40 }}</span>
+                            {% else %}
+                            <span class="text-slate-400 italic">No attachment</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3.5 px-4 text-center font-bold text-slate-800">
+                            {% if sub.marks_obtained is not None %}
+                            {{ sub.marks_obtained }}/{{ assignment.max_marks }}
+                            <span class="text-[10px] text-emerald-600 font-bold block">({{ sub.letter_grade }})</span>
+                            {% else %}
+                            <span class="text-slate-400 italic">Not graded</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3.5 px-4 text-right">
+                            <a href="{% url 'submission_grade' submission_pk=sub.id %}" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition-all shadow-sm">
+                                {% if sub.status == 'GRADED' %}Re-grade{% else %}Grade Now{% endif %}
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="py-8 text-center text-slate-400">No student submissions submitted yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

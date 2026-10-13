@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Departments — IIMT UNIVERSITY{% endblock %}
+{% block header_title %}Academic Departments{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+        <div>
+            <h2 class="text-base font-bold text-slate-900">Institutional Departments</h2>
+            <p class="text-xs text-slate-500">Divisions managing faculty, course curricula, and students.</p>
+        </div>
+        {% if request.user.is_admin_role %}
+        <a href="{% url 'department_create' %}" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all">
+            + New Department
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for dept in departments %}
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 flex flex-col justify-between hover:shadow-md transition-all">
+            <div>
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold px-2.5 py-1 rounded bg-indigo-50 text-indigo-700 font-mono">{{ dept.code }}</span>
+                    <span class="text-xs text-slate-400">Created {{ dept.created_at|date:"Y" }}</span>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900">{{ dept.name }}</h3>
+                <p class="text-xs text-slate-500 mt-1 line-clamp-2">{{ dept.description|default:"No description recorded." }}</p>
+
+                <div class="mt-4 pt-3 border-t border-slate-100 grid grid-cols-3 gap-2 text-center text-xs">
+                    <div class="bg-slate-50 p-2 rounded-xl">
+                        <span class="block font-bold text-slate-800">{{ dept.num_students }}</span>
+                        <span class="text-[10px] text-slate-400">Students</span>
+                    </div>
+                    <div class="bg-slate-50 p-2 rounded-xl">
+                        <span class="block font-bold text-slate-800">{{ dept.num_teachers }}</span>
+                        <span class="text-[10px] text-slate-400">Faculty</span>
+                    </div>
+                    <div class="bg-slate-50 p-2 rounded-xl">
+                        <span class="block font-bold text-slate-800">{{ dept.num_courses }}</span>
+                        <span class="text-[10px] text-slate-400">Courses</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                <span class="text-slate-500">HOD: <span class="font-bold text-slate-700">{{ dept.head_of_department.user.get_full_name|default:"Not Assigned" }}</span></span>
+                <a href="{% url 'department_detail' pk=dept.id %}" class="font-bold text-indigo-600 hover:text-indigo-800">Explore &rarr;</a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-3 bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-500">
+            No departments defined yet.
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

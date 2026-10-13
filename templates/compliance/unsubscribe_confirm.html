@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-900">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unsubscribe Confirmation — IIMT UNIVERSITY</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="h-full flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-2xl space-y-6 text-white text-center">
+        <div class="w-14 h-14 rounded-2xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center text-2xl mx-auto">
+            ✉️
+        </div>
+
+        <div>
+            <h1 class="text-xl font-bold">Unsubscribe from IIMT UNIVERSITY Notifications</h1>
+            <p class="text-xs text-slate-400 mt-2">
+                Account: <strong class="text-slate-200">{{ pref.user.email }}</strong>
+            </p>
+        </div>
+
+        <p class="text-xs text-slate-300 leading-relaxed">
+            Under RFC 8058 standards, you can opt out of non-essential email notifications with one click. Please confirm your preferences below:
+        </p>
+
+        <form method="POST" class="space-y-4 text-left text-xs bg-slate-900/50 p-4 rounded-2xl border border-slate-700/60">
+            {% csrf_token %}
+            <label class="flex items-center space-x-2.5 cursor-pointer">
+                <input type="checkbox" name="academic_announcements" {% if pref.academic_announcements %}checked{% endif %} class="rounded bg-slate-800 text-indigo-500 focus:ring-0">
+                <span class="text-slate-300">Keep urgent institutional circulars</span>
+            </label>
+            <label class="flex items-center space-x-2.5 cursor-pointer">
+                <input type="checkbox" name="assignment_alerts" {% if pref.assignment_alerts %}checked{% endif %} class="rounded bg-slate-800 text-indigo-500 focus:ring-0">
+                <span class="text-slate-300">Keep assignment deadline alerts</span>
+            </label>
+            <label class="flex items-center space-x-2.5 cursor-pointer">
+                <input type="checkbox" name="grade_notifications" {% if pref.grade_notifications %}checked{% endif %} class="rounded bg-slate-800 text-indigo-500 focus:ring-0">
+                <span class="text-slate-300">Keep grade evaluation updates</span>
+            </label>
+
+            <div class="pt-3">
+                <button type="submit" class="w-full py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs transition-colors shadow-md">
+                    Confirm & Unsubscribe
+                </button>
+            </div>
+        </form>
+
+        <p class="text-[11px] text-slate-500">
+            IIMT UNIVERSITY &bull; 100 Academic Parkway, Science City, MA 02138
+        </p>
+    </div>
+</body>
+</html>

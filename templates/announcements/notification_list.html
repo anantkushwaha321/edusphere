@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}My Notifications — IIMT UNIVERSITY{% endblock %}
+{% block header_title %}Notifications & Activity Alerts{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+    <div class="flex items-center justify-between bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+        <div>
+            <h2 class="text-base font-bold text-slate-900">Notification Center</h2>
+            <p class="text-xs text-slate-500">System updates, assignment deadlines, and grade notifications.</p>
+        </div>
+        <div>
+            <a href="{% url 'notification_mark_all_read' %}" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all">
+                Mark All as Read
+            </a>
+        </div>
+    </div>
+
+    <div class="space-y-3">
+        {% for n in notifications %}
+        <div class="p-4 rounded-2xl border transition-all flex items-start justify-between {% if not n.is_read %}bg-indigo-50/40 border-indigo-200{% else %}bg-white border-slate-200/80{% endif %}">
+            <div class="flex items-start space-x-3 flex-1 pr-3">
+                <span class="text-lg">
+                    {% if n.notification_type == 'GRADE' %}🎖️
+                    {% elif n.notification_type == 'ASSIGNMENT' %}📝
+                    {% elif n.notification_type == 'ANNOUNCEMENT' %}📢
+                    {% else %}🔔{% endif %}
+                </span>
+                <div class="space-y-1">
+                    <h4 class="text-sm font-bold text-slate-900">{{ n.title }}</h4>
+                    <p class="text-xs text-slate-600">{{ n.message }}</p>
+                    <span class="text-[10px] text-slate-400 font-mono">{{ n.created_at|timesince }} ago</span>
+                </div>
+            </div>
+
+            <div>
+                {% if n.link %}
+                <a href="{% url 'notification_mark_read' pk=n.id %}" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold shadow-sm transition-all inline-block">
+                    Open &rarr;
+                </a>
+                {% elif not n.is_read %}
+                <a href="{% url 'notification_mark_read' pk=n.id %}" class="text-xs text-slate-500 hover:text-slate-800 font-semibold">
+                    Mark Read
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-500">
+            No notifications at this time.
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Accessibility Statement — IIMT UNIVERSITY{% endblock %}
+{% block header_title %}Accessibility & Universal Design{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto bg-white p-8 sm:p-12 rounded-3xl border border-slate-200/80 shadow-sm space-y-8 text-slate-700">
+    <div class="border-b border-slate-200 pb-6">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold mb-3">
+            <span>♿ WCAG 2.1 Level AA Conformance</span>
+        </div>
+        <h1 class="text-3xl font-black text-slate-900 tracking-tight">Accessibility Statement</h1>
+        <p class="text-xs text-slate-500 mt-2 font-mono">Last Reviewed: {{ last_updated }}</p>
+    </div>
+
+    <section class="space-y-3">
+        <h2 class="text-lg font-bold text-slate-900">1. Our Commitment</h2>
+        <p class="text-sm leading-relaxed">
+            IIMT UNIVERSITY is committed to ensuring digital accessibility for students, faculty, and administrators with disabilities. We continuously refine the user experience to ensure equal access, adhering to the <strong>Web Content Accessibility Guidelines (WCAG) 2.1 Level AA</strong> standards and Section 508 of the US Rehabilitation Act.
+        </p>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-lg font-bold text-slate-900">2. Implemented Accessibility Measures</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-1">
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+                <h4 class="font-bold text-slate-900">High Color Contrast</h4>
+                <p class="text-slate-600">All text content meets or exceeds the required 4.5:1 contrast ratio against background elements (3:1 for large headings).</p>
+            </div>
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+                <h4 class="font-bold text-slate-900">Full Keyboard Navigation</h4>
+                <p class="text-slate-600">All interactive components (navigation menus, modal dialogs, form controls, buttons) are fully navigable via standard <kbd class="px-1.5 py-0.5 rounded bg-slate-200 font-mono">Tab</kbd>, <kbd class="px-1.5 py-0.5 rounded bg-slate-200 font-mono">Enter</kbd>, and <kbd class="px-1.5 py-0.5 rounded bg-slate-200 font-mono">Esc</kbd> keys.</p>
+            </div>
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+                <h4 class="font-bold text-slate-900">Screen Reader Optimization</h4>
+                <p class="text-slate-600">Semantic HTML5 landmarks (`<nav>`, `<main>`, `<aside>`, `<header>`), descriptive `alt` tags on photos, and `aria-hidden="true"` on decorative icons.</p>
+            </div>
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+                <h4 class="font-bold text-slate-900">Skip-to-Content Mechanism</h4>
+                <p class="text-slate-600">A direct bypass link allowing keyboard and screen-reader users to jump directly to the primary page content without navigating sidebar links.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-lg font-bold text-slate-900">3. Assistive Technology Compatibility</h2>
+        <p class="text-sm leading-relaxed">
+            IIMT UNIVERSITY is tested and compatible with modern assistive tools including:
+        </p>
+        <ul class="list-disc pl-5 text-sm space-y-1 text-slate-600">
+            <li>NVDA and JAWS screen readers on Windows.</li>
+            <li>Apple VoiceOver on macOS and iOS.</li>
+            <li>Native browser zoom scaling up to 200% without loss of layout integrity or text clipping.</li>
+        </ul>
+    </section>
+
+    <section class="space-y-3 border-t border-slate-200 pt-6">
+        <h2 class="text-lg font-bold text-slate-900">4. Accessibility Feedback & Accommodations</h2>
+        <p class="text-sm leading-relaxed">
+            If you encounter any accessibility barriers on IIMT UNIVERSITY or need alternative course material formats, please contact our Disability Services Coordinator at:
+        </p>
+        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-mono">
+            <p><strong>Office of Student Accessibility & Disability Support:</strong> <a href="mailto:accessibility@IIMT UNIVERSITY.edu" class="text-indigo-600 font-bold underline">accessibility@IIMT UNIVERSITY.edu</a></p>
+            <p><strong>Phone:</strong> +1 (555) 019-2845 (TTY Relay Supported)</p>
+        </div>
+    </section>
+</div>
+{% endblock %}

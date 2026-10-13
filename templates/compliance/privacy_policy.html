@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}Privacy Policy — IIMT UNIVERSITY{% endblock %}
+{% block header_title %}Privacy Policy & Data Protection{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto bg-white p-8 sm:p-12 rounded-3xl border border-slate-200/80 shadow-sm space-y-8 text-slate-700">
+    <!-- Header -->
+    <div class="border-b border-slate-200 pb-6">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold mb-3">
+            <span>🛡️ Regulatory Compliance: GDPR &bull; FERPA &bull; COPPA &bull; CCPA</span>
+        </div>
+        <h1 class="text-3xl font-black text-slate-900 tracking-tight">IIMT UNIVERSITY Institutional Privacy Policy</h1>
+        <p class="text-xs text-slate-500 mt-2 font-mono">Last Reviewed & Effective: {{ last_updated }} &bull; Version 2.4</p>
+    </div>
+
+    <!-- Overview & Controller Identity -->
+    <section class="space-y-3">
+        <h2 class="text-lg font-bold text-slate-900">1. Data Controller Identification</h2>
+        <p class="text-sm leading-relaxed">
+            This Privacy Policy governs the processing of personal data by <strong>IIMT UNIVERSITY</strong> ("IIMT UNIVERSITY", "we", "us", or "our"), an accredited educational software provider and academic institution entity.
+        </p>
+        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1 font-mono">
+            <p><strong>Official Entity:</strong> IIMT UNIVERSITY</p>
+            <p><strong>Registered Office:</strong> 100 Academic Parkway, Science City, MA 02138, United States</p>
+            <p><strong>Data Protection Officer (DPO):</strong> <a href="mailto:{{ dpo_email }}" class="text-indigo-600 underline font-bold">{{ dpo_email }}</a></p>
+            <p><strong>Telephone:</strong> +1 (555) 019-2800</p>
+        </div>
+    </section>
+
+    <!-- Data Minimization Principle -->
+    <section class="space-y-3">
+        <h2 class="text-lg font-bold text-slate-900">2. Principle of Data Minimization</h2>
+        <p class="text-sm leading-relaxed">
+            Under Article 5(1)(c) of the General Data Protection Regulation (GDPR) and FERPA guidelines, IIMT UNIVERSITY operates under strict <strong>data minimization</strong> standards. We only collect and process personal data that is adequate, relevant, and strictly limited to what is necessary in relation to academic instruction, assignment evaluation, attendance certification, and institutional management.
+        </p>
+        <ul class="list-disc pl-5 text-sm space-y-1.5 text-slate-600">
+            <li>We do <strong>not</strong> collect sensitive biometric data, financial payment numbers, or social media identifiers.</li>
+            <li>We do <strong>not</strong> sell, rent, monetize, or broker personal student or faculty data to any third party.</li>
+            <li>We do <strong>not</strong> employ automated behavioral tracking or cross-context behavioral ad surveillance.</li>
+        </ul>
+    </section>
+
+    <!-- Data Collected -->
+    <section class="space-y-3">
+        <h2 class="text-lg font-bold text-slate-900">3. Categories of Personal Data Processed</h2>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-200 font-bold text-slate-700 uppercase">
+                        <th class="py-2.5 px-3">Data Category</th>
+                        <th class="py-2.5 px-3">Purpose & Lawful Basis</th>
+                        <th class="py-2.5 px-3">Retention Period</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    <tr>
+                        <td class="py-2.5 px-3 font-semibold text-slate-900">Account Credentials & Profile (Name, Email, Roll Number)</td>
+                        <td class="py-2.5 px-3">Authentication, role provisioning, and academic identity (Contractual necessity).</td>
+                        <td class="py-2.5 px-3">Duration of academic enrollment + 5 years for transcript verification.</td>
+                    </tr>
+                    <tr>
+                        <td class="py-2.5 px-3 font-semibold text-slate-900">Course Work, Submissions & Marks</td>
+                        <td class="py-2.5 px-3">Academic instruction, grading, and accreditation review (FERPA / Legitimate Interest).</td>
+                        <td class="py-2.5 px-3">Retained per institutional grading archive mandates (7 years).</td>
+                    </tr>
+                    <tr>
+                        <td class="py-2.5 px-3 font-semibold text-slate-900">Attendance Records</td>
+                        <td class="py-2.5 px-3">Statutory exam eligibility certification & compliance oversight.</td>
+                        <td class="py-2.5 px-3">Duration of academic degree program.</td>
+                    </tr>
+                    <tr>
+                        <td class="py-2.5 px-3 font-semibold text-slate-900">Security Audit Logs (IP addresses, Timestamps)</td>
+                        <td class="py-2.5 px-3">System security, fraud prevention, and session integrity (GDPR Art. 6(1)(f)).</td>
+                        <td class="py-2.5 px-3">Rolling 90-day window, then permanently sanitized.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Children / Kids Privacy (COPPA & GDPR Article 8) -->
+    <section class="space-y-3">
+        <h2 class="text-lg font-bold text-slate-900">4. Protection of Minors (COPPA & GDPR-K)</h2>
+        <p class="text-sm leading-relaxed">
+            IIMT UNIVERSITY is designed in full compliance with the <strong>Children's Online Privacy Protection Act (COPPA)</strong> and GDPR Article 8. For any enrolled student under 13 years of age (or under 16 within the European Economic Area):
+        </p>
+        <ul class="list-disc pl-5 text-sm space-y-1.5 text-slate-600">
+            <li>Verifiable parental or legal guardian consent must be recorded prior to activating access to online academic submissions.</li>
+            <li>Guardians maintain the statutory right to review, request deletion, or revoke consent for their child's educational records at any time.</li>
+            <li>Guardians can access our dedicated <a href="{% url 'compliance:parental_consent' %}" class="text-indigo-600 font-bold underline">Verifiable Parental Consent Portal</a>.</li>
+        </ul>
+    </section>
+
+    <!-- Third-Party SDK & Processor Audit -->
+    <section class="space-y-3">
+        <h2 class="text-lg font-bold text-slate-900">5. Audit of Third-Party Processors & Infrastructure</h2>
+        <p class="text-sm leading-relaxed">
+            IIMT UNIVERSITY has conducted a strict vendor assessment to exclude invasive tracking SDKs. We do not integrate tracking beacons, Meta pixels, or third-party ad networks. Our minimal external dependencies include:
+        </p>
+        <ul class="list-disc pl-5 text-sm space-y-1 text-slate-600">
+            <li><strong>PostgreSQL Database Engine:</strong> Self-hosted/private encrypted database instance at rest (AES-256).</li>
+            <li><strong>Content Delivery Networks (CDN):</strong> Tailwind CSS and Chart.js served strictly for UI rendering without telemetry tracking.</li>
+        </ul>
+    </section>
+
+    <!-- Data Subject Rights -->
+    <section class="space-y-3">
+        <h2 class="text-lg font-bold text-slate-900">6. Your Data Protection Rights (GDPR & CCPA)</h2>
+        <p class="text-sm leading-relaxed">You hold the following enforceable rights regarding your personal data:</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-2">
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50">
+                <span class="font-bold text-slate-900 block mb-1">Right to Access (Art. 15)</span>
+                Inspect and receive confirmation of all personal records held in the database.
+            </div>
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50">
+                <span class="font-bold text-slate-900 block mb-1">Right to Data Portability (Art. 20)</span>
+                Download your complete academic records in structured JSON format via our self-service portal.
+            </div>
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50">
+                <span class="font-bold text-slate-900 block mb-1">Right to Erasure / Deletion (Art. 17)</span>
+                Request complete erasure of non-mandatory personal data.
+            </div>
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50">
+                <span class="font-bold text-slate-900 block mb-1">Right to Rectification (Art. 16)</span>
+                Correct inaccurate profile records or typographical errors anytime.
+            </div>
+        </div>
+        <div class="pt-3">
+            <a href="{% url 'compliance:data_portal' %}" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition-colors shadow-sm">
+                Open Self-Service Privacy Rights Portal &rarr;
+            </a>
+        </div>
+    </section>
+
+    <!-- DPO Contact Section -->
+    <section class="space-y-3 border-t border-slate-200 pt-6">
+        <h2 class="text-lg font-bold text-slate-900">7. Data Protection Officer Contact & Supervisory Authority</h2>
+        <p class="text-sm leading-relaxed">
+            If you have inquiries, complaints, or wish to exercise your rights, contact our Data Protection Officer at <a href="mailto:{{ dpo_email }}" class="text-indigo-600 font-bold underline">{{ dpo_email }}</a>. You also have the statutory right to lodge a complaint with your local Data Protection Authority.
+        </p>
+    </section>
+</div>
+{% endblock %}

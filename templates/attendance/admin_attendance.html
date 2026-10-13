@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Campus Attendance — IIMT UNIVERSITY{% endblock %}
+{% block header_title %}Institutional Attendance Register{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Recorded Sessions</p>
+                <h3 class="text-3xl font-black text-slate-900 mt-1">{{ total_sessions }}</h3>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl font-bold">
+                🗓️
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Campus Attendance Average</p>
+                <h3 class="text-3xl font-black text-emerald-600 mt-1">{{ campus_avg }}%</h3>
+            </div>
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl font-bold">
+                📈
+            </div>
+        </div>
+    </div>
+
+    <!-- Sessions List -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+            <h3 class="text-sm font-bold text-slate-900">All Attendance Sessions</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase">
+                        <th class="py-3 px-4">Date</th>
+                        <th class="py-3 px-4">Course</th>
+                        <th class="py-3 px-4">Faculty</th>
+                        <th class="py-3 px-4">Topic Covered</th>
+                        <th class="py-3 px-4 text-center">Compliance</th>
+                        <th class="py-3 px-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for s in recent_sessions %}
+                    <tr class="hover:bg-slate-50/70">
+                        <td class="py-3 px-4 font-bold text-slate-800">{{ s.date|date:"M d, Y" }}</td>
+                        <td class="py-3 px-4 font-semibold text-indigo-700">{{ s.course.code }}</td>
+                        <td class="py-3 px-4 text-slate-700">{{ s.taken_by.user.get_full_name|default:"TBA" }}</td>
+                        <td class="py-3 px-4 text-slate-500">{{ s.topic_covered|default:"—" }}</td>
+                        <td class="py-3 px-4 text-center">
+                            <span class="inline-block px-2.5 py-0.5 rounded text-[10px] font-black bg-emerald-100 text-emerald-800">
+                                {{ s.present_percentage }}% Present
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-right">
+                            <a href="{% url 'attendance_session_detail' pk=s.id %}" class="font-bold text-indigo-600 hover:underline">
+                                Inspect &rarr;
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="py-8 text-center text-slate-400">No attendance sessions registered.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

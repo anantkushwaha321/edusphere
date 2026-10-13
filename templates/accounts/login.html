@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-900">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Passwordless OTP Sign-in & Registration for IIMT UNIVERSITY Smart Academic Management System">
+    <title>Sign In & Register — IIMT UNIVERSITY</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .fade-enter {
+            opacity: 0;
+            transform: translateY(6px);
+            transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+        }
+        .fade-enter-active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        /* Disable arrows on number inputs */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="min-h-full flex flex-col justify-between p-4 selection:bg-indigo-500 selection:text-white font-sans">
+
+    <!-- Top Skip Link for Accessibility -->
+    <a href="#authCard" class="sr-only focus:not-sr-only fixed top-3 left-3 z-50 bg-indigo-700 text-white rounded-xl shadow-xl font-bold text-xs p-3 ring-2 ring-white">
+        Skip to Authentication &rarr;
+    </a>
+
+    <div class="flex-1 flex items-center justify-center py-8">
+        <div class="max-w-md w-full space-y-6">
+            <!-- Brand Logo & Header -->
+            <div class="text-center">
+                <div class="inline-flex w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 items-center justify-center text-white text-3xl font-black shadow-lg shadow-indigo-500/30 mb-3" aria-hidden="true">
+                    🎓
+                </div>
+                <h1 class="text-3xl font-extrabold text-white tracking-tight">IIMT <span class="text-indigo-400">UNIVERSITY</span></h1>
+                <p class="mt-1 text-sm text-slate-300 font-medium">Smart Academic Management System</p>
+            </div>
+
+            <!-- Dynamic Feedback Alert Banner -->
+            <div id="alertBox" class="hidden rounded-2xl p-4 text-xs font-semibold border transition-all duration-200" role="alert" aria-live="polite">
+                <div class="flex items-start space-x-2.5">
+                    <span id="alertIcon" class="text-base" aria-hidden="true">ℹ️</span>
+                    <p id="alertMessage" class="flex-1 leading-relaxed"></p>
+                </div>
+            </div>
+
+            <!-- Main Interactive Auth Card -->
+            <div id="authCard" class="bg-slate-800/90 backdrop-blur border border-slate-700/80 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+
+                <!-- STEP 1: Email Input Form -->
+                <div id="stepEmail" class="space-y-5">
+                    <div class="text-center">
+                        <h2 class="text-lg font-bold text-white">Sign In or Register with OTP</h2>
+                        <p class="text-xs text-slate-400 mt-1">Enter your registered or institutional email to receive a secure 6-digit one-time code.</p>
+                    </div>
+
+                    <form id="emailForm" onsubmit="handleSendOtp(event)" class="space-y-4">
+                        {% csrf_token %}
+                        <div>
+                            <label for="emailInput" class="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-2">Institutional Email Address</label>
+                            <div class="relative">
+                                <input type="email" id="emailInput" required autocomplete="email" placeholder="name@iimtindia.net"
+                                       class="w-full px-4 py-3 rounded-xl border border-slate-600 bg-slate-900/80 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                                <span class="absolute right-3.5 top-3.5 text-slate-500" aria-hidden="true">✉️</span>
+                            </div>
+                        </div>
+
+                        <!-- Terms of Service & Privacy Consent Checkbox -->
+                        <div class="pt-1 flex items-start space-x-2.5">
+                            <input type="checkbox" id="termsConsent" required class="mt-0.5 h-4 w-4 rounded bg-slate-700 border-slate-600 text-indigo-600 focus:ring-indigo-500">
+                            <label for="termsConsent" class="text-xs text-slate-300 leading-snug cursor-pointer">
+                                I agree to the <a href="{% url 'compliance:terms_of_service' %}" target="_blank" class="text-indigo-400 underline font-semibold hover:text-indigo-300">Terms of Service</a> and have reviewed the <a href="{% url 'compliance:privacy_policy' %}" target="_blank" class="text-indigo-400 underline font-semibold hover:text-indigo-300">Privacy Policy</a>.
+                            </label>
+                        </div>
+
+                        <div class="pt-2">
+                            <button type="submit" id="sendOtpBtn" class="w-full py-3 px-4 rounded-xl text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 active:scale-[0.99] transition-all shadow-md shadow-indigo-600/30 flex items-center justify-center space-x-2">
+                                <span id="sendOtpText">Send Verification Code</span>
+                                <div id="sendOtpSpinner" class="hidden w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- STEP 2: 6-Digit OTP Verification -->
+                <div id="stepOtp" class="hidden space-y-5 fade-enter">
+                    <div class="text-center">
+                        <div class="inline-flex w-10 h-10 rounded-xl bg-indigo-600/20 text-indigo-400 items-center justify-center text-lg mb-2">
+                            📩
+                        </div>
+                        <h2 class="text-lg font-bold text-white">Enter Verification Code</h2>
+                        <p class="text-xs text-slate-400 mt-1">
+                            We sent a 6-digit code to <strong id="displayEmail" class="text-indigo-300 font-mono"></strong>
+                        </p>
+                        <button type="button" onclick="handleChangeEmail()" class="text-xs text-indigo-400 hover:text-indigo-300 underline font-semibold mt-1">
+                            Change Email Address
+                        </button>
+                    </div>
+
+                    <form id="otpForm" onsubmit="handleVerifyOtp(event)" class="space-y-5">
+                        <!-- Segmented 6-Digit OTP Input -->
+                        <div class="flex justify-between items-center gap-2 max-w-xs mx-auto">
+                            <input type="text" maxlength="1" inputmode="numeric" class="otp-digit w-11 h-12 text-center text-xl font-black rounded-xl bg-slate-900 border border-slate-600 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                            <input type="text" maxlength="1" inputmode="numeric" class="otp-digit w-11 h-12 text-center text-xl font-black rounded-xl bg-slate-900 border border-slate-600 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                            <input type="text" maxlength="1" inputmode="numeric" class="otp-digit w-11 h-12 text-center text-xl font-black rounded-xl bg-slate-900 border border-slate-600 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                            <input type="text" maxlength="1" inputmode="numeric" class="otp-digit w-11 h-12 text-center text-xl font-black rounded-xl bg-slate-900 border border-slate-600 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                            <input type="text" maxlength="1" inputmode="numeric" class="otp-digit w-11 h-12 text-center text-xl font-black rounded-xl bg-slate-900 border border-slate-600 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                            <input type="text" maxlength="1" inputmode="numeric" class="otp-digit w-11 h-12 text-center text-xl font-black rounded-xl bg-slate-900 border border-slate-600 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                        </div>
+
+                        <!-- Expiry & Resend Cooldown Section -->
+                        <div class="flex items-center justify-between text-xs text-slate-400 px-1">
+                            <span class="flex items-center space-x-1">
+                                <span>⏱️ Code expires in 5 mins</span>
+                            </span>
+                            <div id="resendContainer">
+                                <span id="cooldownText" class="text-slate-400 font-mono">Resend in 60s</span>
+                                <button type="button" id="resendBtn" onclick="handleResendOtp()" class="hidden text-indigo-400 hover:text-indigo-300 font-bold underline">
+                                    Resend Code
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="pt-2">
+                            <button type="submit" id="verifyOtpBtn" class="w-full py-3 px-4 rounded-xl text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 active:scale-[0.99] transition-all shadow-md shadow-indigo-600/30 flex items-center justify-center space-x-2">
+                                <span id="verifyOtpText">Verify Code & Continue</span>
+                                <div id="verifyOtpSpinner" class="hidden w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- STEP 3: Complete Student Profile (New Users Only) -->
+                <div id="stepProfile" class="hidden space-y-5 fade-enter">
+                    <div class="text-center">
+                        <div class="inline-flex w-10 h-10 rounded-xl bg-emerald-600/20 text-emerald-400 items-center justify-center text-lg mb-2">
+                            🎉
+                        </div>
+                        <h2 class="text-lg font-bold text-white">Complete Student Profile</h2>
+                        <p class="text-xs text-slate-400 mt-1">Email verified! Enter your details to finalize your registration.</p>
+                    </div>
+
+                    <form id="profileForm" onsubmit="handleCompleteRegistration(event)" class="space-y-4">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label for="regFirstName" class="block text-xs font-bold text-slate-300 mb-1">First Name *</label>
+                                <input type="text" id="regFirstName" required placeholder="Alice"
+                                       class="w-full px-3 py-2.5 rounded-xl border border-slate-600 bg-slate-900/80 text-white placeholder-slate-500 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="regLastName" class="block text-xs font-bold text-slate-300 mb-1">Last Name *</label>
+                                <input type="text" id="regLastName" required placeholder="Smith"
+                                       class="w-full px-3 py-2.5 rounded-xl border border-slate-600 bg-slate-900/80 text-white placeholder-slate-500 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="regRollNumber" class="block text-xs font-bold text-slate-300 mb-1">Student Roll Number (Optional)</label>
+                            <input type="text" id="regRollNumber" placeholder="e.g. CS2026-050"
+                                   class="w-full px-3 py-2.5 rounded-xl border border-slate-600 bg-slate-900/80 text-white placeholder-slate-500 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label for="regDepartment" class="block text-xs font-bold text-slate-300 mb-1">Academic Department</label>
+                            <select id="regDepartment" class="w-full px-3 py-2.5 rounded-xl border border-slate-600 bg-slate-900/80 text-white text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                                {% for d in departments %}
+                                <option value="{{ d.id }}">{{ d.name }} ({{ d.code }})</option>
+                                {% empty %}
+                                <option value="">General Academic Department</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="pt-2">
+                            <button type="submit" id="completeRegBtn" class="w-full py-3 px-4 rounded-xl text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-400 active:scale-[0.99] transition-all shadow-md shadow-emerald-600/30 flex items-center justify-center space-x-2">
+                                <span id="completeRegText">Finalize & Enter Dashboard</span>
+                                <div id="completeRegSpinner" class="hidden w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Quick Seed Demo Login Buttons (1-Click Fill) -->
+                <div class="pt-4 border-t border-slate-700/80">
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center mb-2.5">
+                        Test Demo Accounts (1-Click Fill)
+                    </p>
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                        <button type="button" onclick="fillDemoEmail('admin@iimtindia.net')" class="px-2 py-2 rounded-xl text-xs font-bold bg-purple-900/40 hover:bg-purple-900/60 border border-purple-700/60 text-purple-200 transition-all focus:outline-none focus:ring-2 focus:ring-purple-400">
+                            <span class="block">Admin</span>
+                            <span class="text-[10px] text-purple-300 font-mono">admin@</span>
+                        </button>
+                        <button type="button" onclick="fillDemoEmail('alan.turing@iimtindia.net')" class="px-2 py-2 rounded-xl text-xs font-bold bg-emerald-900/40 hover:bg-emerald-900/60 border border-emerald-700/60 text-emerald-200 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                            <span class="block">Teacher</span>
+                            <span class="text-[10px] text-emerald-300 font-mono">alan.turing@</span>
+                        </button>
+                        <button type="button" onclick="fillDemoEmail('student.alice@iimtindia.net')" class="px-2 py-2 rounded-xl text-xs font-bold bg-blue-900/40 hover:bg-blue-900/60 border border-blue-700/60 text-blue-200 transition-all focus:outline-none focus:ring-2 focus:ring-blue-400">
+                            <span class="block">Student</span>
+                            <span class="text-[10px] text-blue-300 font-mono">student.alice@</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Official Institutional Footer -->
+    <footer class="max-w-4xl mx-auto w-full text-center text-xs text-slate-400 space-y-2 py-4" role="contentinfo">
+        <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-slate-300">
+            <a href="{% url 'compliance:privacy_policy' %}" class="hover:underline">Privacy Policy</a>
+            <span aria-hidden="true">&bull;</span>
+            <a href="{% url 'compliance:terms_of_service' %}" class="hover:underline">Terms of Service</a>
+            <span aria-hidden="true">&bull;</span>
+            <a href="{% url 'compliance:cookie_policy' %}" class="hover:underline">Cookie Policy</a>
+            <span aria-hidden="true">&bull;</span>
+            <a href="{% url 'compliance:refund_policy' %}" class="hover:underline">Tuition Refund Policy</a>
+            <span aria-hidden="true">&bull;</span>
+            <a href="{% url 'compliance:parental_consent' %}" class="hover:underline">Parental Consent (COPPA)</a>
+            <span aria-hidden="true">&bull;</span>
+            <a href="{% url 'compliance:accessibility_statement' %}" class="hover:underline">Accessibility</a>
+        </div>
+        <p class="text-[11px] text-slate-500">
+            &copy; 2026 IIMT UNIVERSITY &bull; 'O' Pocket, Ganga Nagar, Meerut, UP 250001 &bull; Contact: privacy@iimtindia.net
+        </p>
+    </footer>
+
+    <!-- Cookie Banner Component -->
+    {% include 'compliance/cookie_banner.html' %}
+
+    <!-- Client-Side OTP Controller Script -->
+    <script>
+        let currentEmail = '';
+        let cooldownTimer = null;
+        let remainingSeconds = 0;
+        let lastOtpEntered = '';
+
+        // Helper to extract CSRF token from cookie
+        function getCsrfToken() {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, 10) === ('csrftoken=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(10));
+                        break;
+                    }
+                }
+            }
+            if (!cookieValue) {
+                const csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+                if (csrfInput) cookieValue = csrfInput.value;
+            }
+            return cookieValue || '';
+        }
+
+        function showAlert(message, type = 'error') {
+            const box = document.getElementById('alertBox');
+            const msg = document.getElementById('alertMessage');
+            const icon = document.getElementById('alertIcon');
+
+            box.className = 'rounded-2xl p-4 text-xs font-semibold border transition-all duration-200';
+            if (type === 'error') {
+                box.classList.add('bg-rose-950/60', 'border-rose-700', 'text-rose-200');
+                icon.textContent = '⚠️';
+            } else if (type === 'success') {
+                box.classList.add('bg-emerald-950/60', 'border-emerald-700', 'text-emerald-200');
+                icon.textContent = '✅';
+            } else {
+                box.classList.add('bg-indigo-950/60', 'border-indigo-700', 'text-indigo-200');
+                icon.textContent = 'ℹ️';
+            }
+            msg.textContent = message;
+            box.classList.remove('hidden');
+        }
+
+        function hideAlert() {
+            document.getElementById('alertBox').classList.add('hidden');
+        }
+
+        function fillDemoEmail(email) {
+            document.getElementById('emailInput').value = email;
+            document.getElementById('termsConsent').checked = true;
+            hideAlert();
+        }
+
+        // Start Resend Cooldown Countdown
+        function startCooldown(seconds) {
+            remainingSeconds = seconds;
+            const cooldownText = document.getElementById('cooldownText');
+            const resendBtn = document.getElementById('resendBtn');
+
+            cooldownText.classList.remove('hidden');
+            resendBtn.classList.add('hidden');
+
+            if (cooldownTimer) clearInterval(cooldownTimer);
+
+            cooldownTimer = setInterval(() => {
+                remainingSeconds -= 1;
+                if (remainingSeconds <= 0) {
+                    clearInterval(cooldownTimer);
+                    cooldownText.classList.add('hidden');
+                    resendBtn.classList.remove('hidden');
+                } else {
+                    cooldownText.textContent = `Resend in ${remainingSeconds}s`;
+                }
+            }, 1000);
+            cooldownText.textContent = `Resend in ${remainingSeconds}s`;
+        }
+
+        // STEP 1: Send OTP
+        async function handleSendOtp(event) {
+            event.preventDefault();
+            hideAlert();
+
+            const email = document.getElementById('emailInput').value.trim();
+            const terms = document.getElementById('termsConsent').checked;
+
+            if (!terms) {
+                showAlert("Please accept the Terms of Service and Privacy Policy to proceed.", 'error');
+                return;
+            }
+
+            const btn = document.getElementById('sendOtpBtn');
+            const text = document.getElementById('sendOtpText');
+            const spinner = document.getElementById('sendOtpSpinner');
+
+            btn.disabled = true;
+            text.textContent = 'Sending Code...';
+            spinner.classList.remove('hidden');
+
+            try {
+                const response = await fetch("{% url 'api_send_otp' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken(),
+                    },
+                    body: JSON.stringify({ email: email })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    currentEmail = email;
+                    document.getElementById('displayEmail').textContent = email;
+
+                    // Transition to OTP screen
+                    document.getElementById('stepEmail').classList.add('hidden');
+                    document.getElementById('stepOtp').classList.remove('hidden');
+                    document.getElementById('stepOtp').classList.add('fade-enter-active');
+
+                    // Focus first digit
+                    const firstInput = document.querySelector('.otp-digit');
+                    if (firstInput) firstInput.focus();
+
+                    startCooldown(data.cooldown_seconds || 60);
+                    showAlert(data.message, 'success');
+                } else {
+                    showAlert(data.message || 'Failed to send verification code.', 'error');
+                }
+            } catch (err) {
+                showAlert("Network communication error. Please check your connection.", 'error');
+            } finally {
+                btn.disabled = false;
+                text.textContent = 'Send Verification Code';
+                spinner.classList.add('hidden');
+            }
+        }
+
+        // Resend OTP
+        async function handleResendOtp() {
+            hideAlert();
+            const resendBtn = document.getElementById('resendBtn');
+            resendBtn.disabled = true;
+            resendBtn.textContent = 'Sending...';
+
+            try {
+                const response = await fetch("{% url 'api_resend_otp' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken(),
+                    },
+                    body: JSON.stringify({ email: currentEmail })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    startCooldown(data.cooldown_seconds || 60);
+                } else {
+                    showAlert(data.message, 'error');
+                    resendBtn.disabled = false;
+                    resendBtn.textContent = 'Resend Code';
+                }
+            } catch (err) {
+                showAlert("Failed to resend verification code.", 'error');
+                resendBtn.disabled = false;
+                resendBtn.textContent = 'Resend Code';
+            }
+        }
+
+        function handleChangeEmail() {
+            hideAlert();
+            if (cooldownTimer) clearInterval(cooldownTimer);
+            document.getElementById('stepOtp').classList.add('hidden');
+            document.getElementById('stepProfile').classList.add('hidden');
+            document.getElementById('stepEmail').classList.remove('hidden');
+            // Clear inputs
+            document.querySelectorAll('.otp-digit').forEach(el => el.value = '');
+        }
+
+        // Collect 6-digit OTP from input boxes
+        function getOtpString() {
+            let code = '';
+            document.querySelectorAll('.otp-digit').forEach(el => {
+                code += el.value.trim();
+            });
+            return code;
+        }
+
+        // STEP 2: Verify OTP
+        async function handleVerifyOtp(event) {
+            event.preventDefault();
+            hideAlert();
+
+            const otp = getOtpString();
+            if (otp.length !== 6) {
+                showAlert("Please enter all 6 digits of your verification code.", 'error');
+                return;
+            }
+            lastOtpEntered = otp;
+
+            const btn = document.getElementById('verifyOtpBtn');
+            const text = document.getElementById('verifyOtpText');
+            const spinner = document.getElementById('verifyOtpSpinner');
+
+            btn.disabled = true;
+            text.textContent = 'Verifying...';
+            spinner.classList.remove('hidden');
+
+            try {
+                const response = await fetch("{% url 'api_verify_otp' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken(),
+                    },
+                    body: JSON.stringify({
+                        email: currentEmail,
+                        otp: otp
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    if (data.requires_registration) {
+                        // User verified email, now transition to profile setup
+                        document.getElementById('stepOtp').classList.add('hidden');
+                        document.getElementById('stepProfile').classList.remove('hidden');
+                        document.getElementById('stepProfile').classList.add('fade-enter-active');
+                        showAlert(data.message, 'success');
+                    } else if (data.authenticated && data.redirect_url) {
+                        showAlert("Authentication successful! Redirecting to workspace...", 'success');
+                        setTimeout(() => {
+                            window.location.href = data.redirect_url;
+                        }, 400);
+                    }
+                } else {
+                    showAlert(data.message || 'Invalid verification code.', 'error');
+                }
+            } catch (err) {
+                showAlert("Verification failed due to a network error.", 'error');
+            } finally {
+                btn.disabled = false;
+                text.textContent = 'Verify Code & Continue';
+                spinner.classList.add('hidden');
+            }
+        }
+
+        // STEP 3: Complete Student Registration
+        async function handleCompleteRegistration(event) {
+            event.preventDefault();
+            hideAlert();
+
+            const firstName = document.getElementById('regFirstName').value.trim();
+            const lastName = document.getElementById('regLastName').value.trim();
+            const rollNumber = document.getElementById('regRollNumber').value.trim();
+            const departmentId = document.getElementById('regDepartment').value;
+
+            const btn = document.getElementById('completeRegBtn');
+            const text = document.getElementById('completeRegText');
+            const spinner = document.getElementById('completeRegSpinner');
+
+            btn.disabled = true;
+            text.textContent = 'Finalizing...';
+            spinner.classList.remove('hidden');
+
+            try {
+                const response = await fetch("{% url 'api_verify_otp' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken(),
+                    },
+                    body: JSON.stringify({
+                        email: currentEmail,
+                        otp: lastOtpEntered,
+                        registration: {
+                            first_name: firstName,
+                            last_name: lastName,
+                            roll_number: rollNumber,
+                            department_id: departmentId
+                        }
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.redirect_url) {
+                    showAlert("Account created successfully! Redirecting to student dashboard...", 'success');
+                    setTimeout(() => {
+                        window.location.href = data.redirect_url;
+                    }, 400);
+                } else {
+                    showAlert(data.message || 'Failed to complete registration.', 'error');
+                }
+            } catch (err) {
+                showAlert("Error completing registration. Please retry.", 'error');
+            } finally {
+                btn.disabled = false;
+                text.textContent = 'Finalize & Enter Dashboard';
+                spinner.classList.add('hidden');
+            }
+        }
+
+        // Setup 6-digit auto-advance and backspace handling
+        const digitInputs = document.querySelectorAll('.otp-digit');
+        digitInputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                const val = e.target.value.replace(/\D/g, '');
+                e.target.value = val ? val[0] : '';
+                if (val && index < digitInputs.length - 1) {
+                    digitInputs[index + 1].focus();
+                }
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    digitInputs[index - 1].focus();
+                }
+            });
+
+            // Handle paste of full 6-digit code
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pasteData = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
+                if (pasteData.length >= 6) {
+                    for (let i = 0; i < 6; i++) {
+                        digitInputs[i].value = pasteData[i];
+                    }
+                    digitInputs[5].focus();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

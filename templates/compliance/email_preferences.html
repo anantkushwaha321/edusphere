@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Email Preferences — IIMT UNIVERSITY{% endblock %}
+{% block header_title %}Email & Communication Preferences{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 sm:p-10 rounded-3xl border border-slate-200/80 shadow-sm space-y-6">
+    <div class="border-b border-slate-100 pb-4">
+        <h2 class="text-xl font-bold text-slate-900">Email Notification Channels</h2>
+        <p class="text-xs text-slate-500 mt-1">Manage which notifications you wish to receive. We strictly respect your opt-out preferences and guarantee zero unsolicited spam.</p>
+    </div>
+
+    <form method="POST" class="space-y-5">
+        {% csrf_token %}
+
+        <!-- Academic Announcements -->
+        <div class="flex items-start justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100">
+            <div class="pr-4 space-y-0.5">
+                <label for="academic_announcements" class="text-sm font-bold text-slate-900 cursor-pointer">Official Academic Circulars & Notices</label>
+                <p class="text-xs text-slate-500">Crucial exam schedules, campus closures, and institutional notices.</p>
+            </div>
+            <input type="checkbox" id="academic_announcements" name="academic_announcements" class="mt-1 h-5 w-5 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300" {% if pref.academic_announcements %}checked{% endif %}>
+        </div>
+
+        <!-- Assignment Alerts -->
+        <div class="flex items-start justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100">
+            <div class="pr-4 space-y-0.5">
+                <label for="assignment_alerts" class="text-sm font-bold text-slate-900 cursor-pointer">Assignment Deadlines & Task Releases</label>
+                <p class="text-xs text-slate-500">Alerts when a teacher publishes an assignment or a due date approaches.</p>
+            </div>
+            <input type="checkbox" id="assignment_alerts" name="assignment_alerts" class="mt-1 h-5 w-5 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300" {% if pref.assignment_alerts %}checked{% endif %}>
+        </div>
+
+        <!-- Grade Notifications -->
+        <div class="flex items-start justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100">
+            <div class="pr-4 space-y-0.5">
+                <label for="grade_notifications" class="text-sm font-bold text-slate-900 cursor-pointer">Grade & Evaluation Publications</label>
+                <p class="text-xs text-slate-500">Instant notification when instructor remarks or marks are uploaded.</p>
+            </div>
+            <input type="checkbox" id="grade_notifications" name="grade_notifications" class="mt-1 h-5 w-5 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300" {% if pref.grade_notifications %}checked{% endif %}>
+        </div>
+
+        <!-- Marketing & Surveys (Opt-in by default False) -->
+        <div class="flex items-start justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100">
+            <div class="pr-4 space-y-0.5">
+                <label for="marketing_and_surveys" class="text-sm font-bold text-slate-900 cursor-pointer">Optional Surveys & Institutional Newsletter</label>
+                <p class="text-xs text-slate-500">Occasional voluntary academic feedback surveys and student life newsletters (Opt-in only).</p>
+            </div>
+            <input type="checkbox" id="marketing_and_surveys" name="marketing_and_surveys" class="mt-1 h-5 w-5 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300" {% if pref.marketing_and_surveys %}checked{% endif %}>
+        </div>
+
+        <div class="pt-3 flex items-center justify-between">
+            <span class="text-xs text-slate-400 font-mono">Preferences update immediately</span>
+            <button type="submit" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs shadow-md transition-all">
+                Save Preferences
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
