@@ -1,90 +1,87 @@
 {% extends 'base.html' %}
 
-{% block title %}Assignments — IIMT UNIVERSITY{% endblock %}
-{% block header_title %}Academic Assignments & Tasks{% endblock %}
+{% block title %}Assignments & Tasks — IIMTMANIA | IIMT UNIVERSITY{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
-    <!-- Header Filter Bar -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm gap-4">
+    <!-- Header Filter Bar (Liquid Glass) -->
+    <div class="glass-panel p-5 rounded-2xl border border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <form method="GET" class="flex flex-wrap items-center gap-3 flex-1">
-            <select name="course" onchange="this.form.submit()" class="py-2 px-3 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
-                <option value="">All Courses</option>
+            <label for="courseFilter" class="sr-only">Filter by Course</label>
+            <select id="courseFilter" name="course" onchange="this.form.submit()" class="glass-input py-2 px-3.5 rounded-xl text-xs text-white bg-[#0D1222] border-white/10 focus:outline-none">
+                <option value="" class="bg-[#070A13]">All Courses</option>
                 {% for c in user_courses %}
-                <option value="{{ c.id }}" {% if selected_course == c.id|stringformat:"i" %}selected{% endif %}>{{ c.code }} - {{ c.name }}</option>
+                <option value="{{ c.id }}" class="bg-[#070A13]" {% if selected_course == c.id|stringformat:"i" %}selected{% endif %}>{{ c.code }} - {{ c.name }}</option>
                 {% endfor %}
             </select>
             {% if selected_course %}
-            <a href="{% url 'assignment_list' %}" class="text-xs text-rose-600 hover:underline font-semibold">Clear Filter</a>
+            <a href="{% url 'assignment_list' %}" class="text-xs text-rose-400 hover:text-rose-300 font-semibold underline">Reset Filter</a>
             {% endif %}
         </form>
 
         {% if request.user.is_teacher_role or request.user.is_admin_role %}
         <div>
-            <a href="{% url 'assignment_create' %}" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all inline-flex items-center space-x-1.5">
+            <a href="{% url 'assignment_create' %}" class="glass-btn glass-btn-primary px-4 py-2.5 rounded-xl text-xs font-bold inline-flex items-center space-x-1.5 shadow-md shadow-blue-600/30">
                 <span>+ Create Assignment</span>
             </a>
         </div>
         {% endif %}
     </div>
 
-    <!-- Assignments List Table / Cards -->
+    <!-- Assignments List Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for a in assignments %}
-        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 flex flex-col justify-between hover:shadow-md transition-all">
+        <div class="glass-card spotlight-card rounded-2xl p-6 flex flex-col justify-between hover-lift">
             <div>
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs font-bold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 font-mono">{{ a.course.code }}</span>
-                    <span class="text-xs font-semibold 
-                        {% if a.is_past_due %}text-rose-600{% else %}text-emerald-600{% endif %}">
-                        {% if a.is_past_due %}Past Due{% else %}Open{% endif %}
+                <div class="flex items-center justify-between mb-3">
+                    <span class="badge-glass badge-glass-blue text-xs font-mono font-bold">{{ a.course.code }}</span>
+                    <span class="badge-glass {% if a.is_past_due %}badge-glass-rose{% else %}badge-glass-emerald{% endif %} text-[10px]">
+                        {% if a.is_past_due %}Past Due{% else %}Open for Submission{% endif %}
                     </span>
                 </div>
-                <h3 class="text-base font-bold text-slate-900">{{ a.title }}</h3>
-                <p class="text-xs text-slate-500 mt-1 line-clamp-2">{{ a.description }}</p>
+                <h3 class="text-base font-bold text-white">{{ a.title }}</h3>
+                <p class="text-xs text-slate-300 mt-1 line-clamp-2 leading-relaxed">{{ a.description }}</p>
 
-                <div class="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500 space-y-1">
-                    <p>Due Date: <span class="font-bold text-slate-800">{{ a.due_date|date:"M d, Y H:i" }}</span></p>
-                    <p>Max Marks: <span class="font-bold text-slate-800">{{ a.max_marks }}</span></p>
+                <div class="mt-4 pt-3 border-t border-white/10 text-xs text-slate-400 space-y-1">
+                    <p>Due Date: <span class="font-bold text-white font-mono">{{ a.due_date|date:"M d, Y H:i" }}</span></p>
+                    <p>Max Marks: <span class="font-bold text-white font-mono">{{ a.max_marks }}</span></p>
 
                     {% if request.user.is_student_role %}
-                        <div class="mt-2 pt-2 border-t border-slate-100">
+                        <div class="mt-2 pt-2 border-t border-white/10">
                             {% if a.my_submission %}
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold 
-                                    {% if a.my_submission.status == 'GRADED' %}bg-emerald-100 text-emerald-800
-                                    {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                <span class="badge-glass {% if a.my_submission.status == 'GRADED' %}badge-glass-emerald{% else %}badge-glass-blue{% endif %} text-[11px]">
                                     {{ a.my_submission.get_status_display }}
                                     {% if a.my_submission.marks_obtained is not None %}
                                     ({{ a.my_submission.marks_obtained }}/{{ a.max_marks }})
                                     {% endif %}
                                 </span>
                             {% else %}
-                                <span class="text-[11px] font-bold text-amber-600">Pending Submission</span>
+                                <span class="badge-glass badge-glass-amber text-[11px]">Pending Submission</span>
                             {% endif %}
                         </div>
                     {% else %}
-                        <div class="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                            <span>Submissions: <strong class="text-slate-800">{{ a.total_submissions }}</strong></span>
-                            <span>Graded: <strong class="text-emerald-600">{{ a.total_graded }}</strong></span>
+                        <div class="mt-2 pt-2 border-t border-white/10 flex items-center justify-between text-[11px]">
+                            <span>Submissions: <strong class="text-white font-mono">{{ a.total_submissions }}</strong></span>
+                            <span>Graded: <strong class="text-emerald-400 font-mono">{{ a.total_graded }}</strong></span>
                         </div>
                     {% endif %}
                 </div>
             </div>
 
-            <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between">
-                <a href="{% url 'assignment_detail' pk=a.id %}" class="text-xs font-bold text-indigo-600 hover:text-indigo-800">
-                    View Details &rarr;
+            <div class="mt-5 pt-3 border-t border-white/10 flex items-center justify-between">
+                <a href="{% url 'assignment_detail' pk=a.id %}" class="text-xs font-bold text-blue-400 hover:text-blue-300">
+                    Assignment Hub &rarr;
                 </a>
                 {% if request.user.is_teacher_role and a.pending_grading > 0 %}
-                <span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded">
-                    {{ a.pending_grading }} to grade
+                <span class="badge-glass badge-glass-amber text-[10px]">
+                    {{ a.pending_grading }} to evaluate
                 </span>
                 {% endif %}
             </div>
         </div>
         {% empty %}
-        <div class="col-span-3 bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-500">
-            No assignments found.
+        <div class="col-span-3 glass-card p-8 rounded-2xl text-center text-slate-400">
+            No assignments found matching your filter.
         </div>
         {% endfor %}
     </div>

@@ -1,0 +1,121 @@
+/**
+ * IIMTMANIA — Design System: Dark Liquid Glass
+ * Core CSS Custom Properties, Surface Tokens, and Typography Scale
+ */
+
+:root {
+    /* Base Color Tokens */
+    --bg-midnight: #070A13;
+    --bg-secondary: #0D1222;
+    --bg-tertiary: #131A30;
+    --bg-elevated: #182240;
+
+    /* Liquid Glass Surface Tokens */
+    --glass-bg-subtle: rgba(13, 18, 34, 0.45);
+    --glass-bg-base: rgba(13, 18, 34, 0.70);
+    --glass-bg-elevated: rgba(18, 26, 48, 0.85);
+    --glass-border-subtle: rgba(255, 255, 255, 0.06);
+    --glass-border-base: rgba(255, 255, 255, 0.12);
+    --glass-border-highlight: rgba(255, 255, 255, 0.22);
+    --glass-inner-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.10);
+    --glass-blur-sm: 8px;
+    --glass-blur-md: 16px;
+    --glass-blur-lg: 24px;
+
+    /* Accent & Brand Colors */
+    --accent-blue: #3B82F6;
+    --accent-blue-glow: rgba(59, 130, 246, 0.35);
+    --accent-violet: #8B5CF6;
+    --accent-violet-glow: rgba(139, 92, 246, 0.35);
+    --accent-cyan: #22D3EE;
+    --accent-cyan-glow: rgba(34, 211, 238, 0.35);
+
+    /* Text & Content Tokens */
+    --text-primary: #F5F7FF;
+    --text-secondary: #94A3B8;
+    --text-muted: #64748B;
+    --text-subtle: #475569;
+
+    /* Semantic Status Colors */
+    --status-success: #10B981;
+    --status-success-bg: rgba(16, 185, 129, 0.15);
+    --status-success-border: rgba(16, 185, 129, 0.30);
+    
+    --status-warning: #F59E0B;
+    --status-warning-bg: rgba(245, 158, 11, 0.15);
+    --status-warning-border: rgba(245, 158, 11, 0.30);
+    
+    --status-danger: #EF4444;
+    --status-danger-bg: rgba(239, 68, 68, 0.15);
+    --status-danger-border: rgba(239, 68, 68, 0.30);
+    
+    --status-info: #38BDF8;
+    --status-info-bg: rgba(56, 189, 248, 0.15);
+    --status-info-border: rgba(56, 189, 248, 0.30);
+
+    /* Elevation Shadows */
+    --shadow-glass-sm: 0 4px 12px 0 rgba(0, 0, 0, 0.35);
+    --shadow-glass-md: 0 10px 30px -5px rgba(0, 0, 0, 0.50);
+    --shadow-glass-lg: 0 20px 45px -10px rgba(0, 0, 0, 0.65), 0 0 30px -5px rgba(59, 130, 246, 0.15);
+    --shadow-glow-blue: 0 0 35px -5px rgba(59, 130, 246, 0.40);
+    --shadow-glow-violet: 0 0 35px -5px rgba(139, 92, 246, 0.40);
+
+    /* Motion & Timing */
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: 400ms cubic-bezier(0.16, 1, 0.3, 1);
+    --transition-spring: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    /* Border Radius Scale */
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-xl: 28px;
+    --radius-full: 9999px;
+}
+
+/* Base Body Application */
+html, body {
+    background-color: var(--bg-midnight) !important;
+    color: var(--text-primary);
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow-x: hidden;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-midnight);
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.22);
+}
+
+/* Gradient Text Effect */
+.gradient-text {
+    background: linear-gradient(135deg, #FFFFFF 0%, #60A5FA 50%, #C084FC 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.gradient-text-electric {
+    background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 40%, #8B5CF6 80%, #22D3EE 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.gradient-text-gold {
+    background: linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}

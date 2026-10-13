@@ -1,4 +1,4 @@
-# 🎓 IIMT UNIVERSITY — Smart Academic Management System
+# 🎓 IIMTMANIA — Premium College Community & Academic Platform
 
 [![Django](https://img.shields.io/badge/Django-6.1-092E20?style=for-the-badge&logo=django&logoColor=white)](https://www.djangoproject.com/)
 [![Python](https://img.shields.io/badge/Python-3.12%20%7C%203.14-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
@@ -7,71 +7,69 @@
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
-**IIMT UNIVERSITY Smart Academic Management System (AMS)** is a production-ready, cloud-deployable academic platform designed to streamline operations between students, faculty members, and institutional administrators.
+**IIMTMANIA** is an institutional-grade, dark **Liquid Glass** college community and academic management platform built for **IIMT UNIVERSITY**. It merges a futuristic, high-contrast dark visual system (`#070A13` midnight navy, translucent glass surfaces, luminous borders, electric blue `#3B82F6` and violet `#8B5CF6` accents) with robust Django architecture.
 
-The platform includes **passwordless OTP-based email authentication**, dedicated role-based dashboards, course catalog management, online assignment workflows with automatic late detection, attendance tracking with mandatory 75% compliance alerts, printable academic marksheets & transcripts, and complete WCAG 2.1 AA legal & privacy compliance portals.
+The platform provides passwordless **cryptographic OTP authentication**, role-based liquid dashboards (`STUDENT`, `TEACHER`, `ADMIN`), student verification, course gradebooks, interactive attendance recording with statutory 75% compliance alerts, real-time assignment submissions, and a complete privacy & legal compliance portal (GDPR / FERPA / COPPA).
 
 ---
 
-## 🌟 Key Features & Architecture
+## 🌟 Key Features & Design System
 
-### 1. 🔐 Passwordless OTP Authentication
-- **Secure Email Verification**: Authentication without passwords using 6-digit cryptographically secure one-time passcodes (`secrets` module).
-- **PBKDF2/SHA256 Hashing**: OTPs are hashed using Django's password hasher before being stored; plain passcodes are never exposed in database records or API responses.
-- **Defense Mechanisms**:
+### 🌌 1. Dark Liquid Glass UI/UX Design System
+- **Color Architecture**: Deep midnight navy `#070A13`, secondary midnight `#0D1222`, luminous electric blue `#3B82F6`, cyber violet `#8B5CF6`, and neon cyan `#22D3EE`.
+- **Liquid Glass Primitives**:
+  - `.glass-panel`: Translucent backdrops (`rgba(13, 18, 34, 0.75)`) with restrained backdrop blur (`16px-24px`), subtle white border (`rgba(255, 255, 255, 0.1)`), and soft inner highlights.
+  - `.glass-card` & `.spotlight-card`: Dynamic radial cursor-following spotlight glows (`pointermove` event listener with auto-fade).
+  - `.glass-navbar` & `.glass-input`: Translucent glass forms, segmented numeric OTP boxes with neon focus rings.
+  - `.badge-glass`: Translucent colored pills (`badge-glass-blue`, `badge-glass-violet`, `badge-glass-emerald`, `badge-glass-rose`, `badge-glass-amber`).
+- **Interactive Background Engine**:
+  - Ambient drifting radial gradient lights.
+  - Canvas-based interactive particle constellation that gently reacts to pointer proximity.
+  - Automatic frame throttling via `requestAnimationFrame` and tab-visibility detection (`document.hidden`) to ensure 60 FPS performance and zero background CPU drain.
+  - Full support for `prefers-reduced-motion: reduce`.
+
+### 🔐 2. Passwordless OTP Authentication
+- **Zero-Password Security**: Log in using only your verified email.
+- **PBKDF2/SHA256 Hashing**: 6-digit OTPs are cryptographically hashed before database persistence; raw OTPs are never stored or logged in production.
+- **Brute-Force & Flood Defense**:
   - 5-minute strict passcode expiration.
-  - 60-second resend cooldown timer.
-  - Automatic challenge invalidation after 5 failed attempts.
-  - Multi-tier rate limiting (max 5 requests/hr per email, max 15 requests/hr per IP).
-  - Role isolation: Self-registration is strictly restricted to `STUDENT` profiles; elevated roles (`ADMIN`, `TEACHER`) can only be provisioned by administrators.
+  - 60-second cooldown timer between resend requests.
+  - Automatic challenge locking after 5 failed attempts.
+  - Multi-tier IP and email rate limiting.
+  - Segmented 6-box input with automated keyboard advance and paste extraction.
 
-### 2. 👥 Role-Based Access Control (RBAC) & Portals
-- **Student Portal**:
-  - Live course enrollment status and credit hour tracking.
-  - Upcoming assignment deadlines with submission status badges.
-  - Real-time grade notifications with teacher remarks.
-  - Attendance compliance meter with 75% mandatory threshold alerts.
-  - Official student transcript & report card with print layout (`window.print()`).
-- **Faculty Portal**:
-  - Assigned course management and syllabus delivery.
-  - Assignment creator with attachments, maximum marks, and due dates.
-  - Grading studio with percentage and letter grade calculation (`A+`, `A`, `B`, `C`, `D`, `F`).
-  - Interactive roll-call attendance launcher with *Mark All Present* / *Mark All Absent* toggles.
-  - Gradebook matrix and 1-click CSV attendance/grade exports.
-- **Administrator Portal**:
-  - Institutional high-level metrics (Total Students, Faculty, Courses, Campus Attendance Rate).
-  - Department enrollment distribution analytics (Chart.js).
-  - User account lifecycle management (creation, profile review, activation/deactivation).
-  - Comprehensive activity audit trail with client IP tracking.
+### 👥 3. Role-Specific Liquid Dashboards
+- **Student Dashboard**: Live enrolled course cards, attendance compliance ring, upcoming assignment countdowns, recent evaluation remarks, and printable transcript reports.
+- **Faculty Dashboard**: Assigned courses roster, batch attendance roll-call launcher (*Mark All Present* / *Mark All Absent*), pending submission evaluation queue, and study notes distributor.
+- **Admin Command Center**: System-wide statistics, interactive dark-themed Chart.js department distribution analytics, user directory management, and tamper-evident audit logs.
 
-### 3. ⚖️ Privacy, Legal & Regulatory Compliance (FERPA / GDPR / COPPA / CCPA)
-- **Official Policy Frameworks**: Institutional Privacy Policy, Terms of Service, Cookie Policy, Tuition Refund Schedule (Zero Hidden Fees), and Accessibility Statement.
-- **Cookie Consent Banner & Modal**: Granular consent preferences API (`Essential`, `Functional`, `Analytics`).
-- **Data Rights Portal (DSAR)**: Instant JSON data export archive (GDPR Art. 20) and Right to Erasure / Account Deletion request filing (GDPR Art. 17).
-- **COPPA Parental Consent**: Verifiable consent tracking for minor students (`< 18` and `< 13`).
-- **RFC 8058 1-Click Email Unsubscribe**: Automatic `List-Unsubscribe` headers and preference management.
+### ⚖️ 4. Legal, Privacy & Compliance Suite
+- Dedicated policy pages: Terms of Service, Privacy Policy, Cookie Policy, Tuition Refund Policy, Parental Consent (COPPA), and WCAG 2.1 AA Accessibility Statement.
+- Granular Cookie Consent banner with customizable preferences (`Essential`, `Functional`, `Analytics`).
+- GDPR Data Rights portal: Instant JSON data export archive and Right to Erasure / account deletion request filing.
+- RFC 8058 1-click email unsubscribe headers.
 
 ---
 
 ## 🛠️ Technology Stack
 
 - **Backend Framework**: Django 6.1 (Python 3.12 / 3.14)
-- **WSGI Production Server**: Gunicorn
-- **Static Assets Engine**: WhiteNoise (Compressed & Cached)
-- **Database**: PostgreSQL (Production) / SQLite (Zero-config local development)
-- **Frontend & UI**: Tailwind CSS, FontAwesome/Heroicons SVGs, Chart.js
-- **Media & File Storage**: Pillow, Django Media Storage
+- **Production Server**: Gunicorn WSGI
+- **Static Asset Caching**: WhiteNoise `CompressedStaticFilesStorage`
+- **Database Engine**: PostgreSQL (Production) / SQLite (Local zero-config dev)
+- **Frontend**: Tailwind CSS CDN, Custom Vanilla JS (`animations.js`, `main.js`, `otp.js`), Chart.js
+- **Containerization**: Docker, Docker Compose
 - **Environment Management**: `python-dotenv`, `dj-database-url`
 
 ---
 
-## 🚀 Quick Start (Local Development)
+## 🚀 Quick Start (Local Setup)
 
-### 1. Clone & Set Up Virtual Environment
+### 1. Clone & Activate Environment
 ```powershell
 # Clone the repository
-git clone https://github.com/<your-username>/iimt-university-ams.git
-cd iimt-university-ams
+git clone https://github.com/<your-username>/iimtmania.git
+cd iimtmania
 
 # Create and activate virtual environment
 python -m venv venv
@@ -84,121 +82,107 @@ python -m venv venv
 pip install -r requirements.txt
 ```
 
-### 3. Configure Environment Variables
-Copy `.env.example` to `.env`:
+### 3. Initialize Environment & Seed Data
 ```powershell
+# Copy sample configuration
 cp .env.example .env
-```
-*(By default, `.env` runs with SQLite and the console email backend so OTP passcodes print directly to your terminal).*
 
-### 4. Run Migrations & Seed Sample Data
-```powershell
+# Run database migrations
 python manage.py migrate
+
+# Seed sample institutional users & courses
 python manage.py seed_data
 ```
 
-### 5. Launch the Server
+### 4. Compile Static Assets & Launch
 ```powershell
+python manage.py collectstatic --noinput
 python manage.py runserver
 ```
-Visit `http://127.0.0.1:8000/` in your browser.
+Visit `http://127.0.0.1:8000/` to experience **IIMTMANIA**!
 
 ---
 
-## 🧪 Demo Login Accounts (1-Click Fill)
+## 🧪 Demo Institutional Accounts (1-Click Fill)
 
-The login screen at `/login/` contains **1-Click Test Demo Account** buttons:
+On the login page (`/login/`), convenient 1-click buttons auto-fill pre-seeded demo accounts:
 
-| Role | Email Address | Description |
+| Role | Email Address | Access Level |
 | :--- | :--- | :--- |
-| **Administrator** | `admin@iimtindia.net` | Institutional Administrator & Dean |
-| **Teacher** | `alan.turing@iimtindia.net` | Dr. Alan Turing (Computer Science HOD) |
-| **Student** | `student.alice@iimtindia.net` | Alice Smith (B.Tech CSE Student) |
+| **Administrator** | `admin@iimtindia.net` | Full Institutional Leadership & Console |
+| **Faculty** | `alan.turing@iimtindia.net` | Course Management & Attendance Evaluation |
+| **Student** | `student.alice@iimtindia.net` | Course Enrollment, Attendance & Tasks |
 
-*When running locally, click **Send Verification Code**, then view the 6-digit code printed in your server terminal output!*
+*In local development (`EMAIL_BACKEND = console`), the 6-digit OTP code prints directly in your running terminal!*
 
 ---
 
 ## 📦 Production Deployment Guide
 
-The codebase is 100% cloud-ready with zero additional configuration needed.
-
-### Option 1: Deploy on Render (Recommended)
-1. Fork or push this repository to your GitHub account.
-2. In the Render Dashboard, click **New +** > **Blueprint**.
-3. Select your repository. Render will automatically detect [`render.yaml`](render.yaml) and provision:
-   - Web Service with Python & Gunicorn
+### Option 1: Render (Recommended Blueprint)
+1. Fork or push this repository to GitHub.
+2. In Render, select **New +** > **Blueprint**.
+3. Choose your repository. Render reads [`render.yaml`](render.yaml) and provisions:
+   - Python Web Service running Gunicorn
    - Managed PostgreSQL Database
-   - Auto-migration build commands
-   - Environment variables
-4. Click **Apply** to deploy!
+   - Build command: `pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate`
+4. Click **Apply** to deploy.
 
-### Option 2: Deploy with Docker & Docker Compose
-The project includes a multi-stage production [`Dockerfile`](Dockerfile) and [`docker-compose.yml`](docker-compose.yml) configured with PostgreSQL:
+### Option 2: Docker & Docker Compose
+The repository includes a production multi-stage [`Dockerfile`](Dockerfile) and [`docker-compose.yml`](docker-compose.yml):
 
 ```bash
-# Build and launch containers
+# Launch application & PostgreSQL database
 docker compose up -d --build
 
-# Run initial migrations and seed demo data
+# Run migrations and seed data
 docker compose exec web python manage.py migrate
 docker compose exec web python manage.py seed_data
 ```
 The application will be live at `http://localhost:8000`.
 
-### Option 3: Deploy on Railway
-1. Click **New Project** > **Deploy from GitHub repo**.
-2. Add a **PostgreSQL** database service.
-3. In the Web service settings, set the environment variables from `.env.example` (Railway automatically provides `DATABASE_URL`).
-4. Railway will automatically detect the [`Procfile`](Procfile) and launch Gunicorn.
+### Option 3: Heroku / Railway / VPS
+The repository includes a production [`Procfile`](Procfile) containing:
+```
+web: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+```
+Automatic database resolution is handled via `dj-database-url` reading `DATABASE_URL`.
 
 ---
 
-## 🐙 How to Publish on GitHub
-
-Follow these steps to publish this repository to your GitHub account:
+## 🐙 Publishing to GitHub
 
 ```bash
-# 1. Initialize git repository (if not already initialized)
-git init
-
-# 2. Add all files
+# 1. Stage all changes
 git add .
 
-# 3. Commit changes
-git commit -m "feat: Initial release of IIMT UNIVERSITY Academic Management System"
+# 2. Commit with descriptive message
+git commit -m "feat: IIMTMANIA — Dark Liquid Glass UI/UX Transformation & Production Deployment Engine"
 
-# 4. Set the main branch
+# 3. Ensure branch is main
 git branch -M main
 
-# 5. Link your GitHub remote repository
-# Replace <your-username> with your GitHub username
-git remote add origin https://github.com/<your-username>/iimt-university-ams.git
+# 4. Link to your GitHub remote
+# (Replace <your-username> with your GitHub username)
+git remote add origin https://github.com/<your-username>/iimtmania.git
 
-# 6. Push to GitHub
+# 5. Push to GitHub
 git push -u origin main
 ```
 
 ---
 
-## 🧪 Running Automated Tests
+## 🧪 Verification & Automated Testing
 
-Run the comprehensive 21-scenario test suite verifying RBAC, OTP authentication, rate limiting, and regulatory compliance:
+Run the full 21-scenario test suite verifying RBAC, OTP cryptographic lifecycle, and legal compliance:
 
 ```powershell
-# Run the entire test suite
 python manage.py test
-
-# Run only the OTP authentication tests
-python manage.py test accounts
-
-# Run only the compliance & legal tests
-python manage.py test compliance
 ```
 
 ---
 
-## 📄 License & Attribution
+## 📄 License & Institutional Accreditation
 
-This project is open-source software licensed under the [MIT License](LICENSE).  
-Developed for **IIMT UNIVERSITY** — *Transforming Education, Empowering Minds*.
+Licensed under the [MIT License](LICENSE).  
+Official platform for **IIMT UNIVERSITY**, Meerut, Uttar Pradesh, India.

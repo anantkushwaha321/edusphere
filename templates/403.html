@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}403 — Access Restricted | IIMTMANIA{% endblock %}
+
+{% block content %}
+<div class="min-h-[60vh] flex items-center justify-center p-4">
+    <div class="glass-panel spotlight-card max-w-lg w-full text-center p-8 sm:p-12 rounded-3xl border border-white/10 space-y-6">
+        <div class="inline-flex w-16 h-16 rounded-2xl bg-amber-500/20 text-amber-400 items-center justify-center text-3xl font-black border border-amber-500/30">
+            🔒
+        </div>
+        <div class="space-y-2">
+            <span class="badge-glass badge-glass-amber text-xs font-mono font-bold">ERROR 403</span>
+            <h1 class="text-3xl sm:text-4xl font-black text-white">Access Restricted</h1>
+            <p class="text-xs sm:text-sm text-slate-300 max-w-md mx-auto leading-relaxed">
+                You do not possess the necessary institutional role clearance to access this academic partition.
+            </p>
+        </div>
+        <div class="pt-4 flex flex-wrap items-center justify-center gap-3">
+            <a href="{% if request.user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="glass-btn glass-btn-primary px-6 py-2.5 rounded-xl text-xs font-bold inline-flex items-center space-x-1.5">
+                <span>&larr; Return to Dashboard</span>
+            </a>
+            <a href="{% url 'profile' %}" class="glass-btn glass-btn-secondary px-5 py-2.5 rounded-xl text-xs font-semibold">
+                <span>View My Role</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-[#070A13] text-[#F5F7FF]">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>500 — Server Incident | IIMTMANIA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{% static 'css/design-system.css' %}">
+    <link rel="stylesheet" href="{% static 'css/liquid-glass.css' %}">
+</head>
+<body class="min-h-full flex items-center justify-center p-4 bg-[#070A13] text-[#F5F7FF] font-sans antialiased relative">
+    <div class="glass-panel max-w-lg w-full text-center p-8 sm:p-12 rounded-3xl border border-white/10 space-y-6 shadow-2xl relative z-10">
+        <div class="inline-flex w-16 h-16 rounded-2xl bg-rose-500/20 text-rose-400 items-center justify-center text-3xl font-black border border-rose-500/30">
+            ⚠️
+        </div>
+        <div class="space-y-2">
+            <span class="badge-glass badge-glass-rose text-xs font-mono font-bold">ERROR 500</span>
+            <h1 class="text-3xl sm:text-4xl font-black text-white">System Error</h1>
+            <p class="text-xs sm:text-sm text-slate-300 max-w-md mx-auto leading-relaxed">
+                An unexpected condition was encountered on the campus cluster. The incident has been logged for engineering review.
+            </p>
+        </div>
+        <div class="pt-4 flex flex-wrap items-center justify-center gap-3">
+            <a href="/" class="glass-btn glass-btn-primary px-6 py-2.5 rounded-xl text-xs font-bold inline-flex items-center space-x-1.5">
+                <span>&larr; Return to Home</span>
+            </a>
+            <a href="mailto:privacy@iimtindia.net" class="glass-btn glass-btn-secondary px-5 py-2.5 rounded-xl text-xs font-semibold">
+                <span>Contact Support</span>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

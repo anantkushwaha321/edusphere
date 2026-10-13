@@ -1,68 +1,78 @@
 {% extends 'base.html' %}
 
-{% block title %}Student Dashboard — IIMT UNIVERSITY{% endblock %}
-{% block header_title %}Student Portal (Semester {{ student.current_semester }}){% endblock %}
+{% block title %}Student Dashboard — IIMTMANIA | IIMT UNIVERSITY{% endblock %}
 
 {% block content %}
 <div class="space-y-8">
-    <!-- Header Welcome Banner -->
-    <div class="bg-gradient-to-r from-indigo-700 via-indigo-600 to-violet-700 rounded-2xl p-6 sm:p-8 text-white shadow-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <span class="text-xs font-bold uppercase tracking-wider text-indigo-200">Department of {{ student.department.name|default:"General Studies" }}</span>
-            <h2 class="text-2xl font-black mt-1">Hello, {{ request.user.first_name }}! 👋</h2>
-            <p class="text-sm text-indigo-100 mt-1">Roll No: <span class="font-bold">{{ student.roll_number }}</span> &bull; Academic Year: <span class="font-bold">{{ student.academic_year.name|default:"2026-2027" }}</span></p>
+    <!-- Header Welcome Banner (Dark Liquid Glass) -->
+    <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-white/10 relative overflow-hidden flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="relative z-10">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-card border-blue-500/30 text-[10px] font-bold text-blue-300 mb-2">
+                <span>Department of {{ student.department.name|default:"General Studies" }}</span>
+                <span>•</span>
+                <span>Semester {{ student.current_semester }}</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-black text-white">Hello, {{ request.user.first_name }}! 👋</h1>
+            <p class="text-xs text-slate-300 mt-1">
+                Roll No: <span class="font-mono text-blue-300 font-bold">{{ student.roll_number }}</span> &bull; 
+                Session: <span class="text-slate-300">{{ student.academic_year.name|default:"2026-2027" }}</span>
+            </p>
         </div>
-        <div>
-            <a href="{% url 'my_report_card' %}" class="inline-flex items-center px-4 py-2.5 bg-white text-indigo-900 hover:bg-indigo-50 font-bold rounded-xl text-sm transition-all shadow-md">
-                📄 View Full Report Card &rarr;
+        <div class="relative z-10 flex flex-wrap items-center gap-3">
+            <a href="{% url 'my_report_card' %}" class="glass-btn glass-btn-primary px-4 py-2.5 rounded-xl text-xs font-bold inline-flex items-center space-x-2">
+                <span>📄 Full Report Card</span>
+                <span aria-hidden="true">&rarr;</span>
+            </a>
+            <a href="{% url 'attendance_dashboard' %}" class="glass-btn glass-btn-secondary px-4 py-2.5 rounded-xl text-xs font-semibold">
+                <span>Attendance Log</span>
             </a>
         </div>
     </div>
 
-    <!-- Student KPI Cards -->
+    <!-- Student KPI Cards (Spotlight Liquid Cards) -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div class="glass-card spotlight-card p-5 rounded-2xl flex items-center justify-between">
             <div>
-                <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Enrolled Courses</p>
-                <h3 class="text-2xl font-extrabold text-slate-900 mt-1">{{ enrollments.count }}</h3>
-                <span class="text-xs text-indigo-600 font-medium">Current Semester</span>
+                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Enrolled Courses</p>
+                <h3 class="text-3xl font-black text-white mt-1">{{ enrollments.count }}</h3>
+                <span class="text-xs text-blue-400 font-medium">Active Semester</span>
             </div>
-            <div class="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg font-bold">
+            <div class="w-12 h-12 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-xl font-bold border border-blue-500/30">
                 📚
             </div>
         </div>
 
-        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div class="glass-card spotlight-card p-5 rounded-2xl flex items-center justify-between">
             <div>
-                <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">My Attendance</p>
-                <h3 class="text-2xl font-extrabold {% if attendance_pct >= 75 %}text-emerald-600{% else %}text-amber-600{% endif %} mt-1">{{ attendance_pct }}%</h3>
-                <span class="text-xs {% if attendance_pct >= 75 %}text-emerald-600{% else %}text-amber-600{% endif %} font-medium">
-                    {% if attendance_pct >= 75 %}Compliant{% else %}⚠️ Below 75% Warning{% endif %}
+                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Attendance Rate</p>
+                <h3 class="text-3xl font-black {% if attendance_pct >= 75 %}text-emerald-400{% else %}text-amber-400{% endif %} mt-1">{{ attendance_pct }}%</h3>
+                <span class="text-xs {% if attendance_pct >= 75 %}text-emerald-400{% else %}text-amber-400{% endif %} font-medium">
+                    {% if attendance_pct >= 75 %}✓ Statutory Compliant{% else %}⚠️ Below 75% Warning{% endif %}
                 </span>
             </div>
-            <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg font-bold">
+            <div class="w-12 h-12 rounded-xl {% if attendance_pct >= 75 %}bg-emerald-500/20 text-emerald-400 border border-emerald-500/30{% else %}bg-amber-500/20 text-amber-400 border border-amber-500/30{% endif %} flex items-center justify-center text-xl font-bold">
                 📅
             </div>
         </div>
 
-        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div class="glass-card spotlight-card p-5 rounded-2xl flex items-center justify-between">
             <div>
-                <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Upcoming Due</p>
-                <h3 class="text-2xl font-extrabold text-slate-900 mt-1">{{ upcoming_assignments.count }}</h3>
-                <span class="text-xs text-slate-500 font-medium">Open Tasks</span>
+                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Upcoming Due</p>
+                <h3 class="text-3xl font-black text-white mt-1">{{ upcoming_assignments.count }}</h3>
+                <span class="text-xs text-cyan-400 font-medium">Open Tasks</span>
             </div>
-            <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg font-bold">
+            <div class="w-12 h-12 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xl font-bold border border-cyan-500/30">
                 ⏳
             </div>
         </div>
 
-        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div class="glass-card spotlight-card p-5 rounded-2xl flex items-center justify-between">
             <div>
-                <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Evaluated Tasks</p>
-                <h3 class="text-2xl font-extrabold text-slate-900 mt-1">{{ recent_grades.count }}</h3>
-                <span class="text-xs text-purple-600 font-medium">Grades Published</span>
+                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Evaluated Tasks</p>
+                <h3 class="text-3xl font-black text-white mt-1">{{ recent_grades.count }}</h3>
+                <span class="text-xs text-violet-400 font-medium">Grades Published</span>
             </div>
-            <div class="w-11 h-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg font-bold">
+            <div class="w-12 h-12 rounded-xl bg-violet-500/20 text-violet-400 flex items-center justify-center text-xl font-bold border border-violet-500/30">
                 🎖️
             </div>
         </div>
@@ -71,32 +81,32 @@
     <!-- Enrolled Courses Grid -->
     <div>
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold text-slate-900">My Registered Courses</h3>
-            <a href="{% url 'course_list' %}" class="text-xs text-indigo-600 font-semibold hover:underline">View All Courses</a>
+            <h2 class="text-lg font-bold text-white">Registered Courses</h2>
+            <a href="{% url 'course_list' %}" class="text-xs text-blue-400 hover:text-blue-300 font-semibold">View All Courses &rarr;</a>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for enrollment in enrollments %}
-            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 flex flex-col justify-between hover:shadow-md transition-all">
+            <div class="glass-card spotlight-card p-6 rounded-2xl flex flex-col justify-between hover-lift">
                 <div>
                     <div class="flex items-center justify-between mb-3">
-                        <span class="text-xs font-bold px-2.5 py-1 rounded bg-indigo-50 text-indigo-700">{{ enrollment.course.code }}</span>
-                        <span class="text-xs text-slate-500 font-medium">{{ enrollment.course.credits }} Credits</span>
+                        <span class="badge-glass badge-glass-blue text-xs font-mono font-bold">{{ enrollment.course.code }}</span>
+                        <span class="text-xs text-slate-400 font-medium">{{ enrollment.course.credits }} Credits</span>
                     </div>
-                    <h4 class="text-base font-bold text-slate-900">{{ enrollment.course.name }}</h4>
-                    <p class="text-xs text-slate-500 mt-1">Instructor: <span class="font-medium text-slate-700">{{ enrollment.course.teacher.user.get_full_name|default:"TBA" }}</span></p>
+                    <h3 class="text-base font-bold text-white">{{ enrollment.course.name }}</h3>
+                    <p class="text-xs text-slate-400 mt-1">Instructor: <span class="font-medium text-slate-200">{{ enrollment.course.teacher.user.get_full_name|default:"TBA" }}</span></p>
                 </div>
-                <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
-                    <a href="{% url 'course_detail' pk=enrollment.course.id %}" class="text-xs font-bold text-indigo-600 hover:text-indigo-800">
-                        View Course Details &rarr;
+                <div class="mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-xs">
+                    <a href="{% url 'course_detail' pk=enrollment.course.id %}" class="font-bold text-blue-400 hover:text-blue-300">
+                        Course Hub &rarr;
                     </a>
-                    <a href="{% url 'material_list' %}?course={{ enrollment.course.id }}" class="text-xs font-semibold text-slate-500 hover:text-slate-800">
+                    <a href="{% url 'material_list' %}?course={{ enrollment.course.id }}" class="text-slate-400 hover:text-white transition-colors">
                         Study Notes
                     </a>
                 </div>
             </div>
             {% empty %}
-            <div class="col-span-3 bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-500">
-                You are not currently enrolled in any courses. Please contact the administrator.
+            <div class="col-span-3 glass-card p-8 rounded-2xl text-center text-slate-400">
+                You are not currently enrolled in any active courses. Contact academic administration.
             </div>
             {% endfor %}
         </div>
@@ -105,62 +115,62 @@
     <!-- Upcoming Assignments & Recent Grades Row -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <!-- Upcoming Assignments -->
-        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
-            <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center justify-between">
-                <span>Upcoming Assignment Deadlines</span>
-                <a href="{% url 'assignment_list' %}" class="text-xs text-indigo-600 hover:underline font-semibold">All Assignments</a>
-            </h3>
-            <div class="divide-y divide-slate-100">
+        <div class="glass-card p-6 rounded-2xl">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-base font-bold text-white">Upcoming Assignment Deadlines</h3>
+                <a href="{% url 'assignment_list' %}" class="text-xs text-blue-400 hover:text-blue-300 font-semibold">All Assignments &rarr;</a>
+            </div>
+            <div class="divide-y divide-white/10">
                 {% for a in upcoming_assignments %}
-                <div class="py-3 flex items-center justify-between">
-                    <div class="overflow-hidden pr-2">
-                        <span class="text-xs font-bold text-indigo-600">{{ a.course.code }}</span>
-                        <h5 class="text-sm font-semibold text-slate-800 truncate">{{ a.title }}</h5>
-                        <p class="text-xs text-slate-500 mt-0.5">Due: {{ a.due_date|date:"M d, Y H:i" }} ({{ a.max_marks }} marks)</p>
+                <div class="py-3.5 flex items-center justify-between gap-3">
+                    <div class="overflow-hidden min-w-0 pr-2">
+                        <span class="badge-glass badge-glass-blue text-[10px] font-mono">{{ a.course.code }}</span>
+                        <h4 class="text-sm font-semibold text-white truncate mt-1">{{ a.title }}</h4>
+                        <p class="text-xs text-slate-400 mt-0.5">Due: {{ a.due_date|date:"M d, Y H:i" }} &bull; Max: {{ a.max_marks }} marks</p>
                     </div>
-                    <div>
+                    <div class="flex-shrink-0">
                         {% if a.is_submitted %}
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span class="badge-glass badge-glass-emerald text-xs">
                             Submitted
                         </span>
                         {% else %}
-                        <a href="{% url 'assignment_detail' pk=a.id %}" class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition-all">
+                        <a href="{% url 'assignment_detail' pk=a.id %}" class="glass-btn glass-btn-primary px-3 py-1.5 rounded-lg text-xs font-bold inline-flex items-center">
                             Submit &rarr;
                         </a>
                         {% endif %}
                     </div>
                 </div>
                 {% empty %}
-                <p class="text-sm text-slate-500 py-4 text-center">🎉 No upcoming assignments due!</p>
+                <p class="text-xs text-slate-400 py-6 text-center">🎉 No upcoming assignments due at this time!</p>
                 {% endfor %}
             </div>
         </div>
 
         <!-- Recent Grades -->
-        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
-            <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center justify-between">
-                <span>Recent Grades & Feedback</span>
-                <a href="{% url 'my_report_card' %}" class="text-xs text-indigo-600 hover:underline font-semibold">Report Card</a>
-            </h3>
-            <div class="divide-y divide-slate-100">
+        <div class="glass-card p-6 rounded-2xl">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-base font-bold text-white">Recent Evaluations & Feedback</h3>
+                <a href="{% url 'my_report_card' %}" class="text-xs text-blue-400 hover:text-blue-300 font-semibold">Report Card &rarr;</a>
+            </div>
+            <div class="divide-y divide-white/10">
                 {% for sub in recent_grades %}
-                <div class="py-3 flex items-start justify-between">
-                    <div class="pr-2">
-                        <span class="text-xs font-bold text-indigo-600">{{ sub.assignment.course.code }}</span>
-                        <h5 class="text-sm font-semibold text-slate-800">{{ sub.assignment.title }}</h5>
+                <div class="py-3.5 flex items-start justify-between gap-3">
+                    <div class="min-w-0 pr-2">
+                        <span class="badge-glass badge-glass-blue text-[10px] font-mono">{{ sub.assignment.course.code }}</span>
+                        <h4 class="text-sm font-semibold text-white mt-1">{{ sub.assignment.title }}</h4>
                         {% if sub.feedback %}
-                        <p class="text-xs text-slate-600 mt-1 italic bg-slate-50 p-2 rounded-lg border border-slate-100">"{{ sub.feedback }}"</p>
+                        <p class="text-xs text-slate-300 mt-1 italic glass-card p-2 rounded-lg border-white/5">"{{ sub.feedback }}"</p>
                         {% endif %}
                     </div>
                     <div class="text-right flex-shrink-0">
-                        <span class="inline-block text-sm font-black px-2.5 py-0.5 rounded-lg bg-indigo-100 text-indigo-800">
+                        <span class="inline-block text-xs font-black px-2.5 py-1 rounded-lg bg-blue-500/20 text-blue-300 border border-blue-500/30">
                             {{ sub.marks_obtained }}/{{ sub.assignment.max_marks }}
                         </span>
-                        <span class="block text-xs font-bold text-slate-500 mt-1">Grade: {{ sub.letter_grade }}</span>
+                        <span class="block text-[11px] font-bold text-slate-400 mt-1">Grade: {{ sub.letter_grade }}</span>
                     </div>
                 </div>
                 {% empty %}
-                <p class="text-sm text-slate-500 py-4 text-center">No graded assignments yet.</p>
+                <p class="text-xs text-slate-400 py-6 text-center">No graded submissions posted yet.</p>
                 {% endfor %}
             </div>
         </div>
