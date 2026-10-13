@@ -139,8 +139,15 @@ def dispatch_otp_email(email: str, otp_code: str, purpose: str, user_name: Optio
     try:
         msg.send(fail_silently=False)
         logger.info(f"Verification OTP email dispatched successfully to {email}")
-        if 'console.EmailBackend' in backend or (settings.DEBUG and not getattr(settings, 'IS_RUNNING_TESTS', False)):
-            # Print prominent console banner for easy developer testing
+        if 'smtp.EmailBackend' in backend:
+            print(f"\n[REAL MAILBOX DELIVERY - SMTP] ==============================")
+            print(f" Recipient Email : {email}")
+            print(f" Dispatched Via  : {settings.EMAIL_HOST}:{settings.EMAIL_PORT}")
+            print(f" Sender Address  : {from_email}")
+            print(f" Status          : Sent to user inbox successfully")
+            print(f"==============================================================\n")
+        elif 'console.EmailBackend' in backend or (settings.DEBUG and not getattr(settings, 'IS_RUNNING_TESTS', False)):
+            # Print console banner for developer testing
             print(f"\n[DEV MODE - CONSOLE BACKEND] ========================================")
             print(f" Target User Email : {email}")
             print(f" 6-Digit OTP Code  : {otp_code}")
