@@ -1,6 +1,8 @@
 import secrets
 import logging
 import datetime
+import smtplib
+import socket
 from typing import Optional, Tuple
 from django.utils import timezone
 from django.conf import settings
@@ -96,6 +98,10 @@ def dispatch_otp_email(email: str, otp_code: str, purpose: str, user_name: Optio
     subject = f"Your IIMT UNIVERSITY Verification Code: {otp_code}"
     from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'IIMT UNIVERSITY Security <no-reply@iimtindia.net>')
 
+    host_user = getattr(settings, 'EMAIL_HOST_USER', '').strip()
+    if host_user and ('@gmail.com' in host_user) and ('no-reply' in from_email or 'iimtindia.net' in from_email):
+        from_email = f"IIMT UNIVERSITY Security <{host_user}>"
+
     context = {
         'otp_code': otp_code,
         'purpose': purpose,
@@ -119,16 +125,55 @@ def dispatch_otp_email(email: str, otp_code: str, purpose: str, user_name: Optio
     )
     msg.attach_alternative(html_message, "text/html")
 
+    # If SMTP backend is selected, check that credentials have been configured
+    backend = getattr(settings, 'EMAIL_BACKEND', '')
+    if 'smtp.EmailBackend' in backend:
+        if not host_user or not getattr(settings, 'EMAIL_HOST_PASSWORD', '').strip():
+            logger.error("SMTP backend is active but EMAIL_HOST_USER or EMAIL_HOST_PASSWORD is missing in .env.")
+            raise OTPError(
+                "SMTP email delivery is active, but EMAIL_HOST_USER and EMAIL_HOST_PASSWORD are not configured in your .env file. Please add your email credentials (e.g. Gmail App Password) to deliver verification codes to real user mailboxes.",
+                code="smtp_credentials_missing",
+                status_code=503
+            )
+
     try:
         msg.send(fail_silently=False)
+        logger.info(f"Verification OTP email dispatched successfully to {email}")
+        if 'console.EmailBackend' in backend or (settings.DEBUG and not getattr(settings, 'IS_RUNNING_TESTS', False)):
+            # Print prominent console banner for easy developer testing
+            print(f"\n[DEV MODE - CONSOLE BACKEND] ========================================")
+            print(f" Target User Email : {email}")
+            print(f" 6-Digit OTP Code  : {otp_code}")
+            print(f" Expires In        : {OTP_EXPIRY_MINUTES} minutes")
+            print(f" Purpose           : {purpose}")
+            print(f"====================================================================\n")
         return True
+    except smtplib.SMTPAuthenticationError as e:
+        logger.error(f"SMTP Authentication failure sending to {email}: {e}")
+        raise OTPError(
+            "SMTP authentication failed. If you are using Gmail, please use a 16-character Google App Password (not your normal Gmail account password) from https://myaccount.google.com/apppasswords.",
+            code="smtp_auth_failed",
+            status_code=500
+        )
+    except smtplib.SMTPSenderRefused as e:
+        logger.error(f"SMTP Sender refused sending to {email}: {e}")
+        raise OTPError(
+            f"SMTP sender was rejected: {e.smtp_error.decode() if hasattr(e.smtp_error, 'decode') else str(e)}.",
+            code="smtp_sender_refused",
+            status_code=500
+        )
+    except (socket.timeout, TimeoutError) as e:
+        logger.error(f"SMTP timeout dispatching to {email}: {e}")
+        raise OTPError(
+            "SMTP connection timed out while sending verification email. Please check your internet connection and EMAIL_HOST/EMAIL_PORT settings.",
+            code="smtp_timeout",
+            status_code=504
+        )
     except Exception as e:
         logger.error(f"Failed to dispatch OTP email to {email}: {e}")
-        # If in debug mode or testing, let console output be captured or log gracefully
-        if settings.DEBUG:
-            return True
+        # Note: locmem.EmailBackend in unit tests won't raise exceptions.
         raise OTPError(
-            "Unable to deliver verification email at this moment. Please check your address or contact support.",
+            f"Unable to deliver verification email: {str(e)}",
             code="delivery_failed",
             status_code=500
         )

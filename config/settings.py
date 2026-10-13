@@ -177,18 +177,33 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 15728640
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Email Delivery Configuration (SMTP with Console fallback for development)
-EMAIL_BACKEND = os.getenv(
-    'EMAIL_BACKEND',
-    'django.core.mail.backends.console.EmailBackend' if DEBUG else 'django.core.mail.backends.smtp.EmailBackend'
-)
 EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '').strip()
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '').strip()
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() in ('true', '1', 'yes')
 EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'False').lower() in ('true', '1', 'yes')
 EMAIL_TIMEOUT = int(os.getenv('EMAIL_TIMEOUT', '10'))
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'IIMT UNIVERSITY Security <no-reply@iimtindia.net>')
+
+# Smart backend selection: SMTP backend when EMAIL_BACKEND is explicitly set to smtp
+# or when EMAIL_HOST_USER is provided.
+_default_backend = (
+    'django.core.mail.backends.smtp.EmailBackend'
+    if EMAIL_HOST_USER else
+    'django.core.mail.backends.console.EmailBackend'
+)
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', _default_backend)
+
+# Smart DEFAULT_FROM_EMAIL:
+# Gmail and many SMTP providers reject emails if the From header doesn't match the authenticated user.
+_configured_from = os.getenv('DEFAULT_FROM_EMAIL', '').strip()
+if _configured_from and ('no-reply@iimtindia.net' not in _configured_from or not EMAIL_HOST_USER):
+    DEFAULT_FROM_EMAIL = _configured_from
+elif EMAIL_HOST_USER:
+    DEFAULT_FROM_EMAIL = f"IIMT UNIVERSITY Security <{EMAIL_HOST_USER}>"
+else:
+    DEFAULT_FROM_EMAIL = 'IIMT UNIVERSITY Security <no-reply@iimtindia.net>'
+
 
 # Session & Cookie Security
 SESSION_COOKIE_HTTPONLY = True
