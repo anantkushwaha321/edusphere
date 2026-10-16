@@ -217,9 +217,11 @@ elif EMAIL_HOST_USER:
 else:
     DEFAULT_FROM_EMAIL = 'IIMT UNIVERSITY Security <no-reply@iimtindia.net>'
 
-# HTTP-based Email Delivery (Resend API - Port 443, immune to cloud SMTP port blocking)
+# HTTP-based Email Delivery (Resend & Brevo APIs - Port 443, immune to cloud SMTP port blocking)
 RESEND_API_KEY = os.getenv('RESEND_API_KEY', '').strip()
 RESEND_FROM_EMAIL = os.getenv('RESEND_FROM_EMAIL', '').strip()
+BREVO_API_KEY = os.getenv('BREVO_API_KEY', '').strip()
+BREVO_FROM_EMAIL = os.getenv('BREVO_FROM_EMAIL', '').strip()
 
 
 # Session & Cookie Security

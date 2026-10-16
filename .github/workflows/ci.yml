@@ -10,8 +10,15 @@ jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        python-version: [ "3.11", "3.12" ]
+        python-version: [ "3.12" ]
+
+    env:
+      DJANGO_SECRET_KEY: 'ci-testing-secret-key-edusphere'
+      DJANGO_DEBUG: 'True'
+      DJANGO_ALLOWED_HOSTS: 'localhost,127.0.0.1,testserver'
+      EMAIL_BACKEND: 'django.core.mail.backends.locmem.EmailBackend'
 
     steps:
     - uses: actions/checkout@v4

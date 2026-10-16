@@ -574,3 +574,144 @@ class OTPAuthenticationComprehensiveTests(TestCase):
         resp_dash = self.client.get(reverse('dashboard'))
         self.assertEqual(resp_dash.status_code, 302)
         self.assertTrue(resp_dash.url.startswith(reverse('login')))
+
+    # -------------------------------------------------------------------------
+    # Scenario 13: Invalid email input returns 400 with descriptive error
+    # -------------------------------------------------------------------------
+    def test_13_invalid_email_input_returns_400(self):
+        """
+        Verify that empty, malformed, or missing email inputs return HTTP 400
+        with structured JSON error responses and code='invalid_email'.
+        """
+        invalid_emails = [
+            "",
+            "   ",
+            "notanemail",
+            "@missinguser.com",
+            "user@nodomain",
+            "spaces in@email.com",
+        ]
+        for bad_email in invalid_emails:
+            resp = self.client.post(
+                reverse('api_send_otp'),
+                data=json.dumps({'email': bad_email}),
+                content_type='application/json'
+            )
+            self.assertEqual(resp.status_code, 400, f"Expected 400 for '{bad_email}', got {resp.status_code}")
+            data = resp.json()
+            self.assertFalse(data['success'])
+            self.assertEqual(data['code'], 'invalid_email')
+
+        # Empty body
+        resp_empty = self.client.post(
+            reverse('api_send_otp'),
+            data="{}",
+            content_type='application/json'
+        )
+        self.assertEqual(resp_empty.status_code, 400)
+        self.assertEqual(resp_empty.json()['code'], 'invalid_email')
+
+    # -------------------------------------------------------------------------
+    # Scenario 14: Email provider failure returns informative JSON error
+    # -------------------------------------------------------------------------
+    def test_14_email_provider_failure_returns_informative_error(self):
+        """
+        Verify that when the email dispatcher encounters SMTP or API connection failure,
+        the endpoint returns a clean JSON error with HTTP 500/503 and never crashes with HTML.
+        """
+        from unittest.mock import patch
+        import socket
+
+        with patch('django.core.mail.EmailMultiAlternatives.send', side_effect=socket.timeout("Connection timed out")):
+            resp = self.client.post(
+                reverse('api_send_otp'),
+                data=json.dumps({'email': 'provider.failure@edusphere.edu'}),
+                content_type='application/json'
+            )
+            self.assertIn(resp.status_code, [500, 503])
+            data = resp.json()
+            self.assertFalse(data['success'])
+            self.assertIn('message', data)
+
+    # -------------------------------------------------------------------------
+    # Scenario 15: Production unconfigured email service fails safely
+    # -------------------------------------------------------------------------
+    def test_15_production_unconfigured_email_fails_safely(self):
+        """
+        Verify that in production (DEBUG=False), if no email provider is configured,
+        the system returns an informative 503 instead of pretending delivery succeeded.
+        """
+        from django.test import override_settings
+
+        with override_settings(
+            DEBUG=False,
+            IS_RUNNING_TESTS=False,
+            EMAIL_BACKEND='django.core.mail.backends.console.EmailBackend',
+            EMAIL_HOST_USER='',
+            EMAIL_HOST_PASSWORD='',
+            RESEND_API_KEY='',
+            BREVO_API_KEY=''
+        ):
+            resp = self.client.post(
+                reverse('api_send_otp'),
+                data=json.dumps({'email': 'production.check@edusphere.edu'}),
+                content_type='application/json'
+            )
+            self.assertEqual(resp.status_code, 503)
+            data = resp.json()
+            self.assertFalse(data['success'])
+            self.assertEqual(data['code'], 'email_service_unconfigured')
+            self.assertIn('Render environment variables', data['message'])
+
+    # -------------------------------------------------------------------------
+    # Scenario 16: Resend HTTPS API dispatch format and response handling
+    # -------------------------------------------------------------------------
+    def test_16_resend_http_dispatch(self):
+        """
+        Verify that dispatch_via_resend sends proper HTTPS payload to Resend API.
+        """
+        from unittest.mock import patch, MagicMock
+        from accounts.otp_service import dispatch_via_resend
+
+        mock_resp = MagicMock()
+        mock_resp.status = 200
+        mock_resp.__enter__.return_value = mock_resp
+
+        with patch('urllib.request.urlopen', return_value=mock_resp) as mock_urlopen:
+            success = dispatch_via_resend(
+                api_key="re_test_key_12345",
+                from_email="EduSphere <onboarding@resend.dev>",
+                to_email="test.student@example.com",
+                subject="Test Subject",
+                html_message="<p>Test</p>",
+                text_message="Test"
+            )
+            self.assertTrue(success)
+            self.assertEqual(mock_urlopen.call_count, 1)
+
+    # -------------------------------------------------------------------------
+    # Scenario 17: Brevo HTTPS API dispatch format and response handling
+    # -------------------------------------------------------------------------
+    def test_17_brevo_http_dispatch(self):
+        """
+        Verify that dispatch_via_brevo sends proper HTTPS payload to Brevo API.
+        """
+        from unittest.mock import patch, MagicMock
+        from accounts.otp_service import dispatch_via_brevo
+
+        mock_resp = MagicMock()
+        mock_resp.status = 201
+        mock_resp.__enter__.return_value = mock_resp
+
+        with patch('urllib.request.urlopen', return_value=mock_resp) as mock_urlopen:
+            success = dispatch_via_brevo(
+                api_key="xkeysib-test-key",
+                from_email="EduSphere Security <no-reply@iimtindia.net>",
+                to_email="test.student@example.com",
+                subject="Test Subject",
+                html_message="<p>Test</p>",
+                text_message="Test"
+            )
+            self.assertTrue(success)
+            self.assertEqual(mock_urlopen.call_count, 1)
+

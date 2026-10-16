@@ -142,8 +142,61 @@ def dispatch_via_resend(api_key: str, from_email: str, to_email: str, subject: s
     return False
 
 
+def dispatch_via_brevo(api_key: str, from_email: str, to_email: str, subject: str, html_message: str, text_message: str) -> bool:
+    """Dispatches email via Brevo HTTPS REST API (Port 443). Safe on Render free tier."""
+    import json
+    import urllib.request
+    import urllib.error
+
+    url = "https://api.brevo.com/v3/smtp/email"
+    headers = {
+        "api-key": api_key,
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "User-Agent": "EduSphere-Academic-PaaS/1.0",
+    }
+    # Parse sender email
+    sender_email = from_email
+    sender_name = "EduSphere Security"
+    if '<' in from_email and '>' in from_email:
+        parts = from_email.split('<')
+        sender_name = parts[0].strip() or sender_name
+        sender_email = parts[1].split('>')[0].strip()
+
+    payload = {
+        "sender": {"name": sender_name, "email": sender_email},
+        "to": [{"email": to_email}],
+        "subject": subject,
+        "htmlContent": html_message,
+        "textContent": text_message,
+    }
+    data = json.dumps(payload).encode('utf-8')
+    req = urllib.request.Request(url, data=data, headers=headers, method='POST')
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            if resp.status in (200, 201, 202):
+                logger.info(f"OTP successfully delivered via Brevo HTTPS API to {to_email}")
+                return True
+    except urllib.error.HTTPError as err:
+        err_msg = err.read().decode('utf-8', errors='ignore')
+        logger.error(f"Brevo HTTP error ({err.code}): {err_msg}")
+        raise OTPError(
+            f"Email delivery via Brevo API failed ({err.code}): {err_msg}",
+            code="brevo_api_failed",
+            status_code=502
+        )
+    except Exception as err:
+        logger.error(f"Brevo dispatch error: {err}")
+        raise OTPError(
+            f"Failed to communicate with Brevo email API: {err}",
+            code="brevo_connection_error",
+            status_code=502
+        )
+    return False
+
+
 def dispatch_otp_email(email: str, otp_code: str, purpose: str, user_name: Optional[str] = None) -> bool:
-    """Send formatted branded OTP email via Resend HTTPS API or Django's configured email backend."""
+    """Send formatted branded OTP email via Resend HTTPS API, Brevo HTTPS API, or Django's configured email backend."""
     subject = f"Your IIMT UNIVERSITY Verification Code: {otp_code}"
     from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'IIMT UNIVERSITY Security <no-reply@iimtindia.net>')
 
@@ -179,7 +232,31 @@ def dispatch_otp_email(email: str, otp_code: str, purpose: str, user_name: Optio
             text_message=text_message
         )
 
-    # 2. Second priority: Standard Django email backend (SMTP or Console)
+    # 2. Second priority: Brevo HTTPS REST API (Port 443 - works everywhere including Render Free Tier)
+    brevo_api_key = getattr(settings, 'BREVO_API_KEY', '').strip()
+    if brevo_api_key:
+        brevo_from = getattr(settings, 'BREVO_FROM_EMAIL', '').strip() or from_email
+        return dispatch_via_brevo(
+            api_key=brevo_api_key,
+            from_email=brevo_from,
+            to_email=email,
+            subject=subject,
+            html_message=html_message,
+            text_message=text_message
+        )
+
+    # 3. Third priority: Standard Django email backend (SMTP or Console)
+    # In production without email credentials, do NOT pretend email was sent via console
+    is_testing = getattr(settings, 'IS_RUNNING_TESTS', False) or 'locmem.EmailBackend' in getattr(settings, 'EMAIL_BACKEND', '')
+    if not settings.DEBUG and not is_testing:
+        if not host_user or not getattr(settings, 'EMAIL_HOST_PASSWORD', '').strip():
+            logger.error("No production email credentials configured in environment.")
+            raise OTPError(
+                "Email delivery service is unconfigured. Please configure EMAIL_HOST_USER and EMAIL_HOST_PASSWORD (for Gmail SMTP) or RESEND_API_KEY / BREVO_API_KEY (for HTTPS delivery) in your Render environment variables.",
+                code="email_service_unconfigured",
+                status_code=503
+            )
+
     msg = EmailMultiAlternatives(
         subject=subject,
         body=text_message,
@@ -194,7 +271,7 @@ def dispatch_otp_email(email: str, otp_code: str, purpose: str, user_name: Optio
         if not host_user or not getattr(settings, 'EMAIL_HOST_PASSWORD', '').strip():
             logger.error("SMTP backend is active but EMAIL_HOST_USER or EMAIL_HOST_PASSWORD is missing in .env.")
             raise OTPError(
-                "SMTP email delivery is active, but EMAIL_HOST_USER and EMAIL_HOST_PASSWORD are not configured. Please add your credentials in Render environment variables, or provide a RESEND_API_KEY.",
+                "SMTP email delivery is active, but EMAIL_HOST_USER and EMAIL_HOST_PASSWORD are not configured. Please add your credentials in Render environment variables, or provide a RESEND_API_KEY or BREVO_API_KEY.",
                 code="smtp_credentials_missing",
                 status_code=503
             )
