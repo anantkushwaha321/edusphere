@@ -44,10 +44,12 @@ def home_landing_view(request):
 def health_check_view(request):
     """Health check endpoint for Render health checks and uptime monitoring."""
     db_ok = False
+    tables = []
     try:
         with connection.cursor() as cursor:
             cursor.execute("SELECT 1;")
             cursor.fetchone()
+        tables = connection.introspection.table_names()
         db_ok = True
     except Exception as e:
         logger.warning("Health check database probe failed: %s", e)
@@ -57,7 +59,11 @@ def health_check_view(request):
     return JsonResponse({
         'status': 'healthy' if db_ok else 'unhealthy',
         'database': 'connected' if db_ok else 'disconnected',
+        'tables_count': len(tables),
+        'has_auth_tables': 'accounts_user' in tables,
+        'has_otp_table': 'accounts_emailotpchallenge' in tables,
     }, status=status_code)
+
 
 
 urlpatterns = [

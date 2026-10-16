@@ -307,8 +307,16 @@
             event.preventDefault();
             hideAlert();
 
-            const email = document.getElementById('emailInput').value.trim();
-            const terms = document.getElementById('termsConsent').checked;
+            const emailInput = document.getElementById('emailInput');
+            const email = emailInput ? emailInput.value.trim() : '';
+            const termsCheckbox = document.getElementById('termsConsent');
+            const terms = termsCheckbox ? termsCheckbox.checked : false;
+
+            if (!email) {
+                showAlert("Please enter your institutional email address.", 'error');
+                if (emailInput) emailInput.focus();
+                return;
+            }
 
             if (!terms) {
                 showAlert("Please accept the Terms of Service to proceed.", 'error');
@@ -333,9 +341,19 @@
                     body: JSON.stringify({ email: email })
                 });
 
-                const data = await response.json();
+                let data;
+                const contentType = response.headers.get('content-type') || '';
+                if (contentType.includes('application/json')) {
+                    data = await response.json();
+                } else {
+                    const errorText = await response.text();
+                    data = {
+                        success: false,
+                        message: `Server returned HTTP ${response.status}. Please check server logs.`
+                    };
+                }
 
-                if (data.success) {
+                if (response.ok && data.success) {
                     currentEmail = email;
                     document.getElementById('displayEmail').textContent = email;
 
@@ -352,7 +370,8 @@
                     showAlert(data.message || 'Failed to send verification code.', 'error');
                 }
             } catch (err) {
-                showAlert("Network connection error. Please retry.", 'error');
+                console.error("Network or script error in handleSendOtp:", err);
+                showAlert("Network connection error. Please verify your connection and retry.", 'error');
             } finally {
                 btn.disabled = false;
                 text.textContent = 'Send Verification Code';
@@ -376,17 +395,25 @@
                     body: JSON.stringify({ email: currentEmail })
                 });
 
-                const data = await response.json();
-                if (data.success) {
+                let data;
+                const contentType = response.headers.get('content-type') || '';
+                if (contentType.includes('application/json')) {
+                    data = await response.json();
+                } else {
+                    data = { success: false, message: `Server error (${response.status}).` };
+                }
+
+                if (response.ok && data.success) {
                     showAlert(data.message, 'success');
                     startCooldown(data.cooldown_seconds || 60);
                 } else {
-                    showAlert(data.message, 'error');
+                    showAlert(data.message || 'Failed to resend code.', 'error');
                     resendBtn.disabled = false;
                     resendBtn.textContent = 'Resend Code';
                 }
             } catch (err) {
-                showAlert("Failed to resend code.", 'error');
+                console.error("Network error in handleResendOtp:", err);
+                showAlert("Failed to resend code due to a network error.", 'error');
                 resendBtn.disabled = false;
                 resendBtn.textContent = 'Resend Code';
             }
@@ -440,9 +467,15 @@
                     })
                 });
 
-                const data = await response.json();
+                let data;
+                const contentType = response.headers.get('content-type') || '';
+                if (contentType.includes('application/json')) {
+                    data = await response.json();
+                } else {
+                    data = { success: false, message: `Server error (${response.status}).` };
+                }
 
-                if (data.success) {
+                if (response.ok && data.success) {
                     showAlert(data.message || "Verification successful. Redirecting...", 'success');
                     const targetUrl = data.redirect_url || "{% url 'dashboard' %}";
                     setTimeout(() => {
@@ -452,6 +485,7 @@
                     showAlert(data.message || 'Invalid verification code.', 'error');
                 }
             } catch (err) {
+                console.error("Network error in handleVerifyOtp:", err);
                 showAlert("Verification failed due to a network error.", 'error');
             } finally {
                 btn.disabled = false;

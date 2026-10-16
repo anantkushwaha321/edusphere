@@ -25,6 +25,7 @@ else:
     CSRF_TRUSTED_ORIGINS = [
         'http://localhost:8000',
         'http://127.0.0.1:8000',
+        'https://edusphere-muzf.onrender.com',
         'https://*.onrender.com',
         'https://*.railway.app',
         'https://*.up.railway.app',
@@ -215,6 +216,10 @@ elif EMAIL_HOST_USER:
     DEFAULT_FROM_EMAIL = f"IIMT UNIVERSITY Security <{EMAIL_HOST_USER}>"
 else:
     DEFAULT_FROM_EMAIL = 'IIMT UNIVERSITY Security <no-reply@iimtindia.net>'
+
+# HTTP-based Email Delivery (Resend API - Port 443, immune to cloud SMTP port blocking)
+RESEND_API_KEY = os.getenv('RESEND_API_KEY', '').strip()
+RESEND_FROM_EMAIL = os.getenv('RESEND_FROM_EMAIL', '').strip()
 
 
 # Session & Cookie Security

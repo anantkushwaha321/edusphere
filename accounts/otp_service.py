@@ -93,8 +93,57 @@ def check_resend_cooldown(email: str):
             )
 
 
+def dispatch_via_resend(api_key: str, from_email: str, to_email: str, subject: str, html_message: str, text_message: str) -> bool:
+    """Dispatches email via Resend HTTPS REST API (Port 443). Never blocked by Render free tier."""
+    import json
+    import urllib.request
+    import urllib.error
+
+    url = "https://api.resend.com/emails"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+        "User-Agent": "EduSphere-Academic-PaaS/1.0",
+    }
+    # Resend default sandbox sender if domain is not yet verified on Resend
+    sender = from_email
+    if 'no-reply@iimtindia.net' in sender or not ('<' in sender or '@' in sender):
+        sender = "EduSphere Verification <onboarding@resend.dev>"
+
+    payload = {
+        "from": sender,
+        "to": [to_email],
+        "subject": subject,
+        "html": html_message,
+        "text": text_message,
+    }
+    data = json.dumps(payload).encode('utf-8')
+    req = urllib.request.Request(url, data=data, headers=headers, method='POST')
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            if resp.status in (200, 201):
+                logger.info(f"OTP successfully delivered via Resend HTTPS API to {to_email}")
+                return True
+    except urllib.error.HTTPError as err:
+        err_msg = err.read().decode('utf-8', errors='ignore')
+        logger.error(f"Resend HTTP error ({err.code}): {err_msg}")
+        raise OTPError(
+            f"Email delivery via Resend API failed ({err.code}): {err_msg}",
+            code="resend_api_failed",
+            status_code=502
+        )
+    except Exception as err:
+        logger.error(f"Resend dispatch error: {err}")
+        raise OTPError(
+            f"Failed to communicate with Resend email API: {err}",
+            code="resend_connection_error",
+            status_code=502
+        )
+    return False
+
+
 def dispatch_otp_email(email: str, otp_code: str, purpose: str, user_name: Optional[str] = None) -> bool:
-    """Send formatted branded OTP email via Django's configured email backend."""
+    """Send formatted branded OTP email via Resend HTTPS API or Django's configured email backend."""
     subject = f"Your IIMT UNIVERSITY Verification Code: {otp_code}"
     from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'IIMT UNIVERSITY Security <no-reply@iimtindia.net>')
 
@@ -117,6 +166,20 @@ def dispatch_otp_email(email: str, otp_code: str, purpose: str, user_name: Optio
         f"IIMT UNIVERSITY Academic Administration"
     )
 
+    # 1. First priority: Resend HTTPS REST API (Port 443 - works everywhere including Render Free Tier)
+    resend_api_key = getattr(settings, 'RESEND_API_KEY', '').strip()
+    if resend_api_key:
+        resend_from = getattr(settings, 'RESEND_FROM_EMAIL', '').strip() or from_email
+        return dispatch_via_resend(
+            api_key=resend_api_key,
+            from_email=resend_from,
+            to_email=email,
+            subject=subject,
+            html_message=html_message,
+            text_message=text_message
+        )
+
+    # 2. Second priority: Standard Django email backend (SMTP or Console)
     msg = EmailMultiAlternatives(
         subject=subject,
         body=text_message,
@@ -131,7 +194,7 @@ def dispatch_otp_email(email: str, otp_code: str, purpose: str, user_name: Optio
         if not host_user or not getattr(settings, 'EMAIL_HOST_PASSWORD', '').strip():
             logger.error("SMTP backend is active but EMAIL_HOST_USER or EMAIL_HOST_PASSWORD is missing in .env.")
             raise OTPError(
-                "SMTP email delivery is active, but EMAIL_HOST_USER and EMAIL_HOST_PASSWORD are not configured in your .env file. Please add your email credentials (e.g. Gmail App Password) to deliver verification codes to real user mailboxes.",
+                "SMTP email delivery is active, but EMAIL_HOST_USER and EMAIL_HOST_PASSWORD are not configured. Please add your credentials in Render environment variables, or provide a RESEND_API_KEY.",
                 code="smtp_credentials_missing",
                 status_code=503
             )
@@ -169,16 +232,15 @@ def dispatch_otp_email(email: str, otp_code: str, purpose: str, user_name: Optio
             code="smtp_sender_refused",
             status_code=500
         )
-    except (socket.timeout, TimeoutError) as e:
-        logger.error(f"SMTP timeout dispatching to {email}: {e}")
+    except (socket.timeout, TimeoutError, ConnectionRefusedError, OSError) as e:
+        logger.error(f"SMTP connection failure dispatching to {email}: {e}")
         raise OTPError(
-            "SMTP connection timed out while sending verification email. Please check your internet connection and EMAIL_HOST/EMAIL_PORT settings.",
-            code="smtp_timeout",
-            status_code=504
+            "SMTP email connection failed or timed out. Note: Render free tier blocks outbound SMTP ports (587, 465, 25). To deliver emails on Render free tier, add RESEND_API_KEY in your Render dashboard environment variables, or upgrade your Render instance to allow outbound SMTP.",
+            code="smtp_blocked_or_timeout",
+            status_code=503
         )
     except Exception as e:
         logger.error(f"Failed to dispatch OTP email to {email}: {e}")
-        # Note: locmem.EmailBackend in unit tests won't raise exceptions.
         raise OTPError(
             f"Unable to deliver verification email: {str(e)}",
             code="delivery_failed",

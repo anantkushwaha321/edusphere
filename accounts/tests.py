@@ -128,39 +128,17 @@ class OTPAuthenticationComprehensiveTests(TestCase):
         )
         plain_otp = self._extract_otp_from_mailbox()
 
-        # 2. Verify without registration details -> returns requires_registration: True
-        resp_prompt = self.client.post(
+        # 2. Verify OTP -> seamless automatic account provisioning & direct authentication
+        resp_verify = self.client.post(
             reverse('api_verify_otp'),
             data=json.dumps({'email': email, 'otp': plain_otp}),
             content_type='application/json'
         )
-        self.assertEqual(resp_prompt.status_code, 200)
-        prompt_data = resp_prompt.json()
-        self.assertTrue(prompt_data['requires_registration'])
-        self.assertFalse(prompt_data['authenticated'])
-
-        # 3. Complete registration with profile data
-        resp_register = self.client.post(
-            reverse('api_verify_otp'),
-            data=json.dumps({
-                'email': email,
-                'otp': plain_otp,
-                'registration': {
-                    'first_name': 'Alice',
-                    'last_name': 'Applicant',
-                    'roll_number': 'CS2026-001',
-                    'department_id': self.department.id,
-                    'guardian_name': 'John Applicant',
-                    'guardian_phone': '+15551234567'
-                }
-            }),
-            content_type='application/json'
-        )
-        self.assertEqual(resp_register.status_code, 200)
-        reg_data = resp_register.json()
-        self.assertTrue(reg_data['success'])
-        self.assertTrue(reg_data['authenticated'])
-        self.assertEqual(reg_data['redirect_url'], reverse('student_dashboard'))
+        self.assertEqual(resp_verify.status_code, 200)
+        verify_data = resp_verify.json()
+        self.assertTrue(verify_data['success'])
+        self.assertTrue(verify_data['authenticated'])
+        self.assertEqual(verify_data['redirect_url'], reverse('student_dashboard'))
 
         # Check DB user creation
         new_user = User.objects.filter(email=email).first()
@@ -173,7 +151,7 @@ class OTPAuthenticationComprehensiveTests(TestCase):
         # Check student profile
         profile = StudentProfile.objects.filter(user=new_user).first()
         self.assertIsNotNone(profile)
-        self.assertEqual(profile.roll_number, 'CS2026-001')
+        self.assertTrue(profile.roll_number.startswith('STU-'))
         self.assertEqual(profile.department, self.department)
 
         # Challenge record should now be marked verified and used

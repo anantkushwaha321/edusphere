@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q
 
+from django.views.decorators.csrf import ensure_csrf_cookie
 from .models import User, StudentProfile, TeacherProfile, AdminProfile
 from .forms import LoginForm, UserProfileUpdateForm, CustomPasswordChangeForm, UserCreationAdminForm
 from .decorators import admin_required, role_required
@@ -12,6 +13,7 @@ from academics.models import Department
 from activity_logs.models import log_activity, ActivityLog
 
 
+@ensure_csrf_cookie
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
@@ -22,6 +24,7 @@ def login_view(request):
         logging.getLogger('django.request').error("Database query failed in login_view: %s", e, exc_info=True)
         departments = []
     return render(request, 'accounts/login.html', {'departments': departments})
+
 
 
 @login_required
