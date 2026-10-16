@@ -198,30 +198,35 @@ EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() in ('true', '1', 'yes
 EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'False').lower() in ('true', '1', 'yes')
 EMAIL_TIMEOUT = int(os.getenv('EMAIL_TIMEOUT', '10'))
 
-# Smart backend selection: SMTP backend when EMAIL_BACKEND is explicitly set to smtp
-# or when EMAIL_HOST_USER is provided.
+# HTTP-based Email Delivery (Resend & Brevo REST APIs - Port 443, immune to cloud SMTP port blocking)
+RESEND_API_KEY = os.getenv('RESEND_API_KEY', '').strip()
+BREVO_API_KEY = os.getenv('BREVO_API_KEY', '').strip()
+BREVO_FROM_EMAIL = os.getenv('BREVO_FROM_EMAIL', '').strip()
+
+# Smart backend selection:
+# 1. Resend HTTPS API backend if RESEND_API_KEY is provided (optimal for Render free tier)
+# 2. SMTP backend if EMAIL_HOST_USER is provided
+# 3. Console backend fallback for local development
 _default_backend = (
+    'accounts.email_backends.ResendEmailBackend'
+    if RESEND_API_KEY else
     'django.core.mail.backends.smtp.EmailBackend'
     if EMAIL_HOST_USER else
     'django.core.mail.backends.console.EmailBackend'
 )
 EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', _default_backend)
 
-# Smart DEFAULT_FROM_EMAIL:
-# Gmail and many SMTP providers reject emails if the From header doesn't match the authenticated user.
-_configured_from = os.getenv('DEFAULT_FROM_EMAIL', '').strip()
-if _configured_from and ('no-reply@iimtindia.net' not in _configured_from or not EMAIL_HOST_USER):
-    DEFAULT_FROM_EMAIL = _configured_from
-elif EMAIL_HOST_USER:
-    DEFAULT_FROM_EMAIL = f"IIMT UNIVERSITY Security <{EMAIL_HOST_USER}>"
-else:
-    DEFAULT_FROM_EMAIL = 'IIMT UNIVERSITY Security <no-reply@iimtindia.net>'
+# DEFAULT_FROM_EMAIL: Read strictly from environment variable if provided.
+# If omitted: defaults to Resend sandbox address (when Resend is active) or host user.
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', '').strip()
+if not DEFAULT_FROM_EMAIL:
+    if RESEND_API_KEY:
+        DEFAULT_FROM_EMAIL = 'EduSphere <onboarding@resend.dev>'
+    elif EMAIL_HOST_USER:
+        DEFAULT_FROM_EMAIL = f"EduSphere <{EMAIL_HOST_USER}>"
+    else:
+        DEFAULT_FROM_EMAIL = 'EduSphere <onboarding@resend.dev>'
 
-# HTTP-based Email Delivery (Resend & Brevo APIs - Port 443, immune to cloud SMTP port blocking)
-RESEND_API_KEY = os.getenv('RESEND_API_KEY', '').strip()
-RESEND_FROM_EMAIL = os.getenv('RESEND_FROM_EMAIL', '').strip()
-BREVO_API_KEY = os.getenv('BREVO_API_KEY', '').strip()
-BREVO_FROM_EMAIL = os.getenv('BREVO_FROM_EMAIL', '').strip()
 
 
 # Session & Cookie Security

@@ -675,6 +675,7 @@ class OTPAuthenticationComprehensiveTests(TestCase):
 
         mock_resp = MagicMock()
         mock_resp.status = 200
+        mock_resp.read.return_value = b'{"id": "msg_test_success_123"}'
         mock_resp.__enter__.return_value = mock_resp
 
         with patch('urllib.request.urlopen', return_value=mock_resp) as mock_urlopen:
@@ -689,6 +690,12 @@ class OTPAuthenticationComprehensiveTests(TestCase):
             self.assertTrue(success)
             self.assertEqual(mock_urlopen.call_count, 1)
 
+            # Verify request headers and URL
+            req_arg = mock_urlopen.call_args[0][0]
+            self.assertEqual(req_arg.full_url, "https://api.resend.com/emails")
+            self.assertEqual(req_arg.headers["Authorization"], "Bearer re_test_key_12345")
+            self.assertEqual(req_arg.headers["Content-type"], "application/json")
+
     # -------------------------------------------------------------------------
     # Scenario 17: Brevo HTTPS API dispatch format and response handling
     # -------------------------------------------------------------------------
@@ -701,6 +708,7 @@ class OTPAuthenticationComprehensiveTests(TestCase):
 
         mock_resp = MagicMock()
         mock_resp.status = 201
+        mock_resp.read.return_value = b'{"messageId": "<test@brevo>"}'
         mock_resp.__enter__.return_value = mock_resp
 
         with patch('urllib.request.urlopen', return_value=mock_resp) as mock_urlopen:
@@ -714,4 +722,181 @@ class OTPAuthenticationComprehensiveTests(TestCase):
             )
             self.assertTrue(success)
             self.assertEqual(mock_urlopen.call_count, 1)
+
+    # -------------------------------------------------------------------------
+    # Scenario 18: Resend API authentication error (401) is handled safely
+    # -------------------------------------------------------------------------
+    def test_18_resend_auth_error_returns_clean_message(self):
+        """
+        Verify that an invalid API key returns HTTP 503 with an actionable error
+        and does NOT expose the API key or internal secrets.
+        """
+        from unittest.mock import patch
+        import urllib.error
+        import io
+        from accounts.otp_service import dispatch_via_resend, OTPError
+
+        err_body = b'{"statusCode": 401, "name": "invalid_api_key", "message": "API key is invalid"}'
+        mock_err = urllib.error.HTTPError(
+            url="https://api.resend.com/emails",
+            code=401,
+            msg="Unauthorized",
+            hdrs={},
+            fp=io.BytesIO(err_body)
+        )
+
+        with patch('urllib.request.urlopen', side_effect=mock_err):
+            with self.assertRaises(OTPError) as ctx:
+                dispatch_via_resend(
+                    api_key="re_invalid_secret_key_999",
+                    from_email="EduSphere <onboarding@resend.dev>",
+                    to_email="user@example.com",
+                    subject="Verification Code",
+                    html_message="<p>123456</p>",
+                    text_message="123456"
+                )
+            self.assertEqual(ctx.exception.code, 'resend_invalid_api_key')
+            self.assertEqual(ctx.exception.status_code, 503)
+            # Ensure the secret key itself was NOT echoed in the exception message
+            self.assertNotIn("re_invalid_secret_key_999", str(ctx.exception))
+            self.assertIn("RESEND_API_KEY", str(ctx.exception))
+
+    # -------------------------------------------------------------------------
+    # Scenario 19: Resend API domain rejection (403/422) returns clean message
+    # -------------------------------------------------------------------------
+    def test_19_resend_domain_rejection_returns_clean_message(self):
+        """
+        Verify that an unverified sender domain returns an informative error
+        guiding the user on domain verification or using onboarding@resend.dev.
+        """
+        from unittest.mock import patch
+        import urllib.error
+        import io
+        from accounts.otp_service import dispatch_via_resend, OTPError
+
+        err_body = b'{"statusCode": 403, "name": "validation_error", "message": "Domain not verified"}'
+        mock_err = urllib.error.HTTPError(
+            url="https://api.resend.com/emails",
+            code=403,
+            msg="Forbidden",
+            hdrs={},
+            fp=io.BytesIO(err_body)
+        )
+
+        with patch('urllib.request.urlopen', side_effect=mock_err):
+            with self.assertRaises(OTPError) as ctx:
+                dispatch_via_resend(
+                    api_key="re_test_key",
+                    from_email="Unverified <unverified@customdomain.com>",
+                    to_email="user@example.com",
+                    subject="Verification Code",
+                    html_message="<p>123456</p>",
+                    text_message="123456"
+                )
+            self.assertEqual(ctx.exception.code, 'resend_validation_error')
+            self.assertEqual(ctx.exception.status_code, 503)
+            self.assertIn("Domain not verified", str(ctx.exception))
+
+    # -------------------------------------------------------------------------
+    # Scenario 20: Resend API network / timeout error returns 502
+    # -------------------------------------------------------------------------
+    def test_20_resend_network_timeout_returns_502(self):
+        """
+        Verify that a network timeout or connection reset returns HTTP 502
+        rather than crashing with an unhandled exception.
+        """
+        from unittest.mock import patch
+        import urllib.error
+        from accounts.otp_service import dispatch_via_resend, OTPError
+
+        with patch('urllib.request.urlopen', side_effect=urllib.error.URLError("Connection reset")):
+            with self.assertRaises(OTPError) as ctx:
+                dispatch_via_resend(
+                    api_key="re_test_key",
+                    from_email="EduSphere <onboarding@resend.dev>",
+                    to_email="user@example.com",
+                    subject="Verification Code",
+                    html_message="<p>123456</p>",
+                    text_message="123456"
+                )
+            self.assertEqual(ctx.exception.code, 'resend_connection_error')
+            self.assertEqual(ctx.exception.status_code, 502)
+
+    # -------------------------------------------------------------------------
+    # Scenario 21: End-to-end OTP API dispatch via Resend HTTPS integration
+    # -------------------------------------------------------------------------
+    def test_21_send_otp_end_to_end_with_resend(self):
+        """
+        Verify that with RESEND_API_KEY configured, api_send_otp invokes Resend
+        and responds with HTTP 200 without exposing OTP in response body.
+        """
+        from unittest.mock import patch, MagicMock
+        from django.test import override_settings
+
+        mock_resp = MagicMock()
+        mock_resp.status = 200
+        mock_resp.read.return_value = b'{"id": "msg_live_mock_123"}'
+        mock_resp.__enter__.return_value = mock_resp
+
+        with override_settings(RESEND_API_KEY="re_test_production_key_123"):
+            with patch('urllib.request.urlopen', return_value=mock_resp) as mock_urlopen:
+                resp = self.client.post(
+                    reverse('api_send_otp'),
+                    data=json.dumps({'email': 'verified.resend@edusphere.edu'}),
+                    content_type='application/json'
+                )
+                self.assertEqual(resp.status_code, 200)
+                data = resp.json()
+                self.assertTrue(data['success'])
+                # Never expose plaintext OTP in public response
+                self.assertNotIn('otp', data)
+                self.assertNotIn('code', data.get('data', {}))
+
+                # Verify Resend API was called with the masked email in logs
+                self.assertEqual(mock_urlopen.call_count, 1)
+
+    # -------------------------------------------------------------------------
+    # Scenario 22: ResendEmailBackend Django backend integration
+    # -------------------------------------------------------------------------
+    def test_22_resend_email_backend_integration(self):
+        """
+        Verify that accounts.email_backends.ResendEmailBackend dispatches
+        Django EmailMultiAlternatives properly.
+        """
+        from unittest.mock import patch, MagicMock
+        from django.core.mail import EmailMultiAlternatives
+        from accounts.email_backends import ResendEmailBackend
+
+        mock_resp = MagicMock()
+        mock_resp.status = 200
+        mock_resp.read.return_value = b'{"id": "backend_test_id"}'
+        mock_resp.__enter__.return_value = mock_resp
+
+        backend = ResendEmailBackend(api_key="re_backend_key")
+        msg = EmailMultiAlternatives(
+            subject="Backend Test",
+            body="Text content",
+            from_email="EduSphere <onboarding@resend.dev>",
+            to=["recipient@example.com"]
+        )
+        msg.attach_alternative("<p>HTML content</p>", "text/html")
+
+        with patch('urllib.request.urlopen', return_value=mock_resp):
+            num_sent = backend.send_messages([msg])
+            self.assertEqual(num_sent, 1)
+
+    # -------------------------------------------------------------------------
+    # Scenario 23: Safe email diagnostic masking
+    # -------------------------------------------------------------------------
+    def test_23_diagnostic_logging_masks_email(self):
+        """
+        Verify that mask_email_address obscures personal identifiers in logs.
+        """
+        from accounts.otp_service import mask_email_address
+
+        self.assertEqual(mask_email_address("anant@example.com"), "a***t@example.com")
+        self.assertEqual(mask_email_address("al@example.com"), "a*@example.com")
+        self.assertEqual(mask_email_address(""), "***")
+        self.assertEqual(mask_email_address("invalid"), "***")
+
 

@@ -1,3 +1,4 @@
+import os
 import secrets
 import logging
 import datetime
@@ -29,6 +30,18 @@ class OTPError(Exception):
         self.message = message
         self.code = code
         self.status_code = status_code
+
+
+def mask_email_address(email: str) -> str:
+    """Mask email for safe diagnostic logging without exposing PII (e.g. a***a@gmail.com)."""
+    if not email or '@' not in email:
+        return '***'
+    local, domain = email.split('@', 1)
+    if len(local) <= 2:
+        masked_local = local[:1] + '*'
+    else:
+        masked_local = local[0] + '*' * (len(local) - 2) + local[-1]
+    return f"{masked_local}@{domain}"
 
 
 def normalize_email(email: str) -> str:
@@ -93,22 +106,42 @@ def check_resend_cooldown(email: str):
             )
 
 
-def dispatch_via_resend(api_key: str, from_email: str, to_email: str, subject: str, html_message: str, text_message: str) -> bool:
-    """Dispatches email via Resend HTTPS REST API (Port 443). Never blocked by Render free tier."""
+def dispatch_via_resend(
+    api_key: str,
+    from_email: str,
+    to_email: str,
+    subject: str,
+    html_message: str,
+    text_message: str
+) -> bool:
+    """
+    Dispatches email via the official Resend HTTPS REST API (Port 443).
+    Immune to cloud SMTP port blocking (Render free tier blocks ports 25, 465, 587).
+    Safely handles provider errors without exposing API keys, OTP codes, or private email content.
+    """
     import json
     import urllib.request
     import urllib.error
 
+    clean_key = (api_key or '').strip()
+    if not clean_key:
+        raise OTPError(
+            "RESEND_API_KEY is not configured.",
+            code="resend_missing_key",
+            status_code=503
+        )
+
     url = "https://api.resend.com/emails"
     headers = {
-        "Authorization": f"Bearer {api_key}",
+        "Authorization": f"Bearer {clean_key}",
         "Content-Type": "application/json",
         "User-Agent": "EduSphere-Academic-PaaS/1.0",
     }
-    # Resend default sandbox sender if domain is not yet verified on Resend
-    sender = from_email
-    if 'no-reply@iimtindia.net' in sender or not ('<' in sender or '@' in sender):
-        sender = "EduSphere Verification <onboarding@resend.dev>"
+
+    # Respect DEFAULT_FROM_EMAIL from settings / env, defaulting to Resend sandbox if omitted
+    sender = (from_email or '').strip()
+    if not sender:
+        sender = getattr(settings, 'DEFAULT_FROM_EMAIL', 'EduSphere <onboarding@resend.dev>')
 
     payload = {
         "from": sender,
@@ -119,27 +152,98 @@ def dispatch_via_resend(api_key: str, from_email: str, to_email: str, subject: s
     }
     data = json.dumps(payload).encode('utf-8')
     req = urllib.request.Request(url, data=data, headers=headers, method='POST')
+
+    timeout_seconds = int(getattr(settings, 'EMAIL_TIMEOUT', 10))
+
     try:
-        with urllib.request.urlopen(req, timeout=10) as resp:
+        with urllib.request.urlopen(req, timeout=timeout_seconds) as resp:
+            resp_body = resp.read().decode('utf-8', errors='ignore')
+            resp_data = {}
+            if resp_body:
+                try:
+                    resp_data = json.loads(resp_body)
+                except Exception:
+                    pass
+
+            email_id = resp_data.get('id', 'accepted')
             if resp.status in (200, 201):
-                logger.info(f"OTP successfully delivered via Resend HTTPS API to {to_email}")
+                logger.info(
+                    "OTP email successfully queued via Resend API (id=%s) to %s",
+                    email_id,
+                    mask_email_address(to_email)
+                )
                 return True
+            else:
+                logger.error(
+                    "Resend API returned unexpected status %s for %s",
+                    resp.status,
+                    mask_email_address(to_email)
+                )
+                raise OTPError(
+                    f"Resend API returned unexpected response status ({resp.status}).",
+                    code="resend_unexpected_status",
+                    status_code=502
+                )
     except urllib.error.HTTPError as err:
-        err_msg = err.read().decode('utf-8', errors='ignore')
-        logger.error(f"Resend HTTP error ({err.code}): {err_msg}")
-        raise OTPError(
-            f"Email delivery via Resend API failed ({err.code}): {err_msg}",
-            code="resend_api_failed",
-            status_code=502
+        err_body = err.read().decode('utf-8', errors='ignore')
+        err_name = 'api_error'
+        err_msg = 'Unknown error'
+        try:
+            parsed = json.loads(err_body)
+            err_msg = parsed.get('message', err_body)
+            err_name = parsed.get('name', 'api_error')
+        except Exception:
+            err_msg = err_body[:200] if err_body else f"HTTP {err.code}"
+
+        logger.error(
+            "Resend API rejected dispatch (HTTP %s, type=%s) for %s: %s",
+            err.code,
+            err_name,
+            mask_email_address(to_email),
+            err_msg
         )
-    except Exception as err:
-        logger.error(f"Resend dispatch error: {err}")
+
+        if err.code == 401:
+            raise OTPError(
+                "Resend API authentication failed. Please verify that RESEND_API_KEY in your Render environment variables is valid.",
+                code="resend_invalid_api_key",
+                status_code=503
+            )
+        elif err.code in (400, 403, 422):
+            raise OTPError(
+                f"Resend rejected email delivery ({err_name}): {err_msg}",
+                code=f"resend_{err_name}",
+                status_code=400 if err.code == 400 else 503
+            )
+        elif err.code >= 500:
+            raise OTPError(
+                "Resend email service is temporarily unavailable. Please retry in a moment.",
+                code="resend_server_error",
+                status_code=502
+            )
+        else:
+            raise OTPError(
+                f"Email delivery via Resend API failed ({err.code}): {err_msg}",
+                code="resend_api_failed",
+                status_code=502
+            )
+    except (urllib.error.URLError, TimeoutError, socket.timeout) as err:
+        logger.error("Resend connection failed for %s: %s", mask_email_address(to_email), err)
         raise OTPError(
-            f"Failed to communicate with Resend email API: {err}",
+            "Failed to communicate with Resend email API. Please check network connectivity.",
             code="resend_connection_error",
             status_code=502
         )
-    return False
+    except OTPError:
+        raise
+    except Exception as err:
+        logger.error("Unexpected error during Resend dispatch: %s", err)
+        raise OTPError(
+            "An unexpected error occurred while communicating with the email delivery service.",
+            code="resend_unexpected_error",
+            status_code=500
+        )
+
 
 
 def dispatch_via_brevo(api_key: str, from_email: str, to_email: str, subject: str, html_message: str, text_message: str) -> bool:
@@ -198,11 +302,15 @@ def dispatch_via_brevo(api_key: str, from_email: str, to_email: str, subject: st
 def dispatch_otp_email(email: str, otp_code: str, purpose: str, user_name: Optional[str] = None) -> bool:
     """Send formatted branded OTP email via Resend HTTPS API, Brevo HTTPS API, or Django's configured email backend."""
     subject = f"Your IIMT UNIVERSITY Verification Code: {otp_code}"
-    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'IIMT UNIVERSITY Security <no-reply@iimtindia.net>')
+    from_email = (
+        getattr(settings, 'DEFAULT_FROM_EMAIL', '').strip() or
+        os.getenv('DEFAULT_FROM_EMAIL', '').strip() or
+        'EduSphere <onboarding@resend.dev>'
+    )
 
     host_user = getattr(settings, 'EMAIL_HOST_USER', '').strip()
-    if host_user and ('@gmail.com' in host_user) and ('no-reply' in from_email or 'iimtindia.net' in from_email):
-        from_email = f"IIMT UNIVERSITY Security <{host_user}>"
+    if host_user and ('@gmail.com' in host_user) and not os.getenv('DEFAULT_FROM_EMAIL'):
+        from_email = f"EduSphere Security <{host_user}>"
 
     context = {
         'otp_code': otp_code,
@@ -220,12 +328,14 @@ def dispatch_otp_email(email: str, otp_code: str, purpose: str, user_name: Optio
     )
 
     # 1. First priority: Resend HTTPS REST API (Port 443 - works everywhere including Render Free Tier)
-    resend_api_key = getattr(settings, 'RESEND_API_KEY', '').strip()
+    resend_api_key = (
+        getattr(settings, 'RESEND_API_KEY', '').strip() or
+        os.getenv('RESEND_API_KEY', '').strip()
+    )
     if resend_api_key:
-        resend_from = getattr(settings, 'RESEND_FROM_EMAIL', '').strip() or from_email
         return dispatch_via_resend(
             api_key=resend_api_key,
-            from_email=resend_from,
+            from_email=from_email,
             to_email=email,
             subject=subject,
             html_message=html_message,
@@ -233,7 +343,10 @@ def dispatch_otp_email(email: str, otp_code: str, purpose: str, user_name: Optio
         )
 
     # 2. Second priority: Brevo HTTPS REST API (Port 443 - works everywhere including Render Free Tier)
-    brevo_api_key = getattr(settings, 'BREVO_API_KEY', '').strip()
+    brevo_api_key = (
+        getattr(settings, 'BREVO_API_KEY', '').strip() or
+        os.getenv('BREVO_API_KEY', '').strip()
+    )
     if brevo_api_key:
         brevo_from = getattr(settings, 'BREVO_FROM_EMAIL', '').strip() or from_email
         return dispatch_via_brevo(
@@ -252,7 +365,7 @@ def dispatch_otp_email(email: str, otp_code: str, purpose: str, user_name: Optio
         if not host_user or not getattr(settings, 'EMAIL_HOST_PASSWORD', '').strip():
             logger.error("No production email credentials configured in environment.")
             raise OTPError(
-                "Email delivery service is unconfigured. Please configure EMAIL_HOST_USER and EMAIL_HOST_PASSWORD (for Gmail SMTP) or RESEND_API_KEY / BREVO_API_KEY (for HTTPS delivery) in your Render environment variables.",
+                "Email delivery service is unconfigured. Please configure RESEND_API_KEY (recommended for Render) or EMAIL_HOST_USER and EMAIL_HOST_PASSWORD (for Gmail SMTP) in your Render environment variables.",
                 code="email_service_unconfigured",
                 status_code=503
             )
