@@ -21,15 +21,24 @@ services:
     build: .
     container_name: iimt_web_app
     restart: unless-stopped
+    env_file:
+      - .env
     command: >
       sh -c "python manage.py migrate &&
              gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3"
     environment:
       - DJANGO_DEBUG=False
-      - DJANGO_SECRET_KEY=production-secret-key-change-in-env
       - DJANGO_ALLOWED_HOSTS=*
       - DATABASE_URL=postgresql://postgres:secure_postgres_password@db:5432/iimt_db
-      - EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+      - DJANGO_SECURE_SSL_REDIRECT=False
+      - EMAIL_BACKEND=${EMAIL_BACKEND:-django.core.mail.backends.smtp.EmailBackend}
+      - EMAIL_HOST=${EMAIL_HOST:-smtp.gmail.com}
+      - EMAIL_PORT=${EMAIL_PORT:-587}
+      - EMAIL_USE_TLS=${EMAIL_USE_TLS:-True}
+      - EMAIL_USE_SSL=${EMAIL_USE_SSL:-False}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL}
     volumes:
       - media_data:/app/media
     ports:

@@ -1,4 +1,5 @@
 import json
+import re
 from django.http import JsonResponse, HttpRequest
 from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -38,6 +39,30 @@ def mask_email(email: str) -> str:
         return f"{masked_user}@{domain_part}"
     except Exception:
         return email
+
+
+def derive_name_from_email(email: str):
+    """
+    Derives clean first_name and last_name from an email address.
+    e.g. 'vikash.kumar@example.com' -> ('Vikash', 'Kumar')
+         'kumarvikash990999@gmail.com' -> ('Kumarvikash', 'Student')
+         'anantkushwaha321@gmail.com' -> ('Anantkushwaha', 'Student')
+    """
+    prefix = email.split('@')[0].strip()
+    words = re.findall(r'[A-Za-z]+|\d+', prefix)
+    alpha_words = [w.capitalize() for w in words if w.isalpha()]
+
+    if len(alpha_words) >= 2:
+        first_name = alpha_words[0]
+        last_name = " ".join(alpha_words[1:])
+    elif len(alpha_words) == 1:
+        first_name = alpha_words[0]
+        last_name = "Student"
+    else:
+        first_name = prefix.capitalize() or "Student"
+        last_name = "User"
+
+    return first_name, last_name
 
 
 def get_dashboard_url_for_user(user: User) -> str:
@@ -189,8 +214,8 @@ def api_verify_otp(request: HttpRequest):
     except OTPError as e:
         return JsonResponse({'success': False, 'message': e.message, 'code': e.code}, status=e.status_code)
 
-    existing_user = User.objects.filter(email__iexact=email, is_active=True).first()
-    mark_used = (existing_user is not None) or (registration_data is not None)
+    # Always mark challenge as used upon successful OTP verification
+    mark_used = True
 
     try:
         success, challenge, user = verify_otp_code(email=email, plain_otp=plain_otp, mark_used=mark_used)
@@ -235,36 +260,10 @@ def api_verify_otp(request: HttpRequest):
             }
         })
 
-    # Case 2: New User - Verify email ownership and collect student profile
-    if not registration_data:
-        # Prompt frontend to show registration fields
-        departments = list(Department.objects.values('id', 'name', 'code'))
-        return JsonResponse({
-            'success': True,
-            'authenticated': False,
-            'requires_registration': True,
-            'email': email,
-            'departments': departments,
-            'message': 'Email verified successfully! Please complete your student profile.'
-        })
-
-    # Case 3: New User Completing Registration
-    first_name = str(registration_data.get('first_name', '')).strip()
-    last_name = str(registration_data.get('last_name', '')).strip()
-    roll_number = str(registration_data.get('roll_number', '')).strip()
-    department_id = registration_data.get('department_id')
-    guardian_name = str(registration_data.get('guardian_name', '')).strip()
-    guardian_phone = str(registration_data.get('guardian_phone', '')).strip()
-
-    if not first_name:
-        return JsonResponse({'success': False, 'message': 'First name is required.', 'code': 'missing_first_name'}, status=400)
-    if not last_name:
-        return JsonResponse({'success': False, 'message': 'Last name is required.', 'code': 'missing_last_name'}, status=400)
-
-    # Ensure role is strictly STUDENT for self-registration
-    # "Never allow users to assign themselves privileged roles."
+    # Case 2: First-time Email Login - Automatically provision account & log in directly
+    # Seamless passwordless experience: never interrupts the user asking for their name or details.
     with transaction.atomic():
-        # Generate clean unique username based on email or name
+        derived_first, derived_last = derive_name_from_email(email)
         base_username = slugify(email.split('@')[0]) or 'student'
         username = base_username
         counter = 1
@@ -272,18 +271,37 @@ def api_verify_otp(request: HttpRequest):
             username = f"{base_username}{counter}"
             counter += 1
 
+        first_name = derived_first
+        last_name = derived_last
+        roll_number = ''
+        department_id = None
+        guardian_name = ''
+        guardian_phone = ''
+
+        # Respect optional registration payload if provided
+        if registration_data and isinstance(registration_data, dict):
+            if registration_data.get('first_name'):
+                first_name = str(registration_data['first_name']).strip()
+            if registration_data.get('last_name'):
+                last_name = str(registration_data['last_name']).strip()
+            if registration_data.get('roll_number'):
+                roll_number = str(registration_data['roll_number']).strip()
+            department_id = registration_data.get('department_id')
+            guardian_name = str(registration_data.get('guardian_name', '')).strip()
+            guardian_phone = str(registration_data.get('guardian_phone', '')).strip()
+
         new_user = User(
             username=username,
             email=email,
             first_name=first_name,
             last_name=last_name,
-            role=User.Role.STUDENT,  # Strictly Student
+            role=User.Role.STUDENT,
             is_active=True
         )
         new_user.set_unusable_password()  # No password required - authenticates via OTP
         new_user.save()
 
-        # Handle department
+        # Handle department & active year
         dept = None
         if department_id:
             dept = Department.objects.filter(pk=department_id).first()
@@ -309,13 +327,14 @@ def api_verify_otp(request: HttpRequest):
 
         challenge.user = new_user
         challenge.is_used = True
-        challenge.save(update_fields=['user', 'is_used'])
+        challenge.is_verified = True
+        challenge.save(update_fields=['user', 'is_used', 'is_verified'])
 
         login(request, new_user)
         log_activity(
             request=request,
             user=new_user,
-            action=f"New student account registered and verified via OTP: {new_user.username}",
+            action=f"New student account provisioned and verified via OTP: {new_user.username}",
             category=ActivityLog.Category.AUTH
         )
 
@@ -324,7 +343,7 @@ def api_verify_otp(request: HttpRequest):
         'authenticated': True,
         'is_existing_user': False,
         'redirect_url': reverse('student_dashboard'),
-        'message': f"Account created successfully! Welcome, {new_user.first_name}.",
+        'message': f"Welcome to EduSphere, {new_user.first_name}!",
         'user': {
             'id': new_user.id,
             'username': new_user.username,

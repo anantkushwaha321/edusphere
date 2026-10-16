@@ -15,7 +15,12 @@ from activity_logs.models import log_activity, ActivityLog
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
-    departments = Department.objects.all()
+    try:
+        departments = Department.objects.all()
+    except Exception as e:
+        import logging
+        logging.getLogger('django.request').error("Database query failed in login_view: %s", e, exc_info=True)
+        departments = []
     return render(request, 'accounts/login.html', {'departments': departments})
 
 

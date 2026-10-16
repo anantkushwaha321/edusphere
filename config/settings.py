@@ -93,11 +93,23 @@ DB_ENGINE = os.getenv('DB_ENGINE', 'sqlite').lower()
 
 if DATABASE_URL:
     import dj_database_url
+
+    # Cloud PostgreSQL SSL Configuration:
+    # Render, Neon, Supabase, Heroku, AWS require SSL.
+    # Allow explicit override via DB_SSL_REQUIRE, or auto-detect non-local databases.
+    db_ssl_env = os.getenv('DB_SSL_REQUIRE')
+    if db_ssl_env is not None:
+        ssl_require = db_ssl_env.lower() in ('true', '1', 'yes')
+    else:
+        is_local_db = any(local in DATABASE_URL.lower() for local in ('@localhost', '@127.0.0.1', '@db:', '@postgres:'))
+        ssl_require = not is_local_db
+
     DATABASES = {
         'default': dj_database_url.config(
             default=DATABASE_URL,
             conn_max_age=600,
             conn_health_checks=True,
+            ssl_require=ssl_require,
         )
     }
 elif DB_ENGINE == 'postgresql':
@@ -222,3 +234,47 @@ if not DEBUG:
     SECURE_HSTS_PRELOAD = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = 'DENY'
+
+# Server-side Error Logging (12-Factor App & Cloud PaaS: Render, Railway, Docker)
+# Safely streams request exceptions and database warnings to stderr without exposing secrets to visitors.
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{asctime}] {levelname} [{name}] {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+    },
+}
