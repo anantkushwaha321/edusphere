@@ -45,14 +45,23 @@ def health_check_view(request):
     """Health check endpoint for Render health checks and uptime monitoring."""
     db_ok = False
     tables = []
+    migration_output = ""
     try:
         with connection.cursor() as cursor:
             cursor.execute("SELECT 1;")
             cursor.fetchone()
         tables = connection.introspection.table_names()
+        if 'accounts_user' not in tables:
+            from io import StringIO
+            from django.core.management import call_command
+            out = StringIO()
+            call_command('migrate', interactive=False, stdout=out)
+            migration_output = out.getvalue()
+            tables = connection.introspection.table_names()
         db_ok = True
     except Exception as e:
         logger.warning("Health check database probe failed: %s", e)
+        migration_output = str(e)
         db_ok = False
 
     status_code = 200 if db_ok else 503
@@ -60,6 +69,8 @@ def health_check_view(request):
         'status': 'healthy' if db_ok else 'unhealthy',
         'database': 'connected' if db_ok else 'disconnected',
         'tables_count': len(tables),
+        'tables': tables,
+        'migration_log': migration_output,
         'has_auth_tables': 'accounts_user' in tables,
         'has_otp_table': 'accounts_emailotpchallenge' in tables,
     }, status=status_code)
